@@ -1,0 +1,9 @@
+*.o
+*.gch
+data/
+*.dSYM
+*.txt
+*.out
+*.dat
+*.a
+__pycache__

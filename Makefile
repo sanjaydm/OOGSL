@@ -4,7 +4,10 @@ CC  = g++-4.9 -std=c++11
 FF  = gfortran-4.9
 
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Group.o
-	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test
+	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out
+
+VirusShell.o: VirusShell.h VirusShell.cpp
+	$(CC) $(DBG) $(OPT) -c VirusShell.h VirusShell.cpp 
 
 MultiMin.o: MultiMin.h MultiMin.cpp libLBFGS
 	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiMin.h MultiMin.cpp 
