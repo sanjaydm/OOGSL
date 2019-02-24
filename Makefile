@@ -1,10 +1,15 @@
 DBG = -g #Debugger Option
 OPT = #-O2 # -pg 
-CC  = g++-4.9 -std=c++11
+CC  = g++-4.9 -std=c++11 
 FF  = gfortran-4.9
+#NOWARN = 2>&1 >/dev/null | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'
+
+hiv: hivShell.cpp Vector.o Matrix.o Problem.o Quadrature.o VirusShell.o libLBFGS MultiMin.o
+	$(CC) $(DBG) $(OPT) -c hivShell.cpp
+	$(CC) $(DBG) $(OPT) hivShell.o Vector.o Matrix.o Problem.o MultiMin.o  VirusShell.o Quadrature.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o hivShell.out
 
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Group.o
-	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out
+	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
 VirusShell.o: VirusShell.h VirusShell.cpp
 	$(CC) $(DBG) $(OPT) -c VirusShell.h VirusShell.cpp 
@@ -22,7 +27,10 @@ Matrix.o: Matrix.h Matrix.cpp
 	$(CC) $(DBG) $(OPT) -c Matrix.h Matrix.cpp 
 
 Vector.o: Vector.h Vector.cpp
-	$(CC) $(DBG) $(OPT) -c Vector.h Vector.cpp
+	$(CC) $(DBG) $(OPT) -c Vector.h Vector.cpp 
+
+Quadrature.o: Quadrature.h Quadrature.cpp
+	$(CC) $(DBG) $(OPT) -c Quadrature.h Quadrature.cpp 
 
 blas.o: blas.f
 	$(FF) -c blas.f -o blas.o

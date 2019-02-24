@@ -37,6 +37,7 @@ public:
   Vector& operator= (Vector& v2);
   Vector& operator= (gsl_vector* v2);
   Vector& operator<< (double val);
+  void setZero();
   double* data();
   void print();
   void write();
