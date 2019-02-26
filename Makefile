@@ -29,6 +29,9 @@ Matrix.o: Matrix.h Matrix.cpp
 Vector.o: Vector.h Vector.cpp
 	$(CC) $(DBG) $(OPT) -c Vector.h Vector.cpp 
 
+Shape.o: Shape.h Shape.cpp
+	$(CC) $(DBG) $(OPT) -c Shape.h Shape.cpp 
+
 Quadrature.o: Quadrature.h Quadrature.cpp
 	$(CC) $(DBG) $(OPT) -c Quadrature.h Quadrature.cpp 
 
