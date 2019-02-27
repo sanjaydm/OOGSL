@@ -51,4 +51,4 @@ libLBFGS: lbfgsb-routines.o blas.o linpack.o timer.o
 	ar cru libLBFGS.a lbfgsb-routines.o blas.o linpack.o timer.o
 	ranlib libLBFGS.a
 clean:
-	rm *.o *.gch *.vtk *.out *.a *.txt
+	rm -r *.o *.gch *.vtk *.out *.a *.txt *.dSYM

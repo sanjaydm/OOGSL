@@ -4,6 +4,7 @@
 //Works for Dim 1- and order 2-6
 #include "Quadrature.h"
 
+Quadrature::Quadrature() : _dim(1), _order(2) {};
 Quadrature::Quadrature(int order, int dim) {
   _order = order;
   _dim   = dim;

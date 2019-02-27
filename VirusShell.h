@@ -9,12 +9,13 @@
 
 class VirusShell: public Problem {
 public:
-  VirusShell(Vector x, Vector para) : Problem(x,para) {
+  VirusShell(Vector x, Vector para, vector<double> nodes, vector<Vector> conn) : _nodes(nodes), _conn(conn), Problem(x,para) {
     _quad.setOrder(3);
     _lclResidue.setDim(4); 
     _D = 1.0; //reference from para;
     _C = 1.0; //reference from para;
     _nu = 0.3;
+    
   }
 
   ~VirusShell(){
@@ -32,5 +33,7 @@ public:
   double _D;
   double _C;
   double _nu;
+  vector<double> _nodes;
+  vector<Vector> _conn;
 };
 #endif
