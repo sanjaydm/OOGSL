@@ -13,27 +13,24 @@
 
 class Shape {
     public:
-        Shape(int dim);   // This
+        Shape(int dim, double point);   // This
         ~Shape();  //Decontructor
 
-        void input_data(double * x_values, double *f_values, double *df_values, int num_points);
-        void generate_table();
-        //compute_shape(P);
+        void compute_shape_functions();
+        
+        Vector & get_shape_functions_N();
+        Vector & get_shape_functions_DN();
+        Vector & get_shape_functions_D2N();
+
 
     private:
-
-        int _num_points; 
-
-        double *  _x_values;
-        double *  _f_values;
-        double *  _df_values;
-
         int  _dim;
+        //Vector _point; //point to find functions on. Is a Vector because this can be 1,2,3dim
+        double _point;
+        Vector _N; //First set of shape functions (Vector of px1) or (Number of shape functions x 1)
+        Vector _DN; //Second eval (number of shape fncts x d)
+        Vector _D2N;//vector<Matrix> _D2N; // each matrix is (dxd) and there are # of functions of those.
 
-        //Vector _P; //known points to interpolate on 
-        //vector _N; //First eval (Vector of px1) or (Number of shape functions x 1)
-        //vector<Vector> _DN; //Second eval (number of shape fncts x d)
-        //vector<Matrix> _D2N; // each matrix is (dxd) and there are # of functions of those.
 };
 
 #endif
