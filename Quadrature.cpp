@@ -16,14 +16,14 @@ Quadrature::~Quadrature(void) {
 }
 
 Vector& Quadrature :: weights() {
-    static Vector weights(_order);
-    weights = _weights;
-    return weights;
+  //static Vector weights(_order);
+  //weights = _weights;
+    return _weights;
 }
 
 vector<Vector>& Quadrature :: nodes()  {
-    static vector<Vector> nodes (_nodes);
-    return nodes;
+  //static vector<Vector> nodes (_nodes);
+    return _nodes;
 } 
 
 
@@ -119,6 +119,7 @@ void Quadrature :: createNodesWeights() {
 
 void Quadrature::setOrder(int order) {
   _order = order;
+  createNodesWeights();
 
 }
 

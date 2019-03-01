@@ -3,13 +3,12 @@
 void VirusShell :: fdf(){
   _f = 0; // reset energy
   _df.setZero(); //reset residue to zero
-  int numEle = 0; // SET NUM ELEMENTS
+  int numEle = _conn.size(); 
   Vector wt = _quad.weights();
   vector<Vector> q = _quad.nodes();
   int numQuad = q.size();
   Vector est(2);
   Vector kst(2);
-
   //Reference surface
   double rho = 1;
   double rho_s = 0; double rho_ss = 0;
@@ -17,12 +16,12 @@ void VirusShell :: fdf(){
   double fr = 1; double fz = 0;
   for (int e=0; e< numEle; e++){
     for (int j=0; j<numQuad; j++) {
+      
       Vector ele (2);
       ele << _conn[e](0); ele << _conn[e](1) ;
-      
+      cout << "\033[31m" << numEle << " " << numQuad << " here \033[0m\n";
       double u, v, u_s, v_s, u_ss, v_ss;
       double Jac;
-
       // Quadrature
       Vector qj = q[j];
       double wj = wt(j);
@@ -107,7 +106,7 @@ void VirusShell :: NeoHookean (Vector& est, Vector& kst){
   // Output stored in _lclEnergy, _lclResidue
   double es = est(0); double et = est(1);
   double ks = kst(0); double kt = kst(1);
-  
+
   if (_fFlag){
     _lclEnergyDensity = 0.5*( _C* (es*es + et*et + 2*_nu*es*et) + 
 			      _C* (ks*ks + kt*kt + 2*_nu*ks*kt) );

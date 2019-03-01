@@ -20,6 +20,7 @@ int main(int argc, char** argv){
     if (i != N) {
       Vector ele(2);
       ele(0) = i; ele(1) = i+1;
+      conn.push_back(ele);
     }
   }
   cout << "done. \033[0m\n";
