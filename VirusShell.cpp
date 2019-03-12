@@ -6,35 +6,61 @@ void VirusShell :: fdf(){
   int numEle = _conn.size(); 
   Vector wt = _quad.weights();
   vector<Vector> q = _quad.nodes();
-  int numQuad = q.size();
+  int numQuad = q[0].size();
   Vector est(2);
   Vector kst(2);
   //Reference surface
   double rho = 1;
   double rho_s = 0; double rho_ss = 0;
   double z_s = 1; double z_ss = 0;
-  double fr = 1; double fz = 0;
+  double fr = 0.01; double fz = 0;
+  double rhofr = rho*fr; double rhofz = rho*fz;
+  
+  Shape hermite(1, 0);
   for (int e=0; e< numEle; e++){
     for (int j=0; j<numQuad; j++) {
       
       Vector ele (2);
-      ele << _conn[e](0); ele << _conn[e](1) ;
-      cout << "\033[31m" << numEle << " " << numQuad << " here \033[0m\n";
+      ele(0) = _conn[e](0); ele(1) = _conn[e](1) ;
       double u, v, u_s, v_s, u_ss, v_ss;
-      double Jac;
       // Quadrature
-      Vector qj = q[j];
+      double qj = q[0](j);
       double wj = wt(j);
+      hermite.compute(qj);
+
+      Vector N = hermite.getN();
+      Vector DN = hermite.getDN();
+      Vector D2N = hermite.getD2N();
       
       // Compute u, v, u', v', u'', v'' using shape functions
       // For each node u,v,u' and v' are stored in this order
+      double U0 =  _x(4*ele(0));
+      double U1 = _x(4*ele(0)+1);
+      double V0 =  _x(4*ele(0)+2);
+      double V1 = _x(4*ele(0)+3);
 
+      double U2 =  _x(4*ele(1));
+      double U3 = _x(4*ele(1)+1);
+      double V2 =  _x(4*ele(1)+2);
+      double V3 = _x(4*ele(1)+3);
+
+      u = U0*N(0)+U1*N(1) + U2*N(2) + U3*N(3);
+      v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
+
+      u_s = U0*DN(0)+U1*DN(1) + U2*DN(2) + U3*DN(3);
+      v_s = V0*DN(0)+V1*DN(1) + V2*DN(2) + V3*DN(3);
+
+      u_ss = U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3);
+      v_ss = V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3);
+
+      double Jac = _nodes[ele(0)]*DN(0) + _nodes[ele(1)]*DN(2);
+      double Jacwj = Jac * wj;
       // Strain measures
-      double es_lin = 0; //u' rho' + z' v'
+      double es_lin = u_s*rho_s+z_s*v_s; //u' rho' + z' v'
       double et_lin = u/rho; //u/rho
-      double phi = 0; //-z' u' + rho' v'
-
-      double k_s = 0; //phi'
+      double phi = -z_s*u_s+rho_s*v_s; //-z' u' + rho' v'
+      double phi_s = -z_ss*u_s -z_s*u_ss + rho_ss*v_s + rho_s*v_ss;
+      double k_s = phi_s; //phi'
       double k_t = v_s/rho; //v'/rho
       
       est(0) = es_lin + 0.5*phi*phi;
@@ -44,10 +70,9 @@ void VirusShell :: fdf(){
 
       // Call material law
       NeoHookean(est, kst);
-      
       // If Energy flag is on
       if (_fFlag){
-	_f += _lclEnergyDensity * Jac * wj;
+	_f +=  (_lclEnergyDensity - rhofr*u - rhofz*v) * Jacwj; 
       }
       // If residue flag is on
       if (_dfFlag){
@@ -57,43 +82,71 @@ void VirusShell :: fdf(){
 	double Tr = cos_gamma - phi*sin_gamma;
 	double Tz = sin_gamma + phi*cos_gamma;
 
-	double delta_es = Tr*(0) + Tz*(0); // Tr (du)' + Tz (dv)'
-	double delta_et = 0/rho; //du/rho
-	double delta_ks = -sin_gamma * (0) + cos_gamma*(0); // -sin g*(du)'+cos(g)*(dv)'
-	double delta_kt = 0/rho; //(dv)'/rho
+	// double delta_es = Tr*(0) + Tz*(0); // Tr (du)' + Tz (dv)'
+	// double delta_et = 0/rho; //du/rho
+	// double delta_ks = -sin_gamma * (0) + cos_gamma*(0); // -sin g*(du)'+cos(g)*(dv)'
+	// double delta_kt = 0/rho; //(dv)'/rho
 
 	double Ns = _lclResidue(0); double Nt = _lclResidue(1);
-	double Ms = _lclResidue(2); double Mt = _lclResidue(2);
-	double Jacwj = Jac * wj;
+	double Ms = _lclResidue(2); double Mt = _lclResidue(3);
 	double rhoNs = rho*Ns;
 
 	// Variations
 	double du0, du1, du2, du3;
 	double dv0, dv1, dv2, dv3;
+	du0 = N(0); du1 = N(1); du2 = N(2); du3 = N(3);
+	dv0 = N(0); dv1 = N(1); dv2 = N(2); dv3 = N(3);
 
 	double du0_s, du1_s, du2_s, du3_s;
 	double dv0_s, dv1_s, dv2_s, dv3_s;
+	du0_s = DN(0); du1_s = DN(1); du2_s = DN(2); du3_s = DN(3);
+	dv0_s = DN(0); dv1_s = DN(1); dv2_s = DN(2); dv3_s = DN(3);
 
 	double du0_ss, du1_ss, du2_ss, du3_ss;
 	double dv0_ss, dv1_ss, dv2_ss, dv3_ss;
+	du0_ss = D2N(0); du1_ss = D2N(1); du2_ss = D2N(2); du3_ss = D2N(3);
+	dv0_ss = D2N(0); dv1_ss = D2N(1); dv2_ss = D2N(2); dv3_ss = D2N(3);
 
-	double dphi0_s = -z_s* du0_s - z_ss* du0_ss + rho_s* dv0_s + rho_ss* dv0_ss; 
-	double dphi1_s = -z_s* du1_s - z_ss* du1_ss + rho_s* dv1_s + rho_ss* dv1_ss;
-	double dphi2_s = -z_s* du2_s - z_ss* du2_ss + rho_s* dv2_s + rho_ss* dv2_ss;
-	double dphi3_s = -z_s* du3_s - z_ss* du3_ss + rho_s* dv3_s + rho_ss* dv3_ss; 
 	
-	_df(2*ele(0)     ) +=  ((rhoNs * Tr)* du0_s + (rhoNs * Tz)* dv0_s +
-			       rho*Ms*dphi0_s + Mt*dv0_s + 
-			       (Nt - fr)* du0 - fz* dv0) *Jacwj ;
-	_df(2*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s + (rhoNs * Tz)* dv1_s +
-			       rho*Ms*dphi1_s + Mt*dv1_s + 
-			       (Nt - fr)* du1 - fz* dv1) *Jacwj ;
-	_df(2*ele(1)     ) += ((rhoNs * Tr)* du2_s + (rhoNs * Tz)* dv2_s +
-			       rho*Ms*dphi2_s + Mt*dv2_s + 
-			       (Nt - fr)* du2 - fz* dv2) *Jacwj ;
-	_df(2*ele(1) + 1 ) += ((rhoNs * Tr)* du3_s + (rhoNs * Tz)* dv3_s +
-			       rho*Ms*dphi3_s + Mt*dv3_s + 
-			       (Nt - fr)* du3 - fz* dv3) *Jacwj ;
+	double dphi0U_s = -z_ss* du0_s - z_s* du0_ss; 
+	double dphi1U_s = -z_ss* du1_s - z_s* du1_ss;
+	double dphi2U_s = -z_ss* du2_s - z_s* du2_ss;
+	double dphi3U_s = -z_ss* du3_s - z_s* du3_ss; 
+
+	double dphi0V_s = rho_ss* dv0_s + rho_s* dv0_ss; 
+	double dphi1V_s = rho_ss* dv1_s + rho_s* dv1_ss;
+	double dphi2V_s = rho_ss* dv2_s + rho_s* dv2_ss;
+	double dphi3V_s = rho_ss* dv3_s + rho_s* dv3_ss; 
+
+
+	_df(4*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
+			       rho*Ms*dphi0U_s + 
+			       (Nt - rhofr)* du0) *Jacwj ;	
+	_df(4*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
+			       rho*Ms*dphi1U_s +
+			       (Nt - rhofr)* du1) *Jacwj ;	
+	
+	_df(4*ele(0) + 2   ) +=  ((rhoNs * Tz)* dv0_s +
+			       rho*Ms*dphi0V_s + Mt*dv0_s
+			        - rhofz* dv0) *Jacwj ;
+	_df(4*ele(0) + 3   ) +=  ((rhoNs * Tz)* dv1_s +
+			       rho*Ms*dphi1V_s + Mt*dv1_s
+			        - rhofz* dv1) *Jacwj ;
+
+	_df(4*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
+			       rho*Ms*dphi2U_s + 
+			       (Nt - rhofr)* du2) *Jacwj ;	
+	_df(4*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
+			       rho*Ms*dphi3U_s +
+			       (Nt - rhofr)* du3) *Jacwj ;	
+	
+	_df(4*ele(1) + 2   ) +=  ((rhoNs * Tz)* dv2_s +
+			       rho*Ms*dphi2V_s + Mt*dv2_s
+			        - rhofz* dv2) *Jacwj ;
+	_df(4*ele(1) + 3   ) +=  ((rhoNs * Tz)* dv3_s +
+			       rho*Ms*dphi3V_s + Mt*dv3_s
+			        - rhofz* dv3) *Jacwj ;
+
       }
 
     } //end: for quadrature

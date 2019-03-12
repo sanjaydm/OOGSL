@@ -46,3 +46,31 @@ void Problem::d2f(){
   }
   _df = df0;
 }
+
+int Problem::checkConsistency(double eps, double tol){
+
+  Vector dfappx(_Ndof);
+  double f0 = f();
+  for (int i=0; i<_Ndof; i++){
+    _x(i) += eps;
+    dfappx(i) = (f()-f0)/eps;
+    _x(i) -= eps;
+  }
+  df();
+  Vector absError = (dfappx- _df);
+  double absErrorNrm = absError.norm();
+  //absError.print();
+  cout << "\033[7;36m\n";
+  cout << "absolute error = " << absErrorNrm << endl;
+  cout << "relative error = " << absErrorNrm/_df.norm() << endl;
+  cout << "\033[0m\n";
+  if (absErrorNrm < tol ){
+    cout << "\033[92m Consistency check passed \033[0m\n";
+    return 1;
+  }
+  else {
+    cout << "\033[31m Consistency check failed \033[0m\n";
+    return -1;
+  }
+    
+}

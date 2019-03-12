@@ -6,11 +6,12 @@
 #include "Problem.h"
 #include "MultiMin.h"
 #include "Quadrature.h"
+#include "Shape.h"
 
 class VirusShell: public Problem {
 public:
   VirusShell(Vector x, Vector para, vector<double> nodes, vector<Vector> conn) : _nodes(nodes), _conn(conn), Problem(x,para) {
-    _quad.setOrder(3);
+    _quad.setOrder(4);
     _lclResidue.setDim(4); 
     _D = 1.0; //reference from para;
     _C = 1.0; //reference from para;

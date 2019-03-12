@@ -37,7 +37,7 @@ void MultiMin::LBFGSB_Solve(){
     LBFGSB_Iterate();
     if (strncmp(_task, "FG", 2) == 0) continue;
     else if (strncmp(_task, "CONV", 4) == 0) break;
-    else if (strncmp(_task, "ABNORM", 6) == 0) exit(-1);
+    else if (strncmp(_task, "ABNORM", 6) == 0) break;
   }
 }
 
