@@ -23,7 +23,7 @@ public:
     
   }
   void NeoHookean(Vector& est, Vector& kst);
-
+  void printU();
   
   void fdf();
 

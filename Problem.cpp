@@ -59,6 +59,8 @@ int Problem::checkConsistency(double eps, double tol){
   df();
   Vector absError = (dfappx- _df);
   double absErrorNrm = absError.norm();
+  absError.print();
+  //_df.print();
   //absError.print();
   cout << "\033[7;36m\n";
   cout << "absolute error = " << absErrorNrm << endl;

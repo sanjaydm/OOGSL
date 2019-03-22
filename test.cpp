@@ -63,22 +63,22 @@ int main(int argc, char** argv){
   // Matrix M(m);
   // M.print();
 
-  Vector x0(2);
-  x0(0) = .3223; x0(1) = .1;
-  Vector para(1);
-  P2* p = new  P2(x0, para);
-  // x0.print();
-  // (p._x).print();
-  // p.f();
-  // p->d2f();
-  // p->_d2f.print();
+  // Vector x0(2);
+  // x0(0) = .3223; x0(1) = .1;
+  // Vector para(1);
+  // P2* p = new  P2(x0, para);
+  // // x0.print();
+  // // (p._x).print();
+  // // p.f();
+  // // p->d2f();
+  // // p->_d2f.print();
 
-  MultiMin M("lbfgs", p);
-  M._LBFGSB_Initialize();
-  M.LBFGSB_Solve();
-  // M._GSLMin_Initialize();
-  // M.GSLMin_Solve();
-  p->_x.print();
+  // MultiMin M("lbfgs", p);
+  // M._LBFGSB_Initialize();
+  // M.LBFGSB_Solve();
+  // // M._GSLMin_Initialize();
+  // // M.GSLMin_Solve();
+  // p->_x.print();
 
   //p.d2f();
   //p._d2f.print();
@@ -87,5 +87,22 @@ int main(int argc, char** argv){
 
   // Constructing projection operator
 
+  Vector v(5);
+  v << 1 << 2 << 3 << 4 << 5;
+  v.print();
+  Vector w = v.view(0,3);
+  cout <<"asfasdf\n";
+  w.print();
+
+  Matrix m(5,5);
+  m << 1 << 1 << 1 << 0 << 0
+    << 0 << 1 << 1 << 0 << 0
+    << 0 << 0 << 1 << 1 << 0
+    << 0 << 0 << 0 << 0 << 1
+    << 1 << 1 << 1 << 1 <<1;
+  m.print();
+  Vector x(5);
+  
+  (m*v).print();
   return 0;
 }

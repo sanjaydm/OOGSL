@@ -43,6 +43,8 @@ public:
   Matrix operator- (Matrix& v2);    
   Matrix& operator= (Matrix& v2);
   Matrix& operator<< (double val);
+
+  Vector operator* (Vector& v);
   void print();
 };
 #endif

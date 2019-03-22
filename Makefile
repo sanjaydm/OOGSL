@@ -4,15 +4,22 @@ CC  = g++-4.9 -std=c++11
 FF  = gfortran-4.9
 #NOWARN = 2>&1 >/dev/null | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'
 
-hiv: hivShell.cpp Vector.o Matrix.o Problem.o Quadrature.o VirusShell.o libLBFGS MultiMin.o Shape.o
+hiv: hivShell.cpp Vector.o Matrix.o Problem.o Quadrature.o VirusShell.o VirusShellBC.o libLBFGS MultiMin.o Shape.o
 	$(CC) $(DBG) $(OPT) -c hivShell.cpp
-	$(CC) $(DBG) $(OPT) hivShell.o Vector.o Shape.o Matrix.o Problem.o MultiMin.o  VirusShell.o Quadrature.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o hivShell.out
+	$(CC) $(DBG) $(OPT) hivShell.o Vector.o Shape.o Matrix.o Problem.o MultiMin.o  VirusShell.o VirusShellBC.o Quadrature.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o hivShell.out
+
+jamming: jamming.cpp myfdf.o libLBFGS
+	$(CC) $(DBG)  $(OPT) jamming.cpp myfdf.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o driver.out
+
 
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Group.o
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
 VirusShell.o: VirusShell.h VirusShell.cpp
 	$(CC) $(DBG) $(OPT) -c VirusShell.h VirusShell.cpp 
+
+VirusShellBC.o: VirusShellBC.h VirusShellBC.cpp
+	$(CC) $(DBG) $(OPT) -c VirusShellBC.h VirusShellBC.cpp 
 
 MultiMin.o: MultiMin.h MultiMin.cpp libLBFGS
 	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiMin.h MultiMin.cpp 

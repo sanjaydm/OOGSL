@@ -34,7 +34,7 @@ void Shape :: compute(double point) {
   //Derivative 2
   _D2N(0) = (3.0/2.0)*_point; 
   _D2N(1) = (1.0/2.0)*(3.0*_point - 1.0);
-  _D2N(2) = (3.0/2.0)*_point; 
+  _D2N(2) = -(3.0/2.0)*_point; 
   _D2N(3) = (1.0/2.0)*(3.0*_point + 1.0);
 }
 

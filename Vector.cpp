@@ -124,9 +124,9 @@ Vector& Vector::operator= (gsl_vector* v2){
   return *this;
 }
 Vector& Vector::operator<< (double val){
-  _idx++;
-  if (_idx == _dim-1) _idx=0;
   (*this)(_idx) = val;
+  if (_idx == _dim-1) _idx=0;
+  _idx++;
   return *this;
 }
 double* Vector::data(){
@@ -134,9 +134,11 @@ double* Vector::data(){
 }
 void Vector::print(){
   // Print to screen
+  cout << "[\n";
   for (int i=0; i<_dim; i++){
-    cout << (*this)(i) << endl;
+    cout << (*this)(i) << ", " << endl;
   }
+  cout << "]\n";
 }
 void Vector::write(){
   // Write to file
@@ -145,4 +147,11 @@ void Vector::write(){
 void Vector::setZero(){
   gsl_vector_set_zero(_gsl_vec);
 }
-  
+
+Vector Vector::view(int i, int j){
+  /* Subvector from i to j*/
+  assert (j>i);
+  _view = gsl_vector_subvector(_gsl_vec, i, j-i);
+  Vector ret(&_view.vector);
+  return ret;
+}

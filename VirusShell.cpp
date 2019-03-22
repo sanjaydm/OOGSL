@@ -13,12 +13,24 @@ void VirusShell :: fdf(){
   double rho = 1;
   double rho_s = 0; double rho_ss = 0;
   double z_s = 1; double z_ss = 0;
-  double fr = 0.01; double fz = 0;
+  double fr = 1; double fz = 0;
   double rhofr = rho*fr; double rhofz = rho*fz;
   
   Shape hermite(1, 0);
+  // // //Boundary conditions
+  // _x(0) = 0; //u(0) = 0
+  // _x(1) = 0; //u'(0) = 0
+  // _x(2) = 0; //v(0) = 0
+ 
+  // _x(4*numEle) = 0;   //u(L) = 0;
+  // _x(4*numEle+1) = 0; //u'(L) = 0;
+  // _x(4*numEle+2) = 0; //v(L) = 0
   for (int e=0; e< numEle; e++){
     for (int j=0; j<numQuad; j++) {
+      // if (e==numEle/2) {
+      // 	rhofr = 1;
+      // }
+      // else rhofr=0;
       
       Vector ele (2);
       ele(0) = _conn[e](0); ele(1) = _conn[e](1) ;
@@ -44,16 +56,24 @@ void VirusShell :: fdf(){
       double V2 =  _x(4*ele(1)+2);
       double V3 = _x(4*ele(1)+3);
 
+      double Jac = _nodes[ele(0)]*DN(0) + _nodes[ele(1)]*DN(2); // 0.5*(_nodes[ele(1)]-_nodes[ele(0)]);  //
+      double Jac_xi = _nodes[ele(0)]*D2N(0) + _nodes[ele(1)]*D2N(2); // 0
+      double Jac2 = Jac * Jac;
+      double Jac1 = Jac;
+      double Jac_xiJac2 = Jac_xi/Jac2;
+      
       u = U0*N(0)+U1*N(1) + U2*N(2) + U3*N(3);
       v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
 
-      u_s = U0*DN(0)+U1*DN(1) + U2*DN(2) + U3*DN(3);
-      v_s = V0*DN(0)+V1*DN(1) + V2*DN(2) + V3*DN(3);
+      u_s = (U0*DN(0)+U1*DN(1) + U2*DN(2) + U3*DN(3))/Jac1;
+      v_s = (V0*DN(0)+V1*DN(1) + V2*DN(2) + V3*DN(3))/Jac1;
 
-      u_ss = U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3);
-      v_ss = V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3);
+      u_ss = (U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3))/Jac2 - u_s*Jac_xiJac2;
+      v_ss = (V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3))/Jac2 - v_s*Jac_xiJac2;
 
-      double Jac = _nodes[ele(0)]*DN(0) + _nodes[ele(1)]*DN(2);
+      cout << "u = " << u << ", u_s = " << u_s << ", u_ss = " << u_ss << endl;
+
+
       double Jacwj = Jac * wj;
       // Strain measures
       double es_lin = u_s*rho_s+z_s*v_s; //u' rho' + z' v'
@@ -62,7 +82,7 @@ void VirusShell :: fdf(){
       double phi_s = -z_ss*u_s -z_s*u_ss + rho_ss*v_s + rho_s*v_ss;
       double k_s = phi_s; //phi'
       double k_t = v_s/rho; //v'/rho
-      
+
       est(0) = es_lin + 0.5*phi*phi;
       est(1) = et_lin;
       kst(0) = k_s;
@@ -94,29 +114,62 @@ void VirusShell :: fdf(){
 	// Variations
 	double du0, du1, du2, du3;
 	double dv0, dv1, dv2, dv3;
-	du0 = N(0); du1 = N(1); du2 = N(2); du3 = N(3);
-	dv0 = N(0); dv1 = N(1); dv2 = N(2); dv3 = N(3);
 
 	double du0_s, du1_s, du2_s, du3_s;
 	double dv0_s, dv1_s, dv2_s, dv3_s;
-	du0_s = DN(0); du1_s = DN(1); du2_s = DN(2); du3_s = DN(3);
-	dv0_s = DN(0); dv1_s = DN(1); dv2_s = DN(2); dv3_s = DN(3);
 
 	double du0_ss, du1_ss, du2_ss, du3_ss;
 	double dv0_ss, dv1_ss, dv2_ss, dv3_ss;
-	du0_ss = D2N(0); du1_ss = D2N(1); du2_ss = D2N(2); du3_ss = D2N(3);
-	dv0_ss = D2N(0); dv1_ss = D2N(1); dv2_ss = D2N(2); dv3_ss = D2N(3);
 
-	
-	double dphi0U_s = -z_ss* du0_s - z_s* du0_ss; 
-	double dphi1U_s = -z_ss* du1_s - z_s* du1_ss;
-	double dphi2U_s = -z_ss* du2_s - z_s* du2_ss;
-	double dphi3U_s = -z_ss* du3_s - z_s* du3_ss; 
+	double dphi0U_s, dphi1U_s, dphi2U_s, dphi3U_s;
+	double dphi0V_s, dphi1V_s, dphi2V_s, dphi3V_s;
 
-	double dphi0V_s = rho_ss* dv0_s + rho_s* dv0_ss; 
-	double dphi1V_s = rho_ss* dv1_s + rho_s* dv1_ss;
-	double dphi2V_s = rho_ss* dv2_s + rho_s* dv2_ss;
-	double dphi3V_s = rho_ss* dv3_s + rho_s* dv3_ss; 
+	//if (e!=0 || e!=numEle-1) {
+	  du0 = N(0); du1 = N(1); du2 = N(2); du3 = N(3);
+	  dv0 = N(0); dv1 = N(1); dv2 = N(2); dv3 = N(3);
+	  
+	  du0_s = DN(0)/Jac1; du1_s = DN(1)/Jac1; du2_s = DN(2)/Jac1; du3_s = DN(3)/Jac1;
+	  dv0_s = DN(0)/Jac1; dv1_s = DN(1)/Jac1; dv2_s = DN(2)/Jac1; dv3_s = DN(3)/Jac1;
+
+	  du0_ss = D2N(0)/Jac2 - du0_s*Jac_xiJac2;
+	  du1_ss = D2N(1)/Jac2 - du1_s*Jac_xiJac2;
+	  du2_ss = D2N(2)/Jac2 - du2_s*Jac_xiJac2;
+	  du3_ss = D2N(3)/Jac2 - du3_s*Jac_xiJac2;
+	  
+	  dv0_ss = D2N(0)/Jac2 - dv0_s*Jac_xiJac2;
+	  dv1_ss = D2N(1)/Jac2 - dv1_s*Jac_xiJac2;
+	  dv2_ss = D2N(2)/Jac2 - dv2_s*Jac_xiJac2;
+	  dv3_ss = D2N(3)/Jac2 - dv3_s*Jac_xiJac2;
+
+	  //}
+	// else if (e==0){
+	//   du0 = 0; du1 = 0; du2 = N(2); du3 = N(3);
+	//   dv0 = 0; dv1 = N(1); dv2 = N(2); dv3 = N(3);
+
+	//   du0_s = 0; du1_s = 0; du2_s = DN(2); du3_s = DN(3);
+	//   dv0_s = 0; dv1_s = DN(1); dv2_s = DN(2); dv3_s = DN(3);
+
+	//   du0_ss = 0; du1_ss = 0; du2_ss = D2N(2); du3_ss = D2N(3);
+	//   dv0_ss = 0; dv1_ss = D2N(1); dv2_ss = D2N(2); dv3_ss = D2N(3);
+	// }
+	// else if (e==numEle-1){
+	//   du0 = N(0); du1 = N(1); du2 = 0; du3 = 0;
+	//   dv0 = N(0); dv1 = N(1); dv2 = 0; dv3 = N(3);
+	//   du0_s = DN(0); du1_s = DN(1); du2_s = 0; du3_s = 0;
+	//   dv0_s = DN(0); dv1_s = DN(1); dv2_s = 0; dv3_s = DN(3);
+	//   du0_ss = D2N(0); du1_ss = D2N(1); du2_ss = 0; du3_ss = 0;
+	//   dv0_ss = D2N(0); dv1_ss = D2N(1); dv2_ss = 0; dv3_ss = D2N(3);
+	// }
+		
+	dphi0U_s = -z_ss* du0_s - z_s* du0_ss; 
+	dphi1U_s = -z_ss* du1_s - z_s* du1_ss;
+	dphi2U_s = -z_ss* du2_s - z_s* du2_ss;
+	dphi3U_s = -z_ss* du3_s - z_s* du3_ss; 
+
+	dphi0V_s = rho_ss* dv0_s + rho_s* dv0_ss; 
+	dphi1V_s = rho_ss* dv1_s + rho_s* dv1_ss;
+	dphi2V_s = rho_ss* dv2_s + rho_s* dv2_ss;
+	dphi3V_s = rho_ss* dv3_s + rho_s* dv3_ss; 
 
 
 	_df(4*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
@@ -159,10 +212,9 @@ void VirusShell :: NeoHookean (Vector& est, Vector& kst){
   // Output stored in _lclEnergy, _lclResidue
   double es = est(0); double et = est(1);
   double ks = kst(0); double kt = kst(1);
-
   if (_fFlag){
     _lclEnergyDensity = 0.5*( _C* (es*es + et*et + 2*_nu*es*et) + 
-			      _C* (ks*ks + kt*kt + 2*_nu*ks*kt) );
+			      _D* (ks*ks + kt*kt + 2*_nu*ks*kt) );
   }
   if (_dfFlag) {
     
@@ -174,3 +226,11 @@ void VirusShell :: NeoHookean (Vector& est, Vector& kst){
   }
 }
 
+void VirusShell::printU(){
+  int NDOF = _x.size();
+  cout <<"U=[ ";
+  for (int i=0; i < NDOF; i=i+4){
+    cout << _x(i) << ", ";
+  }
+  cout << "];\n";
+}

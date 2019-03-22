@@ -182,8 +182,8 @@ Matrix& Matrix::operator<< (double val){
 }
 void Matrix::print(){
   // Print to screen
-  for (int i=0; i < _dim2; i++) {
-    for (int j=0; j<_dim1; j++){
+  for (int i=0; i < _dim1; i++) {
+    for (int j=0; j<_dim2; j++){
       cout << (*this)(i,j) << " ";
     }
     cout << endl;
@@ -200,4 +200,11 @@ Matrix Matrix::inv(){
   gsl_linalg_LU_invert (copy._gsl_mat, p, inv._gsl_mat);
   gsl_permutation_free(p);
   return inv;
+}
+
+Vector Matrix::operator*(Vector & v){
+  assert(_dim2 == v._dim);
+  Vector ret(_dim1);
+  gsl_blas_dgemv(CblasNoTrans, 1.0, _gsl_mat, v._gsl_vec, 0.0, ret._gsl_vec);
+  return ret;
 }
