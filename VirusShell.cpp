@@ -13,7 +13,7 @@ void VirusShell :: fdf(){
   double rho = 1;
   double rho_s = 0; double rho_ss = 0;
   double z_s = 1; double z_ss = 0;
-  double fr = 1; double fz = 0;
+  double fr = 0; double fz = 0;
   double rhofr = rho*fr; double rhofz = rho*fz;
   
   Shape hermite(1, 0);
@@ -56,11 +56,17 @@ void VirusShell :: fdf(){
       double V2 =  _x(4*ele(1)+2);
       double V3 = _x(4*ele(1)+3);
 
-      double Jac = _nodes[ele(0)]*DN(0) + _nodes[ele(1)]*DN(2); // 0.5*(_nodes[ele(1)]-_nodes[ele(0)]);  //
-      double Jac_xi = _nodes[ele(0)]*D2N(0) + _nodes[ele(1)]*D2N(2); // 0
-      double Jac2 = Jac * Jac;
-      double Jac1 = Jac;
+      double slope = (_nodes[ele(1)]-_nodes[ele(0)])/2;
+      double Jac = 0.5*(_nodes[ele(1)]-_nodes[ele(0)]); //_nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3); //
+      double Jac_xi = 0; _nodes[ele(0)]*D2N(0) + slope*D2N(1) + _nodes[ele(1)]*D2N(2) + slope*D2N(3); // 0
+      double Jac2 = 1; Jac * Jac;
+      double Jac1 = 1;Jac;
       double Jac_xiJac2 = Jac_xi/Jac2;
+
+      // U1 = U1/slope;
+      // U3 = U3/slope;
+      // V1 = V1/slope;
+      // V3 = V3/slope;
       
       u = U0*N(0)+U1*N(1) + U2*N(2) + U3*N(3);
       v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
@@ -68,11 +74,14 @@ void VirusShell :: fdf(){
       u_s = (U0*DN(0)+U1*DN(1) + U2*DN(2) + U3*DN(3))/Jac1;
       v_s = (V0*DN(0)+V1*DN(1) + V2*DN(2) + V3*DN(3))/Jac1;
 
-      u_ss = (U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3))/Jac2 - u_s*Jac_xiJac2;
+      u_ss = (U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3))/Jac2- u_s*Jac_xiJac2;
       v_ss = (V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3))/Jac2 - v_s*Jac_xiJac2;
 
-      cout << "u = " << u << ", u_s = " << u_s << ", u_ss = " << u_ss << endl;
-
+      //cout << "U0 = " << U0 << ", U1 = " << U1 << ", U2 = " << U2 << ", U3 = " << U3 << endl;
+      //cout << "u = " << u << ", u_s = " << u_s << ", u_ss = " << u_ss << endl;
+      //cout << Jac << endl;
+      //cout << 0.05*D2N(0)+.01*D2N(1) + 0.07*D2N(2) + .01*D2N(3) << endl;
+      //cout << D2N(0) << " " << D2N(1) << " " << D2N(2) << " " << D2N(3) << endl;
 
       double Jacwj = Jac * wj;
       // Strain measures
@@ -92,7 +101,7 @@ void VirusShell :: fdf(){
       NeoHookean(est, kst);
       // If Energy flag is on
       if (_fFlag){
-	_f +=  (_lclEnergyDensity - rhofr*u - rhofz*v) * Jacwj; 
+	_f +=  (_lclEnergyDensity*rho - rhofr*u - rhofz*v) * Jacwj; 
       }
       // If residue flag is on
       if (_dfFlag){

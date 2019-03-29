@@ -51,6 +51,7 @@ int Problem::checkConsistency(double eps, double tol){
 
   Vector dfappx(_Ndof);
   double f0 = f();
+  //cout << "f0 = " << f0 << endl;
   for (int i=0; i<_Ndof; i++){
     _x(i) += eps;
     dfappx(i) = (f()-f0)/eps;
@@ -59,7 +60,10 @@ int Problem::checkConsistency(double eps, double tol){
   df();
   Vector absError = (dfappx- _df);
   double absErrorNrm = absError.norm();
+  _df.print();
+  dfappx.print();
   absError.print();
+  cout << "energy = " << f0 << endl;
   //_df.print();
   //absError.print();
   cout << "\033[7;36m\n";

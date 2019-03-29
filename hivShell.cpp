@@ -8,8 +8,8 @@
 
 int main(int argc, char** argv){
 
-  int N = 10; //Num of elements
-  double a = 0; double b = 2; // end points of domain
+  int N = 100; //Num of elements
+  double a = 0; double b = 2.0; // end points of domain
   vector<double> nodes;
   vector<Vector> conn;
 
@@ -37,9 +37,9 @@ int main(int argc, char** argv){
   //   x0(i) = 0.0;
   // }
   for (int i=0; i<=N; i++){
-    x0(4*i) = 0.01*nodes[i]; //u 
-    x0(4*i+1) = 0.; //u'
-    x0(4*i+2) = 0.; //v
+    x0(4*i) = 0.1;
+    x0(4*i+1) = 0; //u'
+    x0(4*i+2) = 0.1; //v
     x0(4*i+3) = 0.; //v'
     
   }
@@ -47,10 +47,12 @@ int main(int argc, char** argv){
 
   VirusShell* p = new  VirusShell(x0, para, nodes, conn);
   //VirusShellBC* p = new  VirusShellBC(x0, para, nodes, conn);
-  // p->df();
+  //  p->fdf();
   // p->_df.print();
+
+  // cout << "energy = " << p->_f << endl;
   p->checkConsistency();
- 
+
   // MultiMin M("lbfgs", p);
   // M._LBFGSB_Initialize();
 
@@ -88,6 +90,6 @@ int main(int argc, char** argv){
   // // p->_df.print();
   // cout << "x = ";
   // p->_x.print();
-  // // p->printU();
+  // p->printU();
   return 0;
 }
