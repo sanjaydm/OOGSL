@@ -20,31 +20,35 @@
 class MembLJ: public Problem {
 public:
  MembLJ(Vector x0, Vector para) : Problem(x0,para) {
-    _quad.setOrder(4);
-    _lclResidue.setDim(4); 
+    _LJForce.setDim(3); 
     _eps1 = 1;
     _eps2 = 1;
     _re1 = 1;
     _re2 = 1.4;
-    
+    _Lmax = 16;
+    _NP = 12;
+
+    _Ntot = (_Lmax + 1 )*(_Lmax + 1);
+    generateCeliaReinaQuad(20, 2*_Lmax + 2);
+    computeYlmLookUp();
   }
 
   ~MembLJ(){
     
   }
-  void LJ(double r);
+  void LJ(Vector f12, double e);
   
   void fdf();
 
   void printToVTK(string filename);
   void printModes(string filename);
   void printParticleCoords(string filename);
-  void printModes(string filename);
+  //void generateGausLegendreQuad(const char* filename);
+  void generateAssociatedLegendreLookUp();
+  void generateCeliaReinaQuad(int orderX, int orderY);
+  void computeYlmLookUp();
 
   // Data specific to this problem
-  Quadrature _quad;
-  double _lclEnergyDensity;
-  Vector _lclResidue;
   int _NP; // number of particles
   int _Lmax; // max modes
   int _Ntot;
@@ -64,7 +68,6 @@ public:
 
   Vector _plmP;
   Vector _plmP_1;
-  Vector _plmPB;
 
 
   Matrix _Ylm;
@@ -75,8 +78,11 @@ public:
   Matrix _Ylm_pp;
   Matrix _Ylm_tp;
 
-  vector<double> qThetas;
-  vector<double> qPhis;
-  vector<double> qWts;
+  double _LJEnergy;
+  Vector _LJForce;
+
+  vector<double> _qThetas;
+  vector<double> _qPhis;
+  vector<double> _qWts;
 };
 #endif

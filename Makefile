@@ -15,6 +15,9 @@ jamming: jamming.cpp myfdf.o libLBFGS
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Group.o
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
+MembLJ.o: MembLJ.h MembLJ.cpp
+	$(CC) $(DBG) $(OPT) -c MembLJ.h MembLJ.cpp 
+
 VirusShell.o: VirusShell.h VirusShell.cpp
 	$(CC) $(DBG) $(OPT) -c VirusShell.h VirusShell.cpp 
 

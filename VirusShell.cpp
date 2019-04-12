@@ -1,4 +1,5 @@
 #include "VirusShell.h"
+#include <iomanip>
 
 void VirusShell :: fdf(){
   _f = 0; // reset energy
@@ -25,13 +26,16 @@ void VirusShell :: fdf(){
   // _x(4*numEle) = 0;   //u(L) = 0;
   // _x(4*numEle+1) = 0; //u'(L) = 0;
   // _x(4*numEle+2) = 0; //v(L) = 0
+  int modelOption = 2;
   for (int e=0; e< numEle; e++){
     for (int j=0; j<numQuad; j++) {
-      // if (e==numEle/2) {
-      // 	rhofr = 1;
-      // }
-      // else rhofr=0;
-      
+      if (e == 3) {
+      	fr = 100;
+      }
+      else
+      	fr=0;
+
+      rhofr = rho*fr;
       Vector ele (2);
       ele(0) = _conn[e](0); ele(1) = _conn[e](1) ;
       double u, v, u_s, v_s, u_ss, v_ss;
@@ -43,7 +47,8 @@ void VirusShell :: fdf(){
       Vector N = hermite.getN();
       Vector DN = hermite.getDN();
       Vector D2N = hermite.getD2N();
-      
+
+      double slope = (_nodes[ele(1)]-_nodes[ele(0)])/2;
       // Compute u, v, u', v', u'', v'' using shape functions
       // For each node u,v,u' and v' are stored in this order
       double U0 =  _x(4*ele(0));
@@ -56,18 +61,32 @@ void VirusShell :: fdf(){
       double V2 =  _x(4*ele(1)+2);
       double V3 = _x(4*ele(1)+3);
 
-      double slope = (_nodes[ele(1)]-_nodes[ele(0)])/2;
-      double Jac = 0.5*(_nodes[ele(1)]-_nodes[ele(0)]); //_nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3); //
-      double Jac_xi = 0; _nodes[ele(0)]*D2N(0) + slope*D2N(1) + _nodes[ele(1)]*D2N(2) + slope*D2N(3); // 0
-      double Jac2 = 1; Jac * Jac;
-      double Jac1 = 1;Jac;
-      double Jac_xiJac2 = Jac_xi/Jac2;
-
+      // cout << "\033[31m " << U0 << " " << U1 << " " << U2 << " " << U3 << "\033[0m\n";
+      // cout << "\033[32m " << V0 << " " << V1 << " " << V2 << " " << V3 << "\033[0m\n";
+      
+      double Jac = _nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3); 
+      double Jac_xi = _nodes[ele(0)]*D2N(0) + slope*D2N(1) + _nodes[ele(1)]*D2N(2) + slope*D2N(3); // 0
+      double Jac2 = (Jac * Jac);
+      double Jac1 = Jac;
+      double Jac_xiJac2 = (Jac_xi/Jac2);
       // U1 = U1/slope;
       // U3 = U3/slope;
       // V1 = V1/slope;
       // V3 = V3/slope;
       
+      z_s = 1; //(_nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3))/Jac1;
+      z_ss = 0;// (_nodes[ele(0)]*D2N(0) + slope*D2N(1) + _nodes[ele(1)]*D2N(2) + slope*D2N(3))/Jac2;
+
+      //cout << "\033[32m z_ss = " << z_ss << "\033[0m\n";
+      /*
+      N(1) *= slope;
+      N(3) *= slope;
+      DN(1) *= slope;
+      DN(3) *= slope;
+      D2N(1) *= slope;
+      D2N(3) *= slope;
+      */
+
       u = U0*N(0)+U1*N(1) + U2*N(2) + U3*N(3);
       v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
 
@@ -76,7 +95,7 @@ void VirusShell :: fdf(){
 
       u_ss = (U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3))/Jac2- u_s*Jac_xiJac2;
       v_ss = (V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3))/Jac2 - v_s*Jac_xiJac2;
-
+      
       //cout << "U0 = " << U0 << ", U1 = " << U1 << ", U2 = " << U2 << ", U3 = " << U3 << endl;
       //cout << "u = " << u << ", u_s = " << u_s << ", u_ss = " << u_ss << endl;
       //cout << Jac << endl;
@@ -101,9 +120,18 @@ void VirusShell :: fdf(){
       NeoHookean(est, kst);
       // If Energy flag is on
       if (_fFlag){
-	_f +=  (_lclEnergyDensity*rho - rhofr*u - rhofz*v) * Jacwj; 
+	switch(modelOption){
+	case 0:
+	  _f += (v_s*v_s -fr*v)* Jacwj;
+	  break;
+	case 1:
+	  _f += (u_ss*u_ss -fr*u)* Jacwj;
+	  break;
+	case 2:
+	  _f +=  (_lclEnergyDensity*rho - rhofr*u - rhofz*v) * Jacwj;
+	  break;
+	}
       }
-      // If residue flag is on
       if (_dfFlag){
 
 	double cos_gamma = rho_s;
@@ -180,35 +208,67 @@ void VirusShell :: fdf(){
 	dphi2V_s = rho_ss* dv2_s + rho_s* dv2_ss;
 	dphi3V_s = rho_ss* dv3_s + rho_s* dv3_ss; 
 
-
-	_df(4*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
-			       rho*Ms*dphi0U_s + 
-			       (Nt - rhofr)* du0) *Jacwj ;	
-	_df(4*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
-			       rho*Ms*dphi1U_s +
-			       (Nt - rhofr)* du1) *Jacwj ;	
+	switch (modelOption) {
+	case 0: 
+	  _df(4*ele(0)     ) +=  0;
+	  _df(4*ele(0) + 1 ) +=  0;
 	
-	_df(4*ele(0) + 2   ) +=  ((rhoNs * Tz)* dv0_s +
-			       rho*Ms*dphi0V_s + Mt*dv0_s
-			        - rhofz* dv0) *Jacwj ;
-	_df(4*ele(0) + 3   ) +=  ((rhoNs * Tz)* dv1_s +
-			       rho*Ms*dphi1V_s + Mt*dv1_s
-			        - rhofz* dv1) *Jacwj ;
-
-	_df(4*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
-			       rho*Ms*dphi2U_s + 
-			       (Nt - rhofr)* du2) *Jacwj ;	
-	_df(4*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
-			       rho*Ms*dphi3U_s +
-			       (Nt - rhofr)* du3) *Jacwj ;	
+	  _df(4*ele(0) + 2   ) += (  2*v_s*dv0_s - fr * dv0 ) *Jacwj ;	  
+	  _df(4*ele(0) + 3   ) += (  2*v_s*dv1_s- fr * dv1 ) *Jacwj ;	
 	
-	_df(4*ele(1) + 2   ) +=  ((rhoNs * Tz)* dv2_s +
-			       rho*Ms*dphi2V_s + Mt*dv2_s
-			        - rhofz* dv2) *Jacwj ;
-	_df(4*ele(1) + 3   ) +=  ((rhoNs * Tz)* dv3_s +
-			       rho*Ms*dphi3V_s + Mt*dv3_s
-			        - rhofz* dv3) *Jacwj ;
+	  _df(4*ele(1)     ) +=  0;
+	  _df(4*ele(1) + 1 ) +=  0;
+	
+	  _df(4*ele(1) + 2   ) += (  2*v_s*dv2_s - fr*dv2  ) *Jacwj ;		
+	  _df(4*ele(1) + 3   ) += (  2*v_s*dv3_s- fr*dv3 ) *Jacwj ;
+	  break;
 
+	case 1:
+	    _df(4*ele(0)     ) +=  (  2*u_ss*du0_ss - fr * du0 ) *Jacwj;
+	    _df(4*ele(0) + 1 ) +=  (  2*u_ss*du1_ss- fr * du1 ) *Jacwj ;
+	
+	    _df(4*ele(0) + 2   ) += 0;	  
+	    _df(4*ele(0) + 3   ) += 0 ;	
+	
+	    _df(4*ele(1)     ) +=  (  2*u_ss*du2_ss - fr*du2  ) *Jacwj ;
+	    _df(4*ele(1) + 1 ) +=  (  2*u_ss*du3_ss- fr*du3 ) *Jacwj ;
+	
+	    _df(4*ele(1) + 2   ) += 0;		
+	    _df(4*ele(1) + 3   ) += 0;		
+	    break;
+
+	case 2:
+	    _df(4*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
+	    rho*Ms*dphi0U_s + 
+	    (Nt - rhofr)* du0) *Jacwj ;	
+	    _df(4*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
+	    rho*Ms*dphi1U_s +
+	    (Nt - rhofr)* du1) *Jacwj ;	
+	
+	    _df(4*ele(0) + 2   ) +=  ((rhoNs * Tz)* dv0_s +
+	    rho*Ms*dphi0V_s + Mt*dv0_s
+	    - rhofz* dv0) *Jacwj ;
+	    _df(4*ele(0) + 3   ) +=  ((rhoNs * Tz)* dv1_s +
+	    rho*Ms*dphi1V_s + Mt*dv1_s
+	    - rhofz* dv1) *Jacwj ;
+
+	    _df(4*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
+	    rho*Ms*dphi2U_s + 
+	    (Nt - rhofr)* du2) *Jacwj ;	
+	    _df(4*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
+	    rho*Ms*dphi3U_s +
+	    (Nt - rhofr)* du3) *Jacwj ;	
+	
+	    _df(4*ele(1) + 2   ) +=  ((rhoNs * Tz)* dv2_s +
+	    rho*Ms*dphi2V_s + Mt*dv2_s
+	    - rhofz* dv2) *Jacwj ;
+	    _df(4*ele(1) + 3   ) +=  ((rhoNs * Tz)* dv3_s +
+	    rho*Ms*dphi3V_s + Mt*dv3_s
+	    - rhofz* dv3) *Jacwj ;
+	    break;
+
+	}
+	
       }
 
     } //end: for quadrature
@@ -242,4 +302,49 @@ void VirusShell::printU(){
     cout << _x(i) << ", ";
   }
   cout << "];\n";
+}
+
+void VirusShell::writeMesh(string filename){
+  ofstream myfile;
+  myfile.open (filename.c_str());
+  cout << "Writing mesh to a file.\n";
+  for (auto it = _nodes.begin(); it != _nodes.end(); ++it) {
+    myfile << *it << endl;
+}
+  myfile.close();
+}
+
+// void VirusShell::writeSolution(string filename){
+//   ofstream myfile;
+//   myfile.open (filename.c_str());
+//   cout << "Writing solution to a file.\n";
+//   myfile << setprecision(15);
+//   for (auto i = 1; i <= _x.size(); i++) {
+//     myfile << _x(i-1);
+//     if (i % 2 == 0)
+//       myfile << "\n";
+//     else
+//       myfile << "\t";
+// }
+//   myfile.close();
+// }
+void VirusShell::writeSolution(string filename){
+  ofstream myfile;
+  myfile.open (filename.c_str());
+  cout << "Writing solution to a file.\n";
+  myfile << setprecision(15);
+  myfile << "x = [";
+  for (auto i = 1; i <= _x.size(); i++) {
+    if (i % 2 == 1)
+      myfile << "\n[" << _x(i-1) << ",\t";
+    else
+      myfile << _x(i-1) << "],";
+}
+  myfile << "]\n";
+  myfile << "from matplotlib import pyplot as plt\n";
+  myfile << "from numpy import *\n";
+  myfile << "x = matrix(x)\n";
+  myfile << "plt.plot(x[0:len(x):2],'*-')\n";
+  myfile << "plt.show()\n";
+  myfile.close();
 }

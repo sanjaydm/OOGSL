@@ -16,6 +16,12 @@ public:
     delete vs;
   }
   void fdf();
+  void writeMesh(string filename) {
+    vs->writeMesh(filename);
+  }
+  void writeSolution(string filename) {
+    vs->writeSolution(filename);
+  }
   VirusShell* vs;
 };
 #endif

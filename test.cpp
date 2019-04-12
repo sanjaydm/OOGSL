@@ -86,7 +86,7 @@ int main(int argc, char** argv){
   // cout << "Size of I = " << I._g.size() << endl;
 
   // Constructing projection operator
-
+  
   Vector v(5);
   v << 1 << 2 << 3 << 4 << 5;
   v.print();

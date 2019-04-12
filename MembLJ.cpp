@@ -1,11 +1,13 @@
 #include "MembLJ.h"
+#include<gsl/gsl_sf.h>
+
 using namespace std;
 
 // Fixed particle coordinates
 #define tN 1.0172220997017924 //PI/2
 #define pN 0.00
 
-void fdf(){
+void MembLJ::fdf(){
 
   _f = 0; // reset energy
   _df.setZero(); //reset residue to zero
@@ -28,25 +30,25 @@ void fdf(){
   // START: Lookup table Sph Harm at Particles
   Matrix YlmP(_NP, _Ntot);
 
-  for (int pi=0; pi < NP; pi++){
+  for (int pi=0; pi < _NP; pi++){
     double ctP, pPi;
-    if (pi == (NP-1)) {
+    if (pi == (_NP-1)) {
       ctP = cos(tN);
       pPi = pN;
     }
     else{
-      ctP = cos(_x(Ntot+2*pi));
-      pPi = _x(Ntot+2*pi + 1);
+      ctP = cos(_x(_Ntot+2*pi));
+      pPi = _x(_Ntot+2*pi + 1);
     }
     double* plmP;
+    int arr_size = gsl_sf_legendre_array_n(_Lmax);
     plmP = new double[arr_size];
-
-    gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM, N, ctP,
+    gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM,_Lmax, ctP,
 				       CSPHASE,  plmP);
     int absm, idx;
     int i=0;
     //------------Legendre Poly----------------------
-    for(int l=0; l<= N; l++){
+    for(int l=0; l<=_Lmax; l++){
       for (int m=-l; m<=l; m++){
 	absm = abs(m);
 	idx = gsl_sf_legendre_array_index(l,absm);
@@ -66,15 +68,18 @@ void fdf(){
   }
   // END: Lookup table Sph Harm at Particles
   // Particle coordinates
-  for (int pid=0; pid < NP; pid++) {
+  int arr_size = gsl_sf_legendre_array_n(_Lmax);
+  double* plmP = new double[arr_size]; 
+  double* plmP_1 = new double[arr_size];
+  for (int pid=0; pid < _NP; pid++) {
     // The particle position follows modal coeffs
-    if (pid == NP-1 ){
+    if (pid == _NP-1 ){
       tP(pid) = tN;
       pP(pid) = pN;
     }
     else{
-      tP(pid) = _x(Ntot+2*pid);
-      pP(pid) = _x(Ntot+2*pid+1);
+      tP(pid) = _x(_Ntot+2*pid);
+      pP(pid) = _x(_Ntot+2*pid+1);
     }
     // Cos and sin values at particle pos.
     double ctP = cos(tP(pid));
@@ -82,7 +87,7 @@ void fdf(){
     double cpP = cos(pP(pid));
     double spP = sin(pP(pid));
 
-    gsl_sf_legendre_deriv_alt_array_e(GSL_SF_LEGENDRE_SPHARM, Lmax, ctP,
+    gsl_sf_legendre_deriv_alt_array_e(GSL_SF_LEGENDRE_SPHARM, _Lmax, ctP,
                                       CSPHASE,  plmP, plmP_1);
     // Compute particle positions
     uP(pid) = 1; 
@@ -90,7 +95,7 @@ void fdf(){
     uP_p(pid) = 0;
     int idx;
     int i = 0;
-    for(int l=0; l<= Lmax; l++){
+    for(int l=0; l<= _Lmax; l++){
       for (int m=-l; m<=l; m++){
         int absm = abs(m);
         idx = gsl_sf_legendre_array_index(l,absm);
@@ -114,34 +119,34 @@ void fdf(){
   } // end loop pid
 
   // Computing particle energy
-  for (int pidB=0; pidB < NP; pidB++) {
-    for (int pidA=pidB+1; pidA < NP; pidA++) {
+  for (int pidB=0; pidB < _NP; pidB++) {
+    for (int pidA=pidB+1; pidA < _NP; pidA++) {
       if (pidA != pidB) {
         double enBA   = 0;
-        double fBA[3] = {0, 0, 0};
-        double PBA[3] = {0, 0, 0};
+        Vector fBA(3);
+        Vector PBA(3);
 
-        double ctA = cos(tP[pidA]);
-        double stA = sin(tP[pidA]);
-        double cpA = cos(pP[pidA]);
-        double spA = sin(pP[pidA]);
+        double ctA = cos(tP(pidA));
+        double stA = sin(tP(pidA));
+        double cpA = cos(pP(pidA));
+        double spA = sin(pP(pidA));
 
-        double ctB = cos(tP[pidB]);
-        double stB = sin(tP[pidB]);
-        double cpB = cos(pP[pidB]);
-        double spB = sin(pP[pidB]);
+        double ctB = cos(tP(pidB));
+        double stB = sin(tP(pidB));
+        double cpB = cos(pP(pidB));
+        double spB = sin(pP(pidB));
 
-        double uA = uP[pidA]; double uB = uP[pidB];
-        fBA[0] = uB*stB*cpB - uA*stA*cpA;
-        fBA[1] = uB*stB*spB - uA*stA*spA;
-        fBA[2] = uB*ctB     - uA*ctA;
-        LJ(fBA, ep, rm, &enBA, PBA, ENERGY);
-        *energyPtr += enBA;
+        double uA = uP(pidA); double uB = uP(pidB);
+        fBA(0) = uB*stB*cpB - uA*stA*cpA;
+        fBA(1) = uB*stB*spB - uA*stA*spA;
+        fBA(2) = uB*ctB     - uA*ctA;
+        LJ(fBA, _eps1);
+        _f += _LJEnergy;
       }
     }
   }
-  // Bypass and return particle energy (stored in energyPtr) if option=PARTICLE
-  if (option == PARTICLE) {return;}
+  // // Bypass and return particle energy (stored in energyPtr) if option=PARTICLE
+  // if (option == PARTICLE) {return;}
   
   //Initialize penatly related quantities
   double area = 0;
@@ -153,40 +158,42 @@ void fdf(){
   double refVolume = 4*PI/3.0;
   
   // START: Compute surface pos, derivatives at all quad points as a vector
-  Vector clm = _x.view (0, Ntot);
-  Vector u_vec(qThetas.size());
-  gsl_blas_dgemv(CblasNoTrans, 1.0, Ylm, &clm.vector, 0.0, u_vec);
+  Vector clm = _x.view (0, _Ntot);
+  //Vector u_vec(_qThetas.size());
+  // Ylm must be defined outside
+  Vector u_vec = _Ylm*clm;
+  
+  //Vector ut_vec(qThetas.size());
+  Vector ut_vec = _Ylm_t*clm;
 
-  Vector ut_vec(qThetas.size());
-  gsl_blas_dgemv(CblasNoTrans, 1.0, Ylm_t, &clm.vector, 0.0, ut_vec);
+  //Vector utt_vec(qThetas.size());
+  Vector utt_vec = _Ylm_tt*clm;
 
-  Vector utt_vec(qThetas.size());
-  gsl_blas_dgemv(CblasNoTrans, 1.0, Ylm_tt, &clm.vector, 0.0, utt_vec);
+  //Vector up_vec(qThetas.size());
+  Vector up_vec = _Ylm_p*clm;
 
-  Vector up_vec(qThetas.size());
-  gsl_blas_dgemv(CblasNoTrans, 1.0, Ylm_p, &clm.vector, 0.0, up_vec);
+  //Vector upp_vec(qThetas.size());
+  Vector upp_vec = _Ylm_pp*clm;
 
-  Vector upp_vec(qThetas.size());
-  gsl_blas_dgemv(CblasNoTrans, 1.0, Ylm_pp, &clm.vector, 0.0, upp_vec);
+  //Vector utp_vec(qThetas.size());
+  Vector utp_vec = _Ylm_tp*clm;
 
-  Vector utp_vec(qThetas.size());
-  gsl_blas_dgemv(CblasNoTrans, 1.0, Ylm_tp, &clm.vector, 0.0, utp_vec);
   // END: Compute surface pos, derivatives at all quad points as a vector
 
   double t, p, wt;
   bool quadFlag = true; // Particle interaction is outside the integral (bypass flag)
-  for(int qi = 0; qi < qThetas.size(); qi++){ // quadrature loop
-    t = qThetas[qi];
-    p = qPhis[qi];
-    wt = qWts[qi];
+  for(int qi = 0; qi < _qThetas.size(); qi++){ // quadrature loop
+    t = _qThetas[qi];
+    p = _qPhis[qi];
+    wt = _qWts[qi];
     
     double ct=cos(t); double st=sin(t);
     double cp=cos(p); double sp=sin(p);
-    // gsl_sf_legendre_deriv2_alt_array_e(GSL_SF_LEGENDRE_SPHARM, Lmax, ct,
+    // gsl_sf_legendre_deriv2_alt_array_e(GSL_SF_LEGENDRE_SPHARM, _Lmax, ct,
     //     			       CSPHASE,  plm, plm_1, plm_2);
-    double* plm = plms[qi];
-    double* plm_1 = plms_1[qi];
-    double* plm_2 = plms_2[qi];
+    double* plm = _plms[qi];
+    double* plm_1 = _plms_1[qi];
+    double* plm_2 = _plms_2[qi];
     
     double u=1; 
     double u_t=0;
@@ -199,12 +206,12 @@ void fdf(){
     int absm, idx;
 
     //START: Using vectorized version
-    u = u_vec->data[qi]+1;
-    u_t = ut_vec->data[qi];
-    u_tt = utt_vec->data[qi];
-    u_p = up_vec->data[qi];
-    u_pp = upp_vec->data[qi];
-    u_tp = utp_vec->data[qi];
+    u = u_vec(qi)+1;
+    u_t = ut_vec(qi);
+    u_tt = utt_vec(qi);
+    u_p = up_vec(qi);
+    u_pp = upp_vec(qi);
+    u_tp = utp_vec(qi);
     //END: Using vectorized version
     
     // Metric Tensor
@@ -312,10 +319,12 @@ void fdf(){
 
     // Energy
     // Volume is computed as a surface integral 1/3. <f,n>
-    *energyPtr += ( k1*H*H)*Sg*wt; 
+    if (_fFlag) {
+     _f += ( k1*H*H)*Sg*wt; 
     //*energyPtr += ( k1*H*H + gamma  +  pressure/3.*u*Rn )*Sg/st*wt-gamma*wt; 
-
-    if (option==RESIDUE) {
+    }
+    
+    if (_dfFlag) {
       
       // START: Vectorization of residue
       // Variation of Sg
@@ -326,13 +335,13 @@ void fdf(){
       gsl_vector_view Ylm_tpqi = gsl_matrix_row(Ylm_tp, qi);
       gsl_vector_view Ylm_ppqi = gsl_matrix_row(Ylm_pp, qi);
       
-      gsl_vector* dSg = gsl_vector_calloc(Ntot);
+      gsl_vector* dSg = gsl_vector_calloc(_Ntot);
       gsl_blas_daxpy (gtt*u_t + gtp*u_p, &Ylm_tqi.vector, dSg); //gtt*u_t*uti
       gsl_blas_daxpy (gtp*u_t + gpp*u_p, &Ylm_pqi.vector, dSg); //+gtp*u_t*upi
       gsl_blas_daxpy (u*(gtt+st*st*gpp), &Ylmqi.vector, dSg); //+u*(gtt+st*st*gpp)*ui
 
       // Variation of H
-      gsl_vector* dH = gsl_vector_calloc(Ntot);
+      gsl_vector* dH = gsl_vector_calloc(_Ntot);
       double temp_a = 0.5*((gtt*g_T+gtp*g_P)/(2*g) + (gtt_T+gtp_P));
       double temp_b = 0.5*((gtp*g_T+gpp*g_P)/(2*g) + (gtp_T+gpp_P));
 
@@ -344,7 +353,7 @@ void fdf(){
       gsl_blas_daxpy( gtp*Rn , &Ylm_tpqi.vector, dH); 
       gsl_blas_daxpy( 0.5*gpp*Rn , &Ylm_ppqi.vector, dH); 
 
-      gsl_vector_view outview = gsl_vector_subvector(out, 0, Ntot);
+      gsl_vector_view outview = gsl_vector_subvector(out, 0, _Ntot);
       gsl_blas_daxpy(2*wt*k1*H*Sg, dH, &outview.vector); gsl_blas_daxpy(wt*k1*H*H*Sg, dSg, &outview.vector); //out->data(i) += wt*( 2*k1*H*dH + k1*H*H * dSg )*Sg;     
       gsl_blas_daxpy(wt*Sg, dSg, ai); //ai->data(i) += wt*dSg*Sg;
       gsl_blas_daxpy(wt*u*st*cp*Sg, dSg, xi); gsl_blas_daxpy(wt*st*cp*Sg, &Ylmqi.vector, xi); //xi->data(i) += wt*(u*st*cp*dSg + st*cp*ui)*Sg;
@@ -354,13 +363,13 @@ void fdf(){
       // Particle interactions
       // Efficetively "Outside" quadrature loop, as it should be
       if (quadFlag) {
-        for (int l=0;l<= Lmax;l++){
+        for (int l=0;l<= _Lmax;l++){
           for (int m=-l; m<=l; m++){
             int absm = abs(m);
             idx = gsl_sf_legendre_array_index(l,absm);
 
-            for (int pidB=0; pidB < NP; pidB++) {
-              for (int pidA=pidB+1; pidA < NP; pidA++) {
+            for (int pidB=0; pidB < _NP; pidB++) {
+              for (int pidA=pidB+1; pidA < _NP; pidA++) {
                 if (pidA != pidB) {
                   double enBA   = 0;
                   double fBA[3] = {0, 0, 0};
@@ -414,13 +423,13 @@ void fdf(){
                     double fAp_y = (uA_p*stA*spA + uA*stA*cpA);
                     double fAp_z =  uA_p*ctA;
 
-                    if (pidB != (NP-1)){
-                      out->data[Ntot+pidB*2]   +=   (PBA[0]*fBt_x + PBA[1]*fBt_y + PBA[2]*fBt_z);
-                      out->data[Ntot+pidB*2+1] += (PBA[0]*fBp_x + PBA[1]*fBp_y + PBA[2]*fBp_z);
+                    if (pidB != (_NP-1)){
+                      out->data[_Ntot+pidB*2]   +=   (PBA[0]*fBt_x + PBA[1]*fBt_y + PBA[2]*fBt_z);
+                      out->data[_Ntot+pidB*2+1] += (PBA[0]*fBp_x + PBA[1]*fBp_y + PBA[2]*fBp_z);
                     }
-                    if (pidA!=(NP-1)){
-                        out->data[Ntot+pidA*2]   +=   -(PBA[0]*fAt_x + PBA[1]*fAt_y + PBA[2]*fAt_z);
-                        out->data[Ntot+pidA*2+1] += -(PBA[0]*fAp_x + PBA[1]*fAp_y + PBA[2]*fAp_z);
+                    if (pidA!=(_NP-1)){
+                        out->data[_Ntot+pidA*2]   +=   -(PBA[0]*fAt_x + PBA[1]*fAt_y + PBA[2]*fAt_z);
+                        out->data[_Ntot+pidA*2+1] += -(PBA[0]*fAp_x + PBA[1]*fAp_y + PBA[2]*fAp_z);
                       }
                 
                   } // end if i==0
@@ -439,11 +448,11 @@ void fdf(){
   } // end quad loop
   
   // Energy contribution from penalty
-  *energyPtr += pow(area - refArea, 2)*0.5*eps;
-  //*energyPtr += 0*pow(volume - refVolume,2)*0.5*eps;
-  *energyPtr += (pow(X0,2)+pow(Y0,2) + pow(Z0,2) )*0.5*eps;
-  //*energyPtr += (pow(tP[NP-1]-PI/2,2) + pow(pP[NP-1],2) )*0.5*eps;
-  //*energyPtr += (pow(_x[1],2) + pow(_x[2],2) + pow(_x[3],2) )*0.5*eps; // setting l=1 modes to zero
+  _f += pow(area - refArea, 2)*0.5*eps;
+  //_f += 0*pow(volume - refVolume,2)*0.5*eps;
+  _f += (pow(X0,2)+pow(Y0,2) + pow(Z0,2) )*0.5*eps;
+  //_f += (pow(tP[_NP-1]-PI/2,2) + pow(pP[_NP-1],2) )*0.5*eps;
+  //_f += (pow(_x[1],2) + pow(_x[2],2) + pow(_x[3],2) )*0.5*eps; // setting l=1 modes to zero
   // Rotation constraint
   
   //Compute constraint forces
@@ -452,33 +461,23 @@ void fdf(){
   double lambY = (Y0)*eps;
   double lambZ = (Z0)*eps;
 
-  //double lambTheta = (tP[NP-1]-PI/2)*eps;
-  //double lambPhi = (pP[NP-1])*eps;
-  if (option==RESIDUE) {
+  //double lambTheta = (tP[_NP-1]-PI/2)*eps;
+  //double lambPhi = (pP[_NP-1])*eps;
+  if (_dfFlag) {
     // START: Vectorization
-    gsl_vector_view outview = gsl_vector_subvector(out, 0, Ntot);
-    gsl_blas_daxpy(gamma, ai, &outview.vector);
-    gsl_blas_daxpy(lambX, xi, &outview.vector);
-    gsl_blas_daxpy(lambY, yi, &outview.vector);
-    gsl_blas_daxpy(lambZ, zi, &outview.vector);
+    //gsl_vector_view outview = gsl_vector_subvector(out, 0, _Ntot);
+    Vector outview = _df.view(0, _Ntot);
+    gsl_blas_daxpy(gamma, ai._gsl_vec, outview._gsl_vec);
+    gsl_blas_daxpy(lambX, xi._gsl_vec, outview._gsl_vec);
+    gsl_blas_daxpy(lambY, yi._gsl_vec, outview._gsl_vec);
+    gsl_blas_daxpy(lambZ, zi._gsl_vec, outview._gsl_vec);
     // END: Vectorizatoin      
   }
 
-  uP.clear();
-  uP_t.clear();
-  uP_p.clear();
-  tP.clear();
-  pP.clear();
-
-  gsl_vector_free(ai);
-  gsl_vector_free(xi);
-  gsl_vector_free(yi);
-  gsl_vector_free(zi);
-  gsl_matrix_free(YlmP);
 }
 
 
-void MembLJ::LJ(Vector f12){
+void MembLJ::LJ(Vector f12, double e){
   // //Harmonic 
   // double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
   // if(option==ENERGY)
@@ -492,15 +491,15 @@ void MembLJ::LJ(Vector f12){
     // --------------- Morse -----------------------
   double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
   //De = e
-  double a = 6/rm; //At this value r = 2re and exponent is e-1
-  double fact = (1-exp(-a*(r-rm)));
-  *energy = e* pow(fact,2);
+  double a = 6/_rm; //At this value r = 2re and exponent is e-1
+  double fact = (1-exp(-a*(r-_rm)));
+  _LJEnergy = e* pow(fact,2);
   //  cout << "\033[32m " << r << "\033[0m\n";
-  if (option==RESIDUE) {
-    double fact2 = 2*e*fact*exp(-a*(r-rm))*a/r;
-    force(0) =  fact2 * f12(0);
-    force(1) =  fact2 * f12(1);
-    force(2) =  fact2 * f12(2);
+  if (_dfFlag) {
+    double fact2 = 2*e*fact*exp(-a*(r-_rm))*a/r;
+    _LJForce(0) =  fact2 * f12(0);
+    _LJForce(1) =  fact2 * f12(1);
+    _LJForce(2) =  fact2 * f12(2);
   }
 
 
@@ -559,7 +558,6 @@ void MembLJ::printToVTK(string filename){
   
   int NNodes =0;
   int dim = 0;
-  int Lmax = N;
   inp >> NNodes >> dim;
   
   // Header
@@ -572,37 +570,37 @@ void MembLJ::printToVTK(string filename){
 
   double x, y, z;
   double t, p;
-  vector <double> uP(NP);
-  vector <double> tP(NP);
-  vector <double> pP(NP);
+  vector <double> uP(_NP);
+  vector <double> tP(_NP);
+  vector <double> pP(_NP);
 
   // Read Quadrature Rule
   //string lebfile("quad.dat");
 
   // Particle coordinates
-  for (int pid=0; pid < NP; pid++) {
-    if (pid == (NP-1) ){
+  for (int pid=0; pid < _NP; pid++) {
+    if (pid == (_NP-1) ){
       tP(pid) = tN;
       pP(pid) = pN;
     }
     else{
-      tP(pid) = arg[Ntot+2*pid];
-      pP(pid) = arg[Ntot+2*pid+1];
+      tP(pid) = arg[_Ntot+2*pid];
+      pP(pid) = arg[_Ntot+2*pid+1];
     }
     double ctP = cos(tP(pid));
     double stP = sin(tP(pid));
     double cpP = cos(pP(pid));
     double spP = sin(pP(pid));
-    gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM, Lmax, ctP,
+    gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM, _Lmax, ctP,
 				       CSPHASE,  plmP);
 
-    // gsl_sf_legendre_deriv_alt_array_e(GSL_SF_LEGENDRE_SPHARM, N, ctP,
+    // gsl_sf_legendre_deriv_alt_array_e(GSL_SF_LEGENDRE_SPHARM,__Lmax, ctP,
     //                                   CSPHASE,  plmP, plmP_1);
     uP(pid) = 1; 
     int idx;
     int i = 0;
     //------------Legendre Poly----------------------
-    for(int l=0; l<= Lmax; l++){
+    for(int l=0; l<= _Lmax; l++){
       for (int m=-l; m<=l; m++){
         int absm = abs(m);
         idx = gsl_sf_legendre_array_index(l,absm);
@@ -629,17 +627,17 @@ void MembLJ::printToVTK(string filename){
     x = x/nrm; y = y/nrm; z= z/nrm;
     t = acos(z/nrm);
     p = atan2(y,x);
-    //int Total_len = Ntot;
+    //int Total_len = _Ntot;
     int idx;
     int md_i = 0;
     double ct=cos(t); double st=sin(t);
     double cp=cos(p); double sp=sin(p);
 
-    gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM, Lmax, ct,
+    gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM, _Lmax, ct,
 				       CSPHASE,  plm);
 
     double u  = 1.0;
-    for(int l=0; l<= Lmax; l++){
+    for(int l=0; l<= _Lmax; l++){
       for (int m=-l; m<=l; m++){
 	int absm = abs(m);
 	idx = gsl_sf_legendre_array_index(l,absm);
@@ -680,8 +678,8 @@ void MembLJ::printToVTK(string filename){
   outAB << "vtk output" << endl;
   outAB << "ASCII" << endl;
   outAB << "DATASET POLYDATA" << endl;
-  outAB << "POINTS " << NP << " FLOAT" << endl;
-  for (int pid=0; pid < NP; pid++) {
+  outAB << "POINTS " << _NP << " FLOAT" << endl;
+  for (int pid=0; pid < _NP; pid++) {
     outAB << uP(pid)*sin(tP(pid))*cos(pP(pid)) << " " << uP(pid)*sin(tP(pid))*sin(pP(pid)) << " " << uP(pid)*cos(tP(pid))<< endl;
   }
   
@@ -702,7 +700,7 @@ void MembLJ::printModes(string filename){
   out << para[1] << endl; //eps
   out << para[2] << endl; //re
   
-  for (int i=0; i<Ntot; i++){
+  for (int i=0; i<_Ntot; i++){
     out << uvec->data[i] << "\n";
   }
 }
@@ -715,38 +713,38 @@ void MembLJ::printParticleCoords(string filename){
   out << para[1] << endl; //eps
   out << para[2] << endl; //re
 
-  for (int i=0; i<NP-1; i++){
-    out << uvec->data[Ntot+2*i] <<"\n";
-    out << uvec->data[Ntot+2*i+1] <<"\n";
+  for (int i=0; i<_NP-1; i++){
+    out << uvec->data[_Ntot+2*i] <<"\n";
+    out << uvec->data[_Ntot+2*i+1] <<"\n";
 
   }
 }
-void generateGausLegendreQuad(const char* filename) {
-  ofstream fid(filename);
-  // Use only even order 
-  int orderX = 10;
-  int orderY = 10;
-  double* X = x10;
-  double* Y = x10;
-  double* WX = w10;
-  double* WY = w10;
-  for (int ix=0; ix<orderX/2; ix++){
-    for (int iy=0; iy<orderY/2; iy++){
-      double tP = PI/2*(X[ix] + 1);
-      double pP = PI*(Y[iy] + 1);
-      double tM = PI/2*(-X[ix] + 1);
-      double pM = PI*(-Y[iy] + 1);
-      fid << setprecision(15) ;
-      fid << pP << " " << tP << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
-      fid << pP << " " << tM << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
-      fid << pM << " " << tP << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
-      fid << pM << " " << tM << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
-    }
-  }
-  fid.close();
-}
+// void generateGausLegendreQuad(const char* filename) {
+//   ofstream fid(filename);
+//   // Use only even order 
+//   int orderX = 10;
+//   int orderY = 10;
+//   double* X = x10;
+//   double* Y = x10;
+//   double* WX = w10;
+//   double* WY = w10;
+//   for (int ix=0; ix<orderX/2; ix++){
+//     for (int iy=0; iy<orderY/2; iy++){
+//       double tP = PI/2*(X[ix] + 1);
+//       double pP = PI*(Y[iy] + 1);
+//       double tM = PI/2*(-X[ix] + 1);
+//       double pM = PI*(-Y[iy] + 1);
+//       fid << setprecision(15) ;
+//       fid << pP << " " << tP << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
+//       fid << pP << " " << tM << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
+//       fid << pM << " " << tP << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
+//       fid << pM << " " << tM << " " << WX[ix]*WY[iy]*PI*PI/2 << endl;
+//     }
+//   }
+//   fid.close();
+// }
 
-void generateCeliaReinaQuad(const char* filename, int orderX, int orderY) {
+void MembLJ::generateCeliaReinaQuad(int orderX, int orderY) {
   // Celia Reina's Quad
   ofstream fid(filename);
   double* X ;
@@ -768,18 +766,116 @@ void generateCeliaReinaQuad(const char* filename, int orderX, int orderY) {
     X = x64;
     WX = w64;
     break;
-
   }
+  cout << "Creating quadrature nodes and weights ...";
   for (int ix=0; ix<orderX/2; ix++){
     for (int iy=0; iy<orderY; iy++){
       double tP = acos(X[ix]);
       double tM = acos(-X[ix]);
       double p = 2*PI/(orderY)*iy;
-      fid << setprecision(15) ;
-      fid << p << " " << tP << " " << WX[ix]/sin(tP)*(2*PI)/orderY << endl;
-      fid << p << " " << tM << " " << WX[ix]/sin(tM)*(2*PI)/orderY << endl;
+
+      _qThetas.push_back(tP);
+      _qPhis.push_back(p);
+      _qWts.push_back(WX[ix]/sin(tP)*(2*PI)/orderY);
+
+      _qThetas.push_back(tM);
+      _qPhis.push_back(p);
+      _qWts.push_back(WX[ix]/sin(tM)*(2*PI)/orderY);
     }
   }
-  fid.close();
+  cout << " done" << endl;
+}
 
+void MembLJ::computeYlmLookUp(){
+  // Generate Spherical Harmonic Lookup
+  cout << "Generating spherical harmonic look up table ... ";
+  _Ylm.setDim(_qThetas.size(), _Ntot);
+  _Ylm_t.setDim(_qThetas.size(), _Ntot);
+  _Ylm_tt.setDim(_qThetas.size(), _Ntot);
+  
+  _Ylm_p.setDim(_qThetas.size(), _Ntot);
+  _Ylm_pp.setDim(_qThetas.size(), _Ntot);
+  _Ylm_tp.setDim(_qThetas.size(), _Ntot);
+
+  for (int qi=0; qi < _qThetas.size(); qi++){
+    double ct = cos(qThetas[qi]);
+    double p = _qPhis[qi];
+    double* plm;
+    double* plm_1;
+    double* plm_2;
+    plm = new double[arr_size];
+    plm_1 = new double[arr_size];
+    plm_2 = new double[arr_size];
+    gsl_sf_legendre_deriv2_alt_array_e(GSL_SF_LEGENDRE_SPHARM,_Lmax, ct,
+				       CSPHASE,  plm, plm_1, plm_2);
+    int absm, idx;
+    int i=0;
+    //------------Legendre Poly----------------------
+    for(int l=0; l<=_Lmax; l++){
+      for (int m=-l; m<=l; m++){
+	absm = abs(m);
+	idx = gsl_sf_legendre_array_index(l,absm);
+	if (m<0){
+	  _Ylm   (qi, i) = S2*plm[idx]*sin(absm*p);
+	  _Ylm_t (qi, i) = S2*(plm_1[idx])*sin(absm*p);
+	  _Ylm_tt(qi, i) = S2*(plm_2[idx])*sin(absm*p);
+
+	  _Ylm_p (qi, i) = absm*S2*(plm[idx])*cos(absm*p);
+	  _Ylm_pp(qi, i) = -m*m*S2*(plm[idx])*sin(absm*p);
+
+	  _Ylm_tp(qi, i) = absm*S2*(plm_1[idx])*cos(absm*p);
+
+	}
+	if (m==0){
+	  _Ylm    (qi, i) = plm[idx];
+	  _Ylm_t  (qi, i) = plm_1[idx];
+	  _Ylm_tt (qi, i) = plm_2[idx];	  
+	}
+	if (m>0){
+
+	  _Ylm    (qi, i) =  S2*plm[idx]*cos(m*p)     ;
+	  _Ylm_t  (qi, i) = S2*(plm_1[idx])*cos(m*p) ;
+	  _Ylm_tt (qi, i) = S2*(plm_2[idx])*cos(m*p) ;
+
+	  _Ylm_p  (qi, i) = -m*S2*(plm[idx])*sin(m*p);
+	  _Ylm_pp (qi, i) = -m*m*S2*(plm[idx])*cos(m*p);
+
+          _Ylm_tp (qi, i) = -m*S2*(plm_1[idx])*sin(m*p);
+	}
+	i ++;
+      }
+
+    }
+    delete[] plm;
+    delete[] plm_1;
+    delete[] plm_2;
+    
+  }
+  cout << "done\n";
+  // END: Generating spherical harmonic lookup table
+
+}
+
+void MembLJ::generateAssociatedLegendreLookUp(){
+
+  //START: Generating associated legendre lookup
+  cout << "Generating associated legendre look up table ... ";
+  int arr_size = gsl_sf_legendre_array_n(_Lmax);
+  for (int i=0; i < _qThetas.size(); i++){
+    double ct = cos(_qThetas[i]);
+    double* temp;
+    double* temp_1;
+    double* temp_2;
+    temp = new double[arr_size];
+    temp_1 = new double[arr_size];
+    temp_2 = new double[arr_size];
+    gsl_sf_legendre_deriv2_alt_array_e(GSL_SF_LEGENDRE_SPHARM, N, ct,
+				       CSPHASE,  temp, temp_1, temp_2);
+    _plms.push_back(temp);
+    _plms_1.push_back(temp_1);
+    _plms_2.push_back(temp_2);
+  }
+  cout << "done\n";
+  // END: Lengendre lookup
+  
 }

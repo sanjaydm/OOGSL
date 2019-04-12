@@ -7,6 +7,7 @@
 #include "MultiMin.h"
 #include "Quadrature.h"
 #include "Shape.h"
+#include <fstream>
 
 class VirusShell: public Problem {
 public:
@@ -24,6 +25,8 @@ public:
   }
   void NeoHookean(Vector& est, Vector& kst);
   void printU();
+  void writeMesh(string filename);
+  void writeSolution(string filename);
   
   void fdf();
 

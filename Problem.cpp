@@ -50,18 +50,20 @@ void Problem::d2f(){
 int Problem::checkConsistency(double eps, double tol){
 
   Vector dfappx(_Ndof);
+  dfappx.setZero();
   double f0 = f();
   //cout << "f0 = " << f0 << endl;
   for (int i=0; i<_Ndof; i++){
     _x(i) += eps;
     dfappx(i) = (f()-f0)/eps;
+    //cout << "\033[32m" << f() << " " << f0 << " " << (f()-f0) << "\033[0m\n";
     _x(i) -= eps;
   }
   df();
   Vector absError = (dfappx- _df);
   double absErrorNrm = absError.norm();
-  _df.print();
   dfappx.print();
+  _df.print();
   absError.print();
   cout << "energy = " << f0 << endl;
   //_df.print();
