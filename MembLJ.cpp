@@ -191,9 +191,9 @@ void MembLJ::fdf(){
     double cp=cos(p); double sp=sin(p);
     // gsl_sf_legendre_deriv2_alt_array_e(GSL_SF_LEGENDRE_SPHARM, _Lmax, ct,
     //     			       CSPHASE,  plm, plm_1, plm_2);
-    double* plm = _plms[qi];
-    double* plm_1 = _plms_1[qi];
-    double* plm_2 = _plms_2[qi];
+    Vector& plm = _plms[qi];
+    Vector& plm_1 = _plms_1[qi];
+    Vector& plm_2 = _plms_2[qi];
     
     double u=1; 
     double u_t=0;
@@ -320,8 +320,8 @@ void MembLJ::fdf(){
     // Energy
     // Volume is computed as a surface integral 1/3. <f,n>
     if (_fFlag) {
-     _f += ( k1*H*H)*Sg*wt; 
-    //*energyPtr += ( k1*H*H + gamma  +  pressure/3.*u*Rn )*Sg/st*wt-gamma*wt; 
+     _f += ( _k1*H*H)*Sg*wt; 
+    //*energyPtr += ( _k1*H*H + gamma  +  pressure/3.*u*Rn )*Sg/st*wt-gamma*wt; 
     }
     
     if (_dfFlag) {
@@ -354,7 +354,7 @@ void MembLJ::fdf(){
       gsl_blas_daxpy( 0.5*gpp*Rn , &Ylm_ppqi.vector, dH); 
 
       gsl_vector_view outview = gsl_vector_subvector(out, 0, _Ntot);
-      gsl_blas_daxpy(2*wt*k1*H*Sg, dH, &outview.vector); gsl_blas_daxpy(wt*k1*H*H*Sg, dSg, &outview.vector); //out->data(i) += wt*( 2*k1*H*dH + k1*H*H * dSg )*Sg;     
+      gsl_blas_daxpy(2*wt*_k1*H*Sg, dH, &outview.vector); gsl_blas_daxpy(wt*_k1*H*H*Sg, dSg, &outview.vector); //out->data(i) += wt*( 2*_k1*H*dH + _k1*H*H * dSg )*Sg;     
       gsl_blas_daxpy(wt*Sg, dSg, ai); //ai->data(i) += wt*dSg*Sg;
       gsl_blas_daxpy(wt*u*st*cp*Sg, dSg, xi); gsl_blas_daxpy(wt*st*cp*Sg, &Ylmqi.vector, xi); //xi->data(i) += wt*(u*st*cp*dSg + st*cp*ui)*Sg;
       gsl_blas_daxpy(wt*Sg*u*st*sp, dSg, yi); gsl_blas_daxpy(wt*Sg*st*sp, &Ylmqi.vector, yi);  //yi->data(i) += wt*(u*st*sp*dSg + st*sp*ui)*Sg;

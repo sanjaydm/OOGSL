@@ -29,7 +29,7 @@ void VirusShell :: fdf(){
   int modelOption = 2;
   for (int e=0; e< numEle; e++){
     for (int j=0; j<numQuad; j++) {
-      if (e == 3) {
+      if (e == 25) {
       	fr = 100;
       }
       else

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <array>
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 #include "Vector.h"
@@ -43,7 +44,8 @@ public:
   Matrix operator- (Matrix& v2);    
   Matrix& operator= (Matrix& v2);
   Matrix& operator<< (double val);
-
+  Vector row(int i);
+  Vector col(int i);
   Vector operator* (Vector& v);
   void print();
 };

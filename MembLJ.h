@@ -27,6 +27,7 @@ public:
     _re2 = 1.4;
     _Lmax = 16;
     _NP = 12;
+    _k1 = 1;
 
     _Ntot = (_Lmax + 1 )*(_Lmax + 1);
     generateCeliaReinaQuad(20, 2*_Lmax + 2);
@@ -56,6 +57,7 @@ public:
   // Lennard Jones Parameters
   double _re1;  double _eps1;
   double _re2;  double _eps2;
+  double _k1;
 
   // Spherical harmonic lookup table
   vector<Vector> _plms;

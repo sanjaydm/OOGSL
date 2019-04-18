@@ -208,3 +208,15 @@ Vector Matrix::operator*(Vector & v){
   gsl_blas_dgemv(CblasNoTrans, 1.0, _gsl_mat, v._gsl_vec, 0.0, ret._gsl_vec);
   return ret;
 }
+
+Vector Matrix::row(int i){
+  gsl_vector_view v = gsl_matrix_row(_gsl_mat, i);
+  Vector ret(&v.vector);
+  return ret;
+}
+
+Vector Matrix::col(int i){
+  gsl_vector_view v = gsl_matrix_column(_gsl_mat, i);
+  Vector ret(&v.vector);
+  return ret;
+}

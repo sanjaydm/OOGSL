@@ -104,5 +104,7 @@ int main(int argc, char** argv){
   Vector x(5);
   
   (m*v).print();
+
+  m.col(0).print();
   return 0;
 }
