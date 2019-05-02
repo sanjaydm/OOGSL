@@ -30,7 +30,7 @@ void VirusShell :: fdf(){
   for (int e=0; e< numEle; e++){
     for (int j=0; j<numQuad; j++) {
       if (e == 25) {
-      	fr = 100;
+      	fr = 0;
       }
       else
       	fr=0;
@@ -78,6 +78,7 @@ void VirusShell :: fdf(){
       z_ss = 0;// (_nodes[ele(0)]*D2N(0) + slope*D2N(1) + _nodes[ele(1)]*D2N(2) + slope*D2N(3))/Jac2;
 
       //cout << "\033[32m z_ss = " << z_ss << "\033[0m\n";
+
       /*
       N(1) *= slope;
       N(3) *= slope;
@@ -314,37 +315,68 @@ void VirusShell::writeMesh(string filename){
   myfile.close();
 }
 
-// void VirusShell::writeSolution(string filename){
-//   ofstream myfile;
-//   myfile.open (filename.c_str());
-//   cout << "Writing solution to a file.\n";
-//   myfile << setprecision(15);
-//   for (auto i = 1; i <= _x.size(); i++) {
-//     myfile << _x(i-1);
-//     if (i % 2 == 0)
-//       myfile << "\n";
-//     else
-//       myfile << "\t";
-// }
-//   myfile.close();
-// }
 void VirusShell::writeSolution(string filename){
   ofstream myfile;
   myfile.open (filename.c_str());
   cout << "Writing solution to a file.\n";
   myfile << setprecision(15);
-  myfile << "x = [";
   for (auto i = 1; i <= _x.size(); i++) {
-    if (i % 2 == 1)
-      myfile << "\n[" << _x(i-1) << ",\t";
+    myfile << _x(i-1);
+    if (i % 2 == 0)
+      myfile << "\n";
     else
-      myfile << _x(i-1) << "],";
+      myfile << "\t";
 }
-  myfile << "]\n";
-  myfile << "from matplotlib import pyplot as plt\n";
-  myfile << "from numpy import *\n";
-  myfile << "x = matrix(x)\n";
-  myfile << "plt.plot(x[0:len(x):2],'*-')\n";
-  myfile << "plt.show()\n";
   myfile.close();
 }
+// void VirusShell::writeSolution(string filename){
+//   ofstream myfile;
+//   myfile.open (filename.c_str());
+//   cout << "Writing solution to a file.\n";
+//   myfile << setprecision(15);
+//   myfile << "x = [";
+//   for (auto i = 1; i <= _x.size(); i++) {
+//     if (i % 2 == 1)
+//       myfile << "\n[" << _x(i-1) << ",\t";
+//     else
+//       myfile << _x(i-1) << "],";
+// }
+//   myfile << "]\n";
+//   myfile << "from matplotlib import pyplot as plt\n";
+//   myfile << "from numpy import *\n";
+//   myfile << "x = matrix(x)\n";
+//   myfile << "plt.plot(x[0:len(x):2],'*-')\n";
+//   myfile << "plt.show()\n";
+//   myfile.close();
+// }
+
+// void VirusShell::writeSolution(string filename){
+//   ofstream myfile;
+//   _x.print();
+//   myfile.open (filename.c_str());
+//   cout << "Writing solution to a file.\n";
+//   myfile << setprecision(15);
+//   myfile << "x = [";
+//   for (auto i = 0; i < _x.size(); i++) {
+//     if (i % 4 == 0)
+//       myfile << 1 + _x(i) << ",";
+//   }
+//   myfile << "]\n";
+//   myfile << "y = [";
+//   for (auto i = 0; i < _x.size(); i++) {
+//     if (i%4 == 2)
+//       myfile << _nodes[i/4]+_x(i) << ",";
+//   }
+//   myfile << "]\n";
+//   myfile << "from matplotlib import pyplot as plt\n";
+//   myfile << "from numpy import *\n";
+//   myfile << "x = matrix(x)\n";
+//   myfile << "y = matrix(y)\n";
+//   myfile << "xmin = -matrix(x)\n";
+//   myfile << "y = matrix(y)\n";
+
+//   myfile << "plt.plot(x.T, y.T,'-')\n";
+//   myfile << "plt.plot(xmin.T, y.T,'-')\n";
+//   myfile << "plt.show()\n";
+//   myfile.close();
+// }

@@ -10,7 +10,7 @@
 int main(int argc, char** argv){
 
   int N = 30; //Num of elements
-  double a = 0; double b = 1.0; // end points of domain
+  double a = 0; double b = 5.0; // end points of domain
   vector<double> nodes;
   vector<Vector> conn;
 
@@ -30,7 +30,9 @@ int main(int argc, char** argv){
   
   // Create initial guess
   //Vector x0(4*N+4); //u,u',v,v'
-  Vector x0(4*N+4-6); //u,u',v,v'
+  //Vector x0(4*N+4-6); //u,u',v,v' for cantilever bc
+
+  Vector x0(4*N-4); //u,u',v,v' for indent-free edge
   Vector para(1);
   para(0) = 1;
   cout << "\033[32m" << "Initializing x0 (guess) ...";
@@ -39,7 +41,7 @@ int main(int argc, char** argv){
   srand (time(NULL));
   for (int i=0; i< x0.size(); i++){
     double rnd = double(rand())/RAND_MAX; 
-    x0(i) = 0.0+0.1*rnd;
+    x0(i) = 0.0+1*rnd;
   }
   // double rnd;
   // for (int i=0; i<=N; i++){
@@ -101,8 +103,8 @@ int main(int argc, char** argv){
   // // p->_df.print();
   // cout << "x = ";
   p->_x.print();
-  p->writeMesh("mesh.txt");
-  p->writeSolution("solution.py");
+  p->writeMesh("mesh_run.txt");
+  p->writeSolution("solution_run.txt");
   // p->printU();
   return 0;
 }
