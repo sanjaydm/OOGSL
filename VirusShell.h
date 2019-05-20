@@ -14,9 +14,9 @@ public:
   VirusShell(Vector x, Vector para, vector<double> nodes, vector<Vector> conn) : _nodes(nodes), _conn(conn), Problem(x,para) {
     _quad.setOrder(4);
     _lclResidue.setDim(4); 
-    _D = 1.0; //reference from para;
-    _C = 1.0; //reference from para;
-    _nu = 0.3;
+    _D = para(0); //reference from para;
+    _C = para(1); //reference from para;
+    _nu = para(2);
     
   }
 

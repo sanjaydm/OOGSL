@@ -10,14 +10,14 @@
 int main(int argc, char** argv){
 
   int N = 30; //Num of elements
-  double a = 0; double b = 5.0; // end points of domain
+  double a = 5; double b = 15.0; // end points of domain
   vector<double> nodes;
   vector<Vector> conn;
 
   // Create mesh
   cout << "\033[32m" << "Creating mesh and connectivity table ...";
   for (int i=0; i <= N; i++) {
-    nodes.push_back((b-a)/N * i);
+    nodes.push_back((b-a)/N * i + a );
     if (i != N) {
       Vector ele(2);
       ele(0) = i; ele(1) = i+1;
@@ -33,8 +33,20 @@ int main(int argc, char** argv){
   //Vector x0(4*N+4-6); //u,u',v,v' for cantilever bc
 
   Vector x0(4*N-4); //u,u',v,v' for indent-free edge
-  Vector para(1);
-  para(0) = 1;
+  Vector para(8);
+  double C = 1; double D = 1; double nu = 0.3;
+  double R = 1;
+  double rho = 1; double d = 1.9; double alpha = 0.52;
+  double u0 = d - rho*cos(alpha)-R;
+  double v0 = rho*sin(alpha);
+  para(0) = C; 
+  para(1) = D;
+  para(2) = nu;
+  para(3) = rho;
+  para(4) = d;
+  para(5) = alpha;
+  para(6) = u0;
+  para(7) = v0;
   cout << "\033[32m" << "Initializing x0 (guess) ...";
 
   /* initialize random seed: */
@@ -104,7 +116,7 @@ int main(int argc, char** argv){
   // cout << "x = ";
   p->_x.print();
   p->writeMesh("mesh_run.txt");
-  p->writeSolution("solution_run.txt");
+  p->writeSolution("solution_run.py");
   // p->printU();
   return 0;
 }

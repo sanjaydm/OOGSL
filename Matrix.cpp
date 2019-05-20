@@ -220,3 +220,20 @@ Vector Matrix::col(int i){
   Vector ret(&v.vector);
   return ret;
 }
+
+int Matrix::rank(double tol){
+  // Computes the rank of a matrix using SVD
+  // The number of nonzero singular values gives the rank.
+  // tol controls what is considered as zero.
+  Matrix copy = *this;
+  Matrix V(_dim2, _dim2);
+  Vector S(_dim2);
+  Vector work(_dim2);
+  gsl_linalg_SV_decomp(copy._gsl_mat, V._gsl_mat, S._gsl_vec, work._gsl_vec);
+  int counter = 0;
+  for (int i=0; i<_dim2; i++) {
+    if (fabs(S(i)) > tol)
+      counter++;
+  }
+  return counter;
+}

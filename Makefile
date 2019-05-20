@@ -1,7 +1,7 @@
 DBG = -g #Debugger Option
 OPT = #-O2 # -pg 
-CC  = g++-4.9 -std=c++11 
-FF  = gfortran-4.9
+CC  = g++-4.8 -std=c++11 
+FF  = gfortran-4.8
 #NOWARN = 2>&1 >/dev/null | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'
 
 hiv: hivShell.cpp Vector.o Matrix.o Problem.o Quadrature.o VirusShell.o VirusShellBC.o libLBFGS MultiMin.o Shape.o
@@ -11,6 +11,9 @@ hiv: hivShell.cpp Vector.o Matrix.o Problem.o Quadrature.o VirusShell.o VirusShe
 jamming: jamming.cpp myfdf.o libLBFGS
 	$(CC) $(DBG)  $(OPT) jamming.cpp myfdf.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o driver.out
 
+
+testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
+	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Group.o
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 

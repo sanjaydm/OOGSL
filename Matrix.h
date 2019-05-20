@@ -47,6 +47,7 @@ public:
   Vector row(int i);
   Vector col(int i);
   Vector operator* (Vector& v);
+  int rank(double tol=1e-10);
   void print();
 };
 #endif

@@ -6,7 +6,7 @@
 class Group{
 public:
   vector<Matrix> _g;
-
+  vector<Matrix> _gen;
   Group();
   void constructGroup();
 };
