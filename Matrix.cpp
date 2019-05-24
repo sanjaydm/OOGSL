@@ -17,6 +17,12 @@ Matrix::Matrix(int n1, int n2) : _dim1(n1), _dim2(n2){
   _idx1 = 0; _idx2=0;
   _vec.setDim(_dim2);
 }
+Matrix::Matrix(int n, char c) : _dim1(n), _dim2(n){
+  _gsl_mat = gsl_matrix_calloc(n,n);
+  _vec.setDim(_dim2);
+  _idx1 = n-1; _idx2 = n-1;
+  gsl_matrix_set_identity(_gsl_mat);
+}
 Matrix::Matrix(const Matrix& v) {
   array<int,2> ret = const_cast<Matrix&>(v).size();
   _dim1 = ret[0]; _dim2 = ret[1]; 

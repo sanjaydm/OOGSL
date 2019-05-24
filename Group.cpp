@@ -4,6 +4,31 @@
 Group::Group(){
   constructGroup();
 }
+void Group::listElements(){
+  for (int i=0; i < _g.size(); i++) {
+    _g[i].print();
+    cout << "------\n";
+  }
+}
+/* ---------------- Cyclic -----------*/
+Cyclic::Cyclic(int n): _n(n){
+  _gen.push_back(Matrix(1,'i'));
+  constructGroup();
+}
+Cyclic::Cyclic(int n, Matrix gen) : _n(n){
+  _gen.push_back(gen);
+  constructGroup();
+}
+void Cyclic::constructGroup(){
+  _g.push_back(_gen[0]);
+  for (int m=1; m<_n; m++){
+    _g.push_back(_gen[0]*_g[m-1]);
+  }
+}
+
+
+
+/*
 void Group::constructGroup(){
   // double tau = sqrt(5);
   // Matrix g2(3);
@@ -45,20 +70,6 @@ void Group::constructGroup(){
   //     }
   //   }
   // }
-  // cout << "done\033[0m\n";
-  double a= 2.0 *M_PI/3.0;
-  double c = cos(a);
-  double s = sin(a);
-  Matrix g(6);
-  g << 0 << 0 << c << -s << 0 << 0
-    << 0 << 0 << s << c  << 0 << 0 
-    << 0 << 0 << 0 << 0 << c << -s 
-    << 0 << 0 << 0 << 0 << s << c
-    << c << -s<< 0 << 0 << 0  << 0 
-    << s << c << 0 << 0 << 0  << 0 ;
-  _g.push_back(g);
-  _g.push_back(g*g);
-  _g.push_back(g*g*g);
+  // cout << "done\033[0m\n";  
     
-    
-}
+  }*/

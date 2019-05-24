@@ -20,6 +20,7 @@ public:
   Matrix() ;
   Matrix(int n);
   Matrix(int n1, int n2);
+  Matrix(int n, char c);
   Matrix(const Matrix& v); //Copy constructor
   ~Matrix();
   array<int,2> size();
@@ -50,4 +51,5 @@ public:
   int rank(double tol=1e-10);
   void print();
 };
+
 #endif

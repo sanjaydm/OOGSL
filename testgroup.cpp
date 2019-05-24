@@ -7,11 +7,14 @@
 
 int main(int argc, char** argv){
 
-
-  Group I;
-  Matrix P = I._g[0] + I._g[1] + I._g[2];
-  P.print();
-  cout << "rank = " << P.rank() << endl;;
+  Matrix I(3,'i');
+  Cyclic Z3(3,I);
+  Z3._gen[0].print();
+  cout << "order = " << Z3.order() << endl;
+  Z3.listElements();
+  // Matrix P = I._g[0] + I._g[1] + I._g[2];
+  // P.print();
+  // cout << "rank = " << P.rank() << endl;;
   // Constructing projection operator
   
   // Vector v(5);
