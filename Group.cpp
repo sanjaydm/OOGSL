@@ -27,6 +27,51 @@ void Cyclic::constructGroup(){
 }
 
 
+/* ----------- Icosahedral ------------- */
+
+Icosahedral::Icosahedral(Matrix g2, Matrix g3){
+    _g2 = g2;
+    _g3 = g3;
+    _gen.push_back(_g2);
+    _gen.push_back(_g3);
+    constructGroup();
+}
+
+void Icosahedral::constructGroup(){
+    Matrix g5 = (_g3*_g2*_g3);
+    Matrix g5inv = g5.inv();
+    Matrix g2d = _g2 * g5inv * g2 * g5 * g2 * g5inv;
+    for (int mu = 0; mu <= 4; mu++){
+        for (int signma = 0; sigma <= 1; sigma ++){
+            Matrix g5_mu = g5^mu
+            Matrix g2d_sigma =g2d^sigma
+            _g.push_back( g5_mu * g2d_sigma );
+            for (int nu = 0; nu <= 4; nu++){
+                _g.push_back( g5_mu * _g2 * (g5^nu) * g2d_sigma);
+            }
+        }
+    }
+}
+
+
+/* --------------- D5 -------------- */
+
+D5::D5(Matrix g2d, Matrix g5){
+    _g2d = g2d;
+    _g5 = g5;
+    _gen.push_back(_g2d);
+    _gen.push_back(_g5);
+    constructGroup();
+}
+
+void D5::constructGroup(){
+    for (int nu = 0; nu <= 4; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            _g.push_back( (_g5^nu) * (_g2d^sigma) );
+        }
+    }
+}
+
 
 /*
 void Group::constructGroup(){
