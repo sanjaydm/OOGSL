@@ -37,7 +37,7 @@ public:
     Matrix _g5;
     D5(Matrix g2d, Matrix g5);
     void constructGroup();
-}
+};
 
 
 
