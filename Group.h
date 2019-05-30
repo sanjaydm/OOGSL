@@ -39,6 +39,13 @@ public:
     void constructGroup();
 };
 
-//test 
+class Tetrahedral: public Group{
+public:
+    Matrix _g2;
+    Matrix _g3d;
+    Tetrahedral(Matrix g2, Matrix g3d);
+    void constructGroup();
+};
+ 
 
 #endif
