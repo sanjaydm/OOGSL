@@ -62,8 +62,8 @@ int Problem::checkConsistency(double eps, double tol){
   df();
   Vector absError = (dfappx- _df);
   double absErrorNrm = absError.norm();
-  dfappx.print();
-  _df.print();
+  //dfappx.print();
+  //_df.print();
   absError.print();
   cout << "energy = " << f0 << endl;
   //_df.print();
@@ -72,7 +72,7 @@ int Problem::checkConsistency(double eps, double tol){
   cout << "absolute error = " << absErrorNrm << endl;
   cout << "relative error = " << absErrorNrm/_df.norm() << endl;
   cout << "\033[0m\n";
-  if (absErrorNrm < tol ){
+  if (absErrorNrm < tol || absErrorNrm/_df.norm() <tol ){
     cout << "\033[92m Consistency check passed \033[0m\n";
     return 1;
   }

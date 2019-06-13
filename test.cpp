@@ -4,6 +4,7 @@
 #include "Problem.h"
 #include "Group.h"
 #include "MultiMin.h"
+#include "MultiRoot.h"
 
 class P2: public Problem {
 public:
@@ -11,7 +12,7 @@ public:
   }
 
   void fdf(){
-  double a = 1.12312; double b = 12.123132;
+  double a = 11.2312; double b = 12.123132;
   if (_fFlag)
     _f = (_x(0)-a)*(_x(0)-a)+ (_x(1)-b)*(_x(1)-b);
   if (_dfFlag){
@@ -63,10 +64,10 @@ int main(int argc, char** argv){
   // Matrix M(m);
   // M.print();
 
-  // Vector x0(2);
-  // x0(0) = .3223; x0(1) = .1;
-  // Vector para(1);
-  // P2* p = new  P2(x0, para);
+  Vector x0(2);
+  x0(0) = .3223; x0(1) = .1;
+  Vector para(1);
+  P2* p = new  P2(x0, para);
   // // x0.print();
   // // (p._x).print();
   // // p.f();
@@ -76,9 +77,14 @@ int main(int argc, char** argv){
   // MultiMin M("lbfgs", p);
   // M._LBFGSB_Initialize();
   // M.LBFGSB_Solve();
+
+  MultiRoot rt("generic", p);
+  rt._GSLRoot_Initialize();
+  rt.GSLRoot_Solve();
+
   // // M._GSLMin_Initialize();
   // // M.GSLMin_Solve();
-  // p->_x.print();
+  p->_x.print();
 
   //p.d2f();
   //p._d2f.print();
@@ -87,24 +93,24 @@ int main(int argc, char** argv){
 
   // Constructing projection operator
   
-  Vector v(5);
-  v << 1 << 2 << 3 << 4 << 5;
-  v.print();
-  Vector w = v.view(0,3);
-  cout <<"asfasdf\n";
-  w.print();
+  // Vector v(5);
+  // v << 1 << 2 << 3 << 4 << 5;
+  // v.print();
+  // Vector w = v.view(0,3);
+  // cout <<"asfasdf\n";
+  // w.print();
 
-  Matrix m(5,5);
-  m << 1 << 1 << 1 << 0 << 0
-    << 0 << 1 << 1 << 0 << 0
-    << 0 << 0 << 1 << 1 << 0
-    << 0 << 0 << 0 << 0 << 1
-    << 1 << 1 << 1 << 1 <<1;
-  m.print();
-  Vector x(5);
+  // Matrix m(5,5);
+  // m << 1 << 1 << 1 << 0 << 0
+  //   << 0 << 1 << 1 << 0 << 0
+  //   << 0 << 0 << 1 << 1 << 0
+  //   << 0 << 0 << 0 << 0 << 1
+  //   << 1 << 1 << 1 << 1 <<1;
+  // m.print();
+  // Vector x(5);
   
-  (m*v).print();
+  // (m*v).print();
 
-  m.col(0).print();
+  // m.col(0).print();
   return 0;
 }

@@ -8,6 +8,10 @@ hiv: hivShell.cpp Vector.o Matrix.o Problem.o Quadrature.o VirusShell.o VirusShe
 	$(CC) $(DBG) $(OPT) -c hivShell.cpp
 	$(CC) $(DBG) $(OPT) hivShell.o Vector.o Shape.o Matrix.o Problem.o MultiMin.o  VirusShell.o VirusShellBC.o Quadrature.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o hivShell.out
 
+indented: indentedShell.cpp Vector.o Matrix.o Problem.o Quadrature.o Indented.o IndentedBC.o libLBFGS MultiMin.o Shape.o MultiRoot.o
+	$(CC) $(DBG) $(OPT) -c indentedShell.cpp
+	$(CC) $(DBG) $(OPT) indentedShell.o Vector.o Shape.o Matrix.o Problem.o MultiMin.o  MultiRoot.o Indented.o IndentedBC.o  Quadrature.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o indentedShell.out
+
 jamming: jamming.cpp myfdf.o libLBFGS
 	$(CC) $(DBG)  $(OPT) jamming.cpp myfdf.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o driver.out
 
@@ -15,8 +19,8 @@ jamming: jamming.cpp myfdf.o libLBFGS
 testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
 	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 
-test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Group.o
-	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
+test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o
+	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
 MembLJ.o: MembLJ.h MembLJ.cpp
 	$(CC) $(DBG) $(OPT) -c MembLJ.h MembLJ.cpp 
@@ -24,11 +28,20 @@ MembLJ.o: MembLJ.h MembLJ.cpp
 VirusShell.o: VirusShell.h VirusShell.cpp
 	$(CC) $(DBG) $(OPT) -c VirusShell.h VirusShell.cpp 
 
+Indented.o: Indented.h Indented.cpp
+	$(CC) $(DBG) $(OPT) -c Indented.h Indented.cpp 
+
 VirusShellBC.o: VirusShellBC.h VirusShellBC.cpp
 	$(CC) $(DBG) $(OPT) -c VirusShellBC.h VirusShellBC.cpp 
 
+IndentedBC.o: IndentedBC.h IndentedBC.cpp
+	$(CC) $(DBG) $(OPT) -c IndentedBC.h IndentedBC.cpp 
+
 MultiMin.o: MultiMin.h MultiMin.cpp libLBFGS
 	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiMin.h MultiMin.cpp 
+
+MultiRoot.o: MultiRoot.h MultiRoot.cpp libLBFGS
+	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiRoot.h MultiRoot.cpp 
 
 Group.o: Group.h Group.cpp libLBFGS
 	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c Group.h Group.cpp 

@@ -38,7 +38,7 @@ int main(int argc, char** argv){
   double R = 1;
   double rho = 1; double d = 1.9; double alpha = 0.52;
   double u0 = d - rho*cos(alpha)-R;
-  double v0 = rho*sin(alpha);
+  double v0 = rho*sin(alpha)-a;
   para(0) = C; 
   para(1) = D;
   para(2) = nu;

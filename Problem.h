@@ -42,6 +42,11 @@ public:
     CCallbackHolder* temp = static_cast<CCallbackHolder*>(classNParams);
     temp->cls->_gsl_df(x, temp->params, g);
   }
+  static int _C_gsl_df_solver(const gsl_vector* x,void* classNParams, gsl_vector* g){
+    CCallbackHolder* temp = static_cast<CCallbackHolder*>(classNParams);
+    temp->cls->_gsl_df(x, temp->params, g);
+    return 0;
+  }
   static void _C_gsl_fdf(const gsl_vector* x,void* classNParams, double* f, gsl_vector* g){
     CCallbackHolder* temp = static_cast<CCallbackHolder*>(classNParams);
     temp->cls->_gsl_fdf(x, temp->params, f, g);

@@ -7,6 +7,7 @@
 
 int main(int argc, char** argv){
 
+
   Matrix I(3,'i');
   Cyclic Z3(3,I);
   Z3._gen[0].print();
