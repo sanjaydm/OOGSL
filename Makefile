@@ -1,5 +1,5 @@
 DBG = #-g #Debugger Option
-OPT = -O2 # -pg 
+OPT = -O0 # -pg 
 CC  = g++-9 -std=c++11 
 FF  = gfortran-9
 #NOWARN = 2>&1 >/dev/null | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'
@@ -15,11 +15,13 @@ indented: indentedShell.cpp Vector.o Matrix.o Problem.o Quadrature.o Indented.o 
 jamming: jamming.cpp myfdf.o libLBFGS
 	$(CC) $(DBG)  $(OPT) jamming.cpp myfdf.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o driver.out
 
+wigner: wigner.cpp Vector.o Matrix.o libLBFGS
+	$(CC) $(DBG) $(OPT) -c Matrix.o Vector.o wigner.cpp -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o wigner.o
 
 testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
 	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 
-test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o
+test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o 
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
 MembLJ.o: MembLJ.h MembLJ.cpp

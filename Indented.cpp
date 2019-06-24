@@ -57,8 +57,12 @@ void Indented :: fdf(){
 
       //cout << "\033[32m z_ss = " << z_ss << "\033[0m\n";
 
+      
       auto L0 = [](double xi) {return (1-xi)/2.0;};
       auto L1 = [](double xi) {return (1+xi)/2.0;};
+      
+
+      
       double DL0 = -0.5;
       double DL1 = 0.5;
 
@@ -68,10 +72,13 @@ void Indented :: fdf(){
       double t_ss = (T0*D2N(0)+T1*D2N(1) + T2*D2N(2) + T3*D2N(3))/Jac2- t_s*Jac_xiJac2;
       
       double fn = F0*L0(qj) + F1*L1(qj);
+      
+      /*
       fz = fn*(-sin(t) + _mu*cos(t));
       fr = fn*(cos(t) + _mu*sin(t));
       rhofr = rho*fr;
       rhofz = rho*fz;
+
       u = (_d - _r*cos(t)-rho);
       v = _r*sin(t)-S;
 
@@ -80,6 +87,21 @@ void Indented :: fdf(){
 
       u_ss = _r*cos(t)*t_s*t_s + _r*sin(t)*t_ss;
       v_ss = -_r*sin(t)*t_s*t_s + _r*cos(t)*t_ss;
+      */
+
+      fz = _mu*fn;
+      fr = fn;
+      rhofr = rho*fr;
+      rhofz = rho*fz;
+
+      u = (_d - _r - rho);
+      v = t;
+
+      u_s = 0;
+      v_s = t_s;
+
+      u_ss = 0;
+      v_ss = t_ss;
       
       double Jacwj = Jac * wj;
       // Strain measures
@@ -152,6 +174,7 @@ void Indented :: fdf(){
 	dt3_ss = D2N(3)/Jac2 - dt3_s*Jac_xiJac2;
 
 
+	/*
 	// Dependence on du , dv s
 	du0 = _r*sin(t)*dt0; du1 = _r*sin(t)*dt1; du2 = _r*sin(t)*dt2; du3 = _r*sin(t)*dt3;
 	dv0 = _r*cos(t)*dt0; dv1 = _r*cos(t)*dt1; dv2 = _r*cos(t)*dt2; dv3 = _r*cos(t)*dt3;
@@ -176,6 +199,54 @@ void Indented :: fdf(){
 	dv2_ss = -_r*cos(t)*t_s*t_s*dt2 -_r*sin(t)*t_ss*dt2 -2*_r*sin(t)*t_s*dt2_s + _r*cos(t)*dt2_ss;
 	dv3_ss = -_r*cos(t)*t_s*t_s*dt3 -_r*sin(t)*t_ss*dt3 -2*_r*sin(t)*t_s*dt3_s + _r*cos(t)*dt3_ss;
 
+	dfr0 = fn*(-sin(t) + _mu*cos(t))*dt0;
+	dfr1 = fn*(-sin(t) + _mu*cos(t))*dt1;
+	dfr2 = fn*(-sin(t) + _mu*cos(t))*dt2;
+	dfr3 = fn*(-sin(t) + _mu*cos(t))*dt3;
+
+	dfz0 = -fn*(cos(t) + _mu*sin(t))*dt0;
+	dfz1 = -fn*(cos(t) + _mu*sin(t))*dt1;
+	dfz2 = -fn*(cos(t) + _mu*sin(t))*dt2;
+	dfz3 = -fn*(cos(t) + _mu*sin(t))*dt3;
+
+	*/
+
+	
+	// Dependence on du , dv s
+	du0 = 0;   du1 = 0;   du2 = 0;   du3 = 0;
+	dv0 = dt0; dv1 = dt1; dv2 = dt2; dv3 = dt3;
+
+	du0_s = 0;
+	du1_s = 0;
+	du2_s = 0;
+	du3_s = 0;
+
+	dv0_s = dt0_s;
+	dv1_s = dt1_s;
+	dv2_s = dt2_s;
+	dv3_s = dt3_s;
+
+	du0_ss =  0;
+	du1_ss =  0;
+	du2_ss =  0;
+	du3_ss =  0;
+	  
+	dv0_ss = dt0_ss;
+	dv1_ss = dt1_ss;
+	dv2_ss = dt2_ss;
+	dv3_ss = dt3_ss;
+
+	dfr0 = 0;
+	dfr1 = 0;
+	dfr2 = 0;
+	dfr3 = 0;
+
+	dfz0 = 0;
+	dfz1 = 0;
+	dfz2 = 0;
+	dfz3 = 0;
+
+	// ------------ END -------------------
 		
 	dphi0U_s = -z_ss* du0_s - z_s* du0_ss; 
 	dphi1U_s = -z_ss* du1_s - z_s* du1_ss;
@@ -187,16 +258,7 @@ void Indented :: fdf(){
 	dphi2V_s = rho_ss* dv2_s + rho_s* dv2_ss;
 	dphi3V_s = rho_ss* dv3_s + rho_s* dv3_ss; 
 
-	dfr0 = fn*(-sin(t) + _mu*cos(t))*dt0;
-	dfr1 = fn*(-sin(t) + _mu*cos(t))*dt1;
-	dfr2 = fn*(-sin(t) + _mu*cos(t))*dt2;
-	dfr3 = fn*(-sin(t) + _mu*cos(t))*dt3;
-
-	dfz0 = -fn*(cos(t) + _mu*sin(t))*dt0;
-	dfz1 = -fn*(cos(t) + _mu*sin(t))*dt1;
-	dfz2 = -fn*(cos(t) + _mu*sin(t))*dt2;
-	dfz3 - -fn*(cos(t) + _mu*sin(t))*dt3;
-
+	
 
 	
 	_df(3*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
@@ -213,8 +275,12 @@ void Indented :: fdf(){
 				  rho*Ms*dphi1V_s + Mt*dv1_s
 				  - rhofz* dv1 - rho*v*dfz1) *Jacwj ;
 
+	/*
 	_df(3*ele(0) + 2   ) +=   -((cos(t) + _mu*sin(t))*u + 
 				   (-sin(t) + _mu*cos(t))*v )*dfn0*rho*Jacwj ;
+	*/
+	_df(3*ele(0) + 2   ) +=   -(u + 
+				   _mu*v )*dfn0*rho*Jacwj ;
 
 
 	_df(3*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
@@ -230,10 +296,14 @@ void Indented :: fdf(){
 	                        ((rhoNs * Tz)* dv3_s +
 				  rho*Ms*dphi3V_s + Mt*dv3_s
 				  - rhofz* dv3 - rho*v*dfz3) *Jacwj ;
-	
+
+	/*
 	_df(3*ele(1) + 2   ) +=  -((cos(t) + _mu*sin(t))*u +
 				   (-sin(t) + _mu*cos(t))*v )*dfn1*rho*Jacwj ;
 
+	*/
+	_df(3*ele(1) + 2   ) +=   -(u + 
+				   _mu*v )*dfn1*rho*Jacwj ;
 
 
 	/*
@@ -333,7 +403,7 @@ void Indented::writeSolution(string filename){
   myfile << "]\n";
   myfile << "y = [";
   for (auto i = 0; i < _x.size(); i++) {
-    if (i%3 == 2){
+    if (i%3 == 0){
       myfile << _x(i)<< ",";
       //myfile << _r*sin(_x(i)) << ",";
     }

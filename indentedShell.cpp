@@ -31,22 +31,18 @@ int main(int argc, char** argv){
   
   // Create initial guess
   //Vector x0(3*N+3); //u,u',v,v'
-  Vector x0(3*N-1); 
+   Vector x0(3*N); 
 
   Vector para(8);
   double C = 1; double D = 1; double nu = 0.3;
   double R = 0.5;
-  double rho = 1; double d = 1.5; double alpha = 0.52;
-  double u0 = d - rho*cos(alpha)-R;
-  double v0 = rho*sin(alpha);
+  double rho = 1; double d = 1.9; double alpha = 0.52;
   para(0) = C; 
   para(1) = D;
   para(2) = nu;
   para(3) = rho;
   para(4) = d;
   para(5) = alpha;
-  para(6) = u0;
-  para(7) = v0;
   cout << "\033[32m" << "Initializing x0 (guess) ...";
 
   /* initialize random seed: */
@@ -54,37 +50,44 @@ int main(int argc, char** argv){
   for (int i=0; i< x0.size(); i++){
     double rnd = double(rand())/RAND_MAX; 
     if (i%3==2)
-      x0(i) = 0;
+      x0(i) = rnd;
     else
-      x0(i) = 0.0;
+      x0(i) = rnd;
   }
   cout << "done. \033[0m\n";
 
   //x0.print();
   //Indented* p = new  Indented(x0, para, nodes, conn);
   IndentedBC* p = new  IndentedBC(x0, para, nodes, conn);
-  //  p->fdf();
-  //p->_df.print();
 
-  //cout << "energy = " << p->_f << endl;
+  p->fdf();
+  (p->vs)->_df.print();
+
+  
+  cout << "energy = " << p->_f << endl;
   p->checkConsistency();
 
-  // MultiRoot rt("generic", p);
-  // rt._GSLRoot_Initialize();
-  // rt.GSLRoot_Solve();
-
-  MultiMin M("lbfgs", p);
-  M._tol = 1e-1;
-  M._LBFGSB_Initialize();
-  M.LBFGSB_Solve();
   
- // p->_df.print();
- //  // // cout << "x = ";
+  MultiRoot rt("generic", p);
+  rt._GSLRoot_Initialize();
+  rt.GSLRoot_Solve();
   (p->vs)->_x.print();
   p->writeMesh("mesh_run.txt");
   (p->vs)->writeSolution("solution_run.py");
-  // // p->printU();
+  
+    
+  /*
+  MultiMin M("lbfgs", p);
+  M._tol = 1e-4;
+  M._LBFGSB_Initialize();
+  M.LBFGSB_Solve();
+  
+  (p->vs)->_x.print();
+  p->writeMesh("mesh_run.txt");
+  (p->vs)->writeSolution("solution_run.py");
   cout << "size of vs = " << (p->vs)->_x.size() << endl;
   cout << "size of s = " << (p->_x.size()) << endl;
+  */
   return 0;
+  
 }

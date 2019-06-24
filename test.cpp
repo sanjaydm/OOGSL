@@ -5,6 +5,7 @@
 #include "Group.h"
 #include "MultiMin.h"
 #include "MultiRoot.h"
+#include "wigner.cpp"
 
 class P2: public Problem {
 public:
@@ -25,6 +26,22 @@ public:
 };
 int main(int argc, char** argv){
 
+  Matrix M(3,3);
+  double alpha = 0.5;
+  M << 1 << 0 << 0 << 
+  0 << cos(alpha) << sin(alpha) <<
+  0 << -sin(alpha) << cos(alpha);
+
+
+  Vector abc = computeEulerAngles(M);
+  abc.print();
+  
+  vector<Matrix> v = wigner_d(0.0001, 3);
+  cout << v.size() << endl;
+  for (int i=0; i < v.size(); i++){
+    cout << "--------------\n";
+    v[i].print();
+  }
   // v(0) = 1.1231;
   // v(1) = 2;
   // Vector v2(3);
@@ -64,27 +81,20 @@ int main(int argc, char** argv){
   // Matrix M(m);
   // M.print();
 
-  Vector x0(2);
-  x0(0) = .3223; x0(1) = .1;
-  Vector para(1);
-  P2* p = new  P2(x0, para);
-  // // x0.print();
-  // // (p._x).print();
-  // // p.f();
-  // // p->d2f();
-  // // p->_d2f.print();
-
+  // Vector x0(2);
+  // x0(0) = .3223; x0(1) = .1;
+  // Vector para(1);
+  // P2* p = new  P2(x0, para);
+  
   // MultiMin M("lbfgs", p);
   // M._LBFGSB_Initialize();
   // M.LBFGSB_Solve();
 
-  MultiRoot rt("generic", p);
-  rt._GSLRoot_Initialize();
-  rt.GSLRoot_Solve();
+  // MultiRoot rt("generic", p);
+  // rt._GSLRoot_Initialize();
+  // rt.GSLRoot_Solve();
 
-  // // M._GSLMin_Initialize();
-  // // M.GSLMin_Solve();
-  p->_x.print();
+  // p->_x.print();
 
   //p.d2f();
   //p._d2f.print();

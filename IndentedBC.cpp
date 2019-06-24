@@ -8,22 +8,22 @@ void IndentedBC :: fdf(){
   _df.setZero(); //reset residue to zero
   int numEle = vs->_conn.size();
   double slope = (vs->_nodes[1]-vs->_nodes[0])/2;
-  /// x = [f0 x1 x1' f1 x2 x2' f2 .... xn-1 xn-1' fn-1 fn]
-  //       0  1  2   3  4  5   6 ....  3n-5 3n-4  3n-3 3n-2
+  /// x = [f0 x1 x1' f1 x2 x2' f2 .... xn-1 xn-1' fn-1 xn    fn]
+  //       0  1  2   3  4  5   6 ....  3n-5 3n-4  3n-3 3n-2  3n-1
 
   //vsx = [x0 x0' f0 x1 x1' f1 .... xn   xn'   fn]
   //        0  1   2  3  4   5  .... 3n 3n+1  3n+2
   // //Boundary conditions applied to "Indented dofs"
-  vs->_x(0) = 0; //theta(0) = 0
-  vs->_x(1) = _x(2); // t1 = t3 = x1'
-  vs->_x(4) = _x(2); //t3 = t3
+  vs->_x(0) = 0; //v(0) = 0
+  vs->_x(1) = _x(2); // v1 = v3 = x1'
+  vs->_x(4) = _x(2); // v3 = v3      v''(0)=0
 
   vs->_x(2) = _x(0); //f0
   vs->_x(3) = _x(1);
   // ------------------
-  vs->_x(3*numEle) = vs->_r*1;   //theta
-  vs->_x(3*numEle+1) = vs->_r*slope; //theta'
-  vs->_x(3*numEle+2) = _x(3*numEle-2);
+  vs->_x(3*numEle) = _x(3*numEle-2);
+  vs->_x(3*numEle+1) = -slope;  
+  vs->_x(3*numEle+2) = _x(3*numEle-1);
   
   for (int i=1; i< N-1; i++){
     // pass dofs to Indented's
@@ -43,9 +43,11 @@ void IndentedBC :: fdf(){
     _df(0) = vs->_df(2);
     _df(1) = vs->_df(3);
     _df(2) = vs->_df(1)+vs->_df(4);
-
-    _df(3*numEle-2) = vs->_x(3*numEle+2);
+    
+    _df(3*numEle-2) = vs->_df(3*numEle) ;
+    _df(3*numEle-1) = vs->_df(3*numEle+2) ;
   }
+
 }
 
 /*

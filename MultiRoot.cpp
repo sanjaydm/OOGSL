@@ -46,7 +46,7 @@ void MultiRoot:: GSLRoot_Solve(){
     if (status == GSL_ENOPROG) cout << status << " Eno prog\n";
     status = gsl_multiroot_test_residual (_gsl_fsolver->f, _tol);
     cout << (_problem->_df.norm()) << endl;
-    if (_problem->_df.norm() < _tol) return;
+    //if (_problem->_df.norm() < _tol) return;
     // printf ("%5d %.5f %.5f %10.5f\n", GSL_SUCCESS,
     //         gsl_vector_get (_gsl_fdfminimizer->x, 0),
     //           gsl_vector_get (_gsl_fdfminimizer->x, 1),
