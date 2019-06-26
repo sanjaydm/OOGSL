@@ -36,12 +36,9 @@ int main(int argc, char** argv){
   Vector abc = computeEulerAngles(M);
   abc.print();
   
-  vector<Matrix> v = wigner_d(0.0001, 3);
-  cout << v.size() << endl;
-  for (int i=0; i < v.size(); i++){
-    cout << "--------------\n";
-    v[i].print();
-  }
+  Wigner_d d(2, 3*M_PI/2+0.1);
+  d._d[1].print();
+  cout << i(-1,2) << endl;
   // v(0) = 1.1231;
   // v(1) = 2;
   // Vector v2(3);

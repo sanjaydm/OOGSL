@@ -15,8 +15,8 @@ indented: indentedShell.cpp Vector.o Matrix.o Problem.o Quadrature.o Indented.o 
 jamming: jamming.cpp myfdf.o libLBFGS
 	$(CC) $(DBG)  $(OPT) jamming.cpp myfdf.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o driver.out
 
-wigner: wigner.cpp Vector.o Matrix.o libLBFGS
-	$(CC) $(DBG) $(OPT) -c Matrix.o Vector.o wigner.cpp -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o wigner.o
+Wigner: Wigner.cpp Vector.o Matrix.o libLBFGS
+	$(CC) $(DBG) $(OPT) -c Matrix.o Vector.o Wigner.cpp -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o Wigner.o
 
 testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
 	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
@@ -24,44 +24,44 @@ testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o 
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
-MembLJ.o: MembLJ.h MembLJ.cpp
-	$(CC) $(DBG) $(OPT) -c MembLJ.h MembLJ.cpp 
+MembLJ.o: MembLJ.cpp
+	$(CC) $(DBG) $(OPT) -c MembLJ.cpp 
 
-VirusShell.o: VirusShell.h VirusShell.cpp
-	$(CC) $(DBG) $(OPT) -c VirusShell.h VirusShell.cpp 
+VirusShell.o: VirusShell.cpp
+	$(CC) $(DBG) $(OPT) -c VirusShell.cpp 
 
-Indented.o: Indented.h Indented.cpp
-	$(CC) $(DBG) $(OPT) -c Indented.h Indented.cpp 
+Indented.o: Indented.cpp
+	$(CC) $(DBG) $(OPT) -c Indented.cpp 
 
-VirusShellBC.o: VirusShellBC.h VirusShellBC.cpp
-	$(CC) $(DBG) $(OPT) -c VirusShellBC.h VirusShellBC.cpp 
+VirusShellBC.o: VirusShellBC.cpp
+	$(CC) $(DBG) $(OPT) -c  VirusShellBC.cpp 
 
-IndentedBC.o: IndentedBC.h IndentedBC.cpp
-	$(CC) $(DBG) $(OPT) -c IndentedBC.h IndentedBC.cpp 
+IndentedBC.o: IndentedBC.cpp
+	$(CC) $(DBG) $(OPT) -c IndentedBC.cpp 
 
-MultiMin.o: MultiMin.h MultiMin.cpp libLBFGS
-	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiMin.h MultiMin.cpp 
+MultiMin.o: MultiMin.cpp libLBFGS
+	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c  MultiMin.cpp 
 
-MultiRoot.o: MultiRoot.h MultiRoot.cpp libLBFGS
-	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiRoot.h MultiRoot.cpp 
+MultiRoot.o: MultiRoot.cpp libLBFGS
+	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c MultiRoot.cpp 
 
-Group.o: Group.h Group.cpp libLBFGS
-	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c Group.h Group.cpp 
+Group.o: Group.cpp libLBFGS
+	$(CC) $(DBG) $(OPT) -L./ -lLBFGS -lgfortran -c Group.cpp 
 
-Problem.o: Problem.h Problem.cpp
-	$(CC) $(DBG) $(OPT) -c Problem.h Problem.cpp 
+Problem.o: Problem.cpp
+	$(CC) $(DBG) $(OPT) -c Problem.cpp 
 
-Matrix.o: Matrix.h Matrix.cpp
-	$(CC) $(DBG) $(OPT) -c Matrix.h Matrix.cpp 
+Matrix.o: Matrix.cpp
+	$(CC) $(DBG) $(OPT) -c Matrix.cpp 
 
-Vector.o: Vector.h Vector.cpp
-	$(CC) $(DBG) $(OPT) -c Vector.h Vector.cpp 
+Vector.o: Vector.cpp
+	$(CC) $(DBG) $(OPT) -c Vector.cpp 
 
-Shape.o: Shape.h Shape.cpp
-	$(CC) $(DBG) $(OPT) -c Shape.h Shape.cpp 
+Shape.o: Shape.cpp
+	$(CC) $(DBG) $(OPT) -c Shape.cpp 
 
-Quadrature.o: Quadrature.h Quadrature.cpp
-	$(CC) $(DBG) $(OPT) -c Quadrature.h Quadrature.cpp 
+Quadrature.o: Quadrature.cpp
+	$(CC) $(DBG) $(OPT) -c Quadrature.cpp 
 
 blas.o: blas.f
 	$(FF) -c blas.f -o blas.o
