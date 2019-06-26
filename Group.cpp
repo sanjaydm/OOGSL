@@ -76,6 +76,33 @@ void D5::constructGroup(){
     }
 }
 
+/* --------------- Tetrahedral ------------- */
+
+Tetrahedral:: Tetrahedral(Matrix g2, Matrix g3d){
+    _g2 = g2;
+    _g3d = g3d;
+    _gen.push_back(_g2);
+    _gen.push_back(_g3d);
+    constructGroup();
+}
+
+void Tetrahedral::constructGroup(){
+    for (int tau = 0; tau <= 2; tau ++){
+        Matrix g3d_tau = _g3d^tau;
+        _g.push_back(g3d_tau);
+        for (int mu = 0; mu <= 2; mu ++){
+            Matrix g3d_mu = _g3d^mu;
+            _g.push_back( g3d_tau * _g2 * g3d_mu);
+        }
+        
+    }
+}
+
+
+
+
+
+
 
 /*
 void Group::constructGroup(){
