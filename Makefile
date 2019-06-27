@@ -18,6 +18,9 @@ jamming: jamming.cpp myfdf.o libLBFGS
 Wigner: Wigner.cpp Vector.o Matrix.o libLBFGS
 	$(CC) $(DBG) $(OPT) -c Matrix.o Vector.o Wigner.cpp -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o Wigner.o
 
+compute_D_matrix: compute_D_matrix.cpp Vector.o Matrix.o libLBFGS
+	$(CC) $(DBG) $(OPT) -c Matrix.o Vector.o compute_D_matrix.cpp -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o compute_D_matrix.o
+
 testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
 	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 

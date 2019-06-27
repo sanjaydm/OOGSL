@@ -6,6 +6,8 @@
 #include "MultiMin.h"
 #include "MultiRoot.h"
 #include "wigner.cpp"
+#include "compute_D_matrix.cpp"
+#include <cmath>
 
 class P2: public Problem {
 public:
@@ -36,9 +38,22 @@ int main(int argc, char** argv){
   Vector abc = computeEulerAngles(M);
   abc.print();
   
-  Wigner_d d(2, 3*M_PI/2+0.1);
-  d._d[1].print();
-  cout << i(-1,2) << endl;
+//  Wigner_d d(1, M_PI/4);
+//  d._d[1].print();
+   // cout << d.get_d(2,-1,0) << endl;
+
+    Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2);
+    D.print();
+    
+    
+    cout << -sin(0.1)/sqrt(2) << endl;
+
+
+    
+
+
+    
+    
   // v(0) = 1.1231;
   // v(1) = 2;
   // Vector v2(3);
