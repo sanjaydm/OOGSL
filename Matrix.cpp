@@ -231,15 +231,48 @@ int Matrix::rank(double tol){
   // Computes the rank of a matrix using SVD
   // The number of nonzero singular values gives the rank.
   // tol controls what is considered as zero.
-  Matrix copy = *this;
+  Matrix U = *this;
   Matrix V(_dim2, _dim2);
   Vector S(_dim2);
-  Vector work(_dim2);
-  gsl_linalg_SV_decomp(copy._gsl_mat, V._gsl_mat, S._gsl_vec, work._gsl_vec);
+  
+  svd(U, V, S, tol);
   int counter = 0;
   for (int i=0; i<_dim2; i++) {
     if (fabs(S(i)) > tol)
       counter++;
   }
   return counter;
+}
+int Matrix::svd(Matrix& U, Matrix& V, Vector& S, double tol){
+  //Matrix K = *this;
+  U = *this;
+  assert (V._dim2 == _dim2 && V._dim1 == _dim2);
+  assert (U._dim1 == _dim1 && U._dim2 == _dim2);
+  assert (S._dim == _dim2);
+  //Matrix V(_dim2, _dim2);
+  //Vector S(_dim2);
+  Vector work(_dim2);
+  return gsl_linalg_SV_decomp(U._gsl_mat, V._gsl_mat, S._gsl_vec, work._gsl_vec);
+}
+
+Matrix Matrix::range(double tol){
+  Matrix U = *this;
+  Matrix V(_dim2, _dim2);
+  Vector S(_dim2);
+  
+  svd(U, V, S, tol);
+  int counter = 0;
+  for (int i=0; i < S._dim; i++){
+    if (fabs(S(i)) > tol)
+      counter++;
+    else
+      break;
+  }
+  Matrix ret(U._dim1, counter); //Range = columns of U with nonzero singular values
+
+  // Better way to copy?
+  for (int r=0; r<ret._dim1; r++)
+    for (int c=0; c<ret._dim2; c++)
+      ret(r,c) = U(r,c);
+  return ret;
 }

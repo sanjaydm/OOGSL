@@ -37,18 +37,24 @@ int main(int argc, char** argv){
 
   Vector abc = computeEulerAngles(M);
   abc.print();
-  
-//  Wigner_d d(1, M_PI/4);
-//  d._d[1].print();
-   // cout << d.get_d(2,-1,0) << endl;
 
-    Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2);
-    D.print();
+  double beta = M_PI/6;
+  Wigner_d d(1, beta);
+  //cout << d.get_d(1, 1, 0) << " " << -sin(beta)/sqrt(2) << endl;
+  //cout << d.get_d(2,-1,0) << endl;
+
+  //Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2);
+  // D.print();
     
     
-    cout << -sin(0.1)/sqrt(2) << endl;
+  //cout << -sin(0.1)/sqrt(2) << endl;
 
-
+  Matrix N(3);
+  N << 1 << 1 << 1
+  << 2 << 2 << 2
+  << 4 << 5 << 6;
+  Matrix rg = N.range();
+  rg.print();
     
 
 

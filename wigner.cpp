@@ -140,7 +140,7 @@ public:
 	    g(l,m) = sqrt( ((double)(l-m+1))/(l+m) )*g(l,m-1);
 	  }
       }
-   
+    
     // precompute sin/cos powers.
     Vector c1(L+1);
     Vector c2(L+1);
@@ -189,12 +189,11 @@ public:
     for (l=0; l<=L; l++){
       array<int,2> rc = D[l].size();
       for (int r=0; r< rc[0]; r++){
-	for (int c=0; c<rc[1]; c++){
-	  if ( (r+c)%2 != 0)
-	    D[l](r,c) *= -D[l](r,c);
-	}
+    	for (int c=0; c<rc[1]; c++){
+    	  if ( (r+c)%2 != 0)
+    	    D[l](r,c) = -D[l](r,c);
+    	}
       }
-    
     }
     return D;
   }

@@ -48,8 +48,10 @@ public:
   Vector row(int i);
   Vector col(int i);
   Vector operator* (Vector& v);
-  int rank(double tol=1e-10);
+  int rank(double tol=1e-8);
   void print();
+  int svd(Matrix& U, Matrix& V, Vector& S, double tol=1e-8);
+  Matrix range(double tol=1e-8);
 };
 
 #endif
