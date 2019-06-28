@@ -16,8 +16,7 @@ using namespace std;
 
 
 
-double compute(int l, int m, int mp, double alpha, double beta, double gamma){
-    Wigner_d d(l,beta);
+double compute(int l, int m, int mp, double alpha, double beta, double gamma, Wigner_d d){
     double temp=0;
     if (m < 0){
         if (mp < 0){
@@ -39,7 +38,6 @@ double compute(int l, int m, int mp, double alpha, double beta, double gamma){
         if (mp < 0){
             double d1 = d.get_d(l,m,mp);
             temp = sqrt(2)*d1*sin(mp*gamma);
-            cout << d1 << endl;
         }
         else if (mp == 0){
             double d1 = d.get_d(l,m,mp);
@@ -73,13 +71,35 @@ double compute(int l, int m, int mp, double alpha, double beta, double gamma){
 
 
 
-Matrix compute_D (int l, double alpha, double beta, double gamma){
+Matrix compute_D (int l, double alpha, double beta, double gamma, Wigner_d d){
     Matrix D(2*l+1);
     for (int m = -l; m <= l; m++ ){
         for (int mp = -l; mp <= l; mp++){
-            D(i(m,l),i(mp,l)) = compute(l,m,mp,alpha,beta,gamma);
+            D(i(m,l),i(mp,l)) = compute(l,m,mp,alpha,beta,gamma,d);
         }
     }
     
     return D;
+}
+
+Matrix compute_R(int lmin, int lmax, Matrix Q){
+    double alpha = atan2(Q(1,2),Q(0,2));
+    double gamma = atan2(Q(2,1),-Q(2,0));
+    double s2 = sqrt(Q(2,0)*Q(2,0)+Q(2,1)*Q(2,1));
+    double beta = atan2(s2,Q(2,2));
+    Wigner_d d(lmax,beta);
+    int n = (lmin+lmax+1)*(lmax-lmin+1);
+    Matrix R(n);
+    int begin = 0;
+    for (int l = lmin; l <= lmax; l++){
+        Matrix D = compute_D(l,alpha,beta,gamma,d);
+        for (int i = begin; i <= begin+2*l; i++){
+            for (int j = begin; j <= begin+2*l; j++){
+                R(i,j) = D(i-begin,j-begin);
+            }
+        }
+        begin = begin + 2*l + 1;
+    }
+    
+    return R;
 }
