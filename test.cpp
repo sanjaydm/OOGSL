@@ -37,16 +37,6 @@ int main(int argc, char** argv){
 
   Vector abc = computeEulerAngles(M);
   abc.print();
-<<<<<<< HEAD
-
-  double beta = M_PI/6;
-  Wigner_d d(1, beta);
-  //cout << d.get_d(1, 1, 0) << " " << -sin(beta)/sqrt(2) << endl;
-  //cout << d.get_d(2,-1,0) << endl;
-
-  //Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2);
-  // D.print();
-=======
     double alphaa = abc(0);
     double betaa  = abc(1);
     double gammaa = abc(2);
@@ -55,35 +45,22 @@ int main(int argc, char** argv){
 //  d._d[1].print();
    // cout << d.get_d(2,-1,0) << endl;
 //
-//    Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2);
+//    Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2,d);
 //    D.print();
 //
 //
 //    cout << -sin(0.1)/sqrt(2) << endl;
 
->>>>>>> 1a050af6297e23bf0eeb18015191ba6a0ad34103
-    
+
     int ub = 2;
     Wigner_d d(ub,betaa);
     for (int i = 0; i <= ub; i++){
         Matrix D = compute_D (i,alphaa,betaa,gammaa,d);
         D.print();
     }
-    
-<<<<<<< HEAD
-  //cout << -sin(0.1)/sqrt(2) << endl;
 
-  Matrix N(3);
-  N << 1 << 1 << 1
-  << 2 << 2 << 2
-  << 4 << 5 << 6;
-  Matrix rg = N.range();
-  rg.print();
-    
-=======
     Matrix R = compute_R(0,2,M);
     R.print();
->>>>>>> 1a050af6297e23bf0eeb18015191ba6a0ad34103
 
 
     
