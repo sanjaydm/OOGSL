@@ -15,15 +15,28 @@ void IndentedBC :: fdf(){
   //        0  1   2  3  4   5  .... 3n 3n+1   || 3n+2
   // //Boundary conditions applied to "Indented dofs"
   vs->_x(0) = 0; //v(0) = 0
+<<<<<<< Updated upstream
   vs->_x(1) = _x(0);//_x(2); // v1 = v3 = x1'
   //vs->_x(4) = _x(3);//_x(2); // v3 = v3      v''(0)=0
+=======
+  vs->_x(1) = 0.75*_x(1)-0.5*_x(2); // 
+  vs->_x(4) = _x(2); // v3 = v3      v''(0)=0
+>>>>>>> Stashed changes
 
   vs->_x(2) = _x(1); //f0
   //vs->_x(3) = _x(2);
   // ------------------
+<<<<<<< Updated upstream
   vs->_x(3*numEle) = _x(3*numEle-1);
   vs->_x(3*numEle+1) = 0;  
   //vs->_x(3*numEle+2) = _x(3*numEle-1);
+=======
+  vs->_x(3*numEle) = _x(3*numEle-2);
+  double u = (vs->_d - vs->_r - 1);
+  double T = 1;
+  vs->_x(3*numEle+1) = slope*(T - vs->_nu*u);  
+  vs->_x(3*numEle+2) = _x(3*numEle-1);
+>>>>>>> Stashed changes
   
   for (int i=2; i< N-1; i++){
     // pass dofs to Indented's
@@ -40,9 +53,15 @@ void IndentedBC :: fdf(){
     for (int i=2; i< N-1; i++){
       _df(i) = vs->_df(i+1);
     }
+<<<<<<< Updated upstream
     _df(0) = vs->_df(1);
     _df(1) = vs->_df(2);
     //_df(2) = vs->_df(1)+vs->_df(4);
+=======
+    _df(0) = vs->_df(2);
+    _df(1) = vs->_df(3)+0.75*vs->_df(1);
+    _df(2) = -0.5*vs->_df(1)+vs->_df(4);
+>>>>>>> Stashed changes
     
     _df(3*numEle-1) = vs->_df(3*numEle) ;
     //_df(3*numEle-1) = vs->_df(3*numEle+2) ;

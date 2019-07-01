@@ -43,7 +43,7 @@ void Indented :: fdf(){
       
       double T2 = _x(3*ele(1));
       double T3 = _x(3*ele(1)+1);
-      //double F1 = _x(3*ele(1)+2);
+      double F1 = _x(3*ele(1)+2);
 
       double S = _nodes[ele(0)]*N(0) + slope*N(1) + _nodes[ele(1)]*N(2) + slope*N(3); 
       double Jac = _nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3); 
@@ -71,7 +71,7 @@ void Indented :: fdf(){
       double t_s = (T0*DN(0)+T1*DN(1) + T2*DN(2) + T3*DN(3))/Jac1;
       double t_ss = (T0*D2N(0)+T1*D2N(1) + T2*D2N(2) + T3*D2N(3))/Jac2- t_s*Jac_xiJac2;
       
-      double fn = F0; //F0*L0(qj) + F1*L1(qj);
+      double fn = F0*L0(qj) + F1*L1(qj);
       
       /*
       fz = fn*(-sin(t) + _mu*cos(t));
@@ -164,7 +164,7 @@ void Indented :: fdf(){
 
 	//if (e!=0 || e!=numEle-1) {
 	dt0 = N(0); dt1 = N(1); dt2 = N(2); dt3 = N(3);
-	dfn0 = 1; //L0(qj); dfn1 = L1(qj);
+	dfn0 = L0(qj); dfn1 = L1(qj);
 
 	dt0_s = DN(0)/Jac1; dt1_s = DN(1)/Jac1; dt2_s = DN(2)/Jac1; dt3_s = DN(3)/Jac1;
 
@@ -302,8 +302,8 @@ void Indented :: fdf(){
 				   (-sin(t) + _mu*cos(t))*v )*dfn1*rho*Jacwj ;
 
 	*/
-	     //_df(3*ele(1) + 2   ) +=   -(u + 
-	     //			   _mu*v )*dfn1*rho*Jacwj ;
+	_df(3*ele(1) + 2   ) +=   -(u + 
+				   _mu*v )*dfn1*rho*Jacwj ;
 
 
 	/*
@@ -394,13 +394,15 @@ void Indented::writeSolution(string filename){
   cout << "Writing solution to a file.\n";
   myfile << setprecision(15);
   myfile << "x = [";
-  for (auto i = 0; i < _nodes.size(); i++) {
-      myfile << _nodes[i] << ",";
+  for (auto i = 0; i < _x.size(); i++) {
+    if (i % 3 == 0){
+      myfile << _nodes[i/3] << ",";
       //myfile <<_d - _r*cos(_x(i)) << ",";
+    }
   }
   myfile << "]\n";
   myfile << "y = [";
-  for (auto i = 0; i <= _x.size(); i++) {
+  for (auto i = 0; i < _x.size(); i++) {
     if (i%3 == 0){
       myfile << _x(i)<< ",";
       //myfile << _r*sin(_x(i)) << ",";
@@ -414,7 +416,7 @@ void Indented::writeSolution(string filename){
   myfile << "xmin = -matrix(x)\n";
   myfile << "y = matrix(y)\n";
 
-  myfile << "plt.plot(x.T, y.T,'-*')\n";
+  myfile << "plt.plot(x.T, y.T,'*-')\n";
   //myfile << "plt.plot(xmin.T, y.T,'-')\n";
   myfile << "plt.axis('tight')\n";
   //myfile << "plt.axis('equal')\n";

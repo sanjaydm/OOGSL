@@ -35,8 +35,13 @@ int main(int argc, char** argv){
 
   Vector para(8);
   double C = 1; double D = 1; double nu = 0.3;
+<<<<<<< Updated upstream
   double R = 1.0;
   double rho = 1; double d = 1.6; double alpha = 0.52;
+=======
+  double R = 0.5;
+  double rho = 1; double d = 2; double alpha = 0.52;
+>>>>>>> Stashed changes
   para(0) = C; 
   para(1) = D;
   para(2) = nu;
@@ -50,9 +55,9 @@ int main(int argc, char** argv){
   for (int i=0; i< x0.size(); i++){
     double rnd = double(rand())/RAND_MAX; 
     if (i%3==2)
-      x0(i) = rnd;
+      x0(i) = 0;
     else
-      x0(i) = rnd;
+      x0(i) = 0;
   }
   cout << "done. \033[0m\n";
 
@@ -75,7 +80,7 @@ int main(int argc, char** argv){
   cout << (p->vs)->_x.size() << endl;
   //p->writeMesh("mesh_run.txt");
   (p->vs)->writeSolution("solution_run.py");
-  
+
     
   /*
   MultiMin M("lbfgs", p);

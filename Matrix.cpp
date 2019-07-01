@@ -188,12 +188,14 @@ Matrix& Matrix::operator<< (double val){
 }
 void Matrix::print(){
   // Print to screen
+  cout << "[\n";
   for (int i=0; i < _dim1; i++) {
     for (int j=0; j<_dim2; j++){
-      cout << (*this)(i,j) << " ";
+      cout << (*this)(i,j) << ",";
     }
-    cout << endl;
+    cout << ";" << endl;
   }
+  cout << "]\n";
 
 }
 Matrix Matrix::inv(){
@@ -274,5 +276,15 @@ Matrix Matrix::range(double tol){
   for (int r=0; r<ret._dim1; r++)
     for (int c=0; c<ret._dim2; c++)
       ret(r,c) = U(r,c);
+  return ret;
+}
+
+void Matrix::selfT(){
+  //Transposes and replaces the existing matrix
+  gsl_matrix_transpose(_gsl_mat);
+}
+Matrix Matrix::T(){
+  Matrix ret(_dim2, _dim1);
+  gsl_matrix_transpose_memcpy(ret._gsl_mat, _gsl_mat);
   return ret;
 }

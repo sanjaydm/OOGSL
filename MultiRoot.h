@@ -16,7 +16,7 @@ public:
 
   int _dim; //dimension of the system
   string _type;
-  double _tol = 1e-6;
+  double _tol = 1e-8;
   void _setMinimizerType(string type);
   Problem* _problem;
 
