@@ -52,6 +52,8 @@ public:
   void print();
   int svd(Matrix& U, Matrix& V, Vector& S, double tol=1e-8);
   Matrix range(double tol=1e-8);
+  void selfT();
+  Matrix T();
 };
 
 #endif
