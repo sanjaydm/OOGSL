@@ -28,19 +28,19 @@ public:
 };
 int main(int argc, char** argv){
 
-  Matrix M(3,3);
-  double alpha = 0.5;
-  M << 1 << 0 << 0 << 
-  0 << cos(alpha) << sin(alpha) <<
-  0 << -sin(alpha) << cos(alpha);
+//  Matrix M(3,3);
+//  double alpha = 0.5;
+//  M << 1 << 0 << 0 <<
+//  0 << cos(alpha) << sin(alpha) <<
+//  0 << -sin(alpha) << cos(alpha);
 
 
-  Vector abc = computeEulerAngles(M);
-  abc.print();
-    double alphaa = abc(0);
-    double betaa  = abc(1);
-    double gammaa = abc(2);
-  
+//  Vector abc = computeEulerAngles(M);
+//  abc.print();
+//    double alphaa = abc(0);
+//    double betaa  = abc(1);
+//    double gammaa = abc(2);
+//
 //  Wigner_d d(1, M_PI/4);
 //  d._d[1].print();
    // cout << d.get_d(2,-1,0) << endl;
@@ -52,17 +52,92 @@ int main(int argc, char** argv){
 //    cout << -sin(0.1)/sqrt(2) << endl;
 
 
-    int ub = 2;
-    Wigner_d d(ub,betaa);
-    for (int i = 0; i <= ub; i++){
-        Matrix D = compute_D (i,alphaa,betaa,gammaa,d);
-        D.print();
-    }
+//    int ub = 2;
+//    Wigner_d d(ub,betaa);
+//    for (int i = 0; i <= ub; i++){
+//        Matrix D = compute_D (i,alphaa,betaa,gammaa,d);
+//        D.print();
+//    }
+//
+//    Matrix R = compute_R(0,2,M);
+//    R.print();
 
-    Matrix R = compute_R(0,2,M);
+    
+    
+
+    
+    
+    // cyclic
+    
+    Matrix Q(3,3);
+    double alpha = 2*M_PI/4;
+    Q << cos(alpha) << sin(alpha) << 0 <<
+        -sin(alpha) << cos(alpha) << 0 <<
+        0 << 0 << 1;
+
+    Matrix R = compute_R(4, 4, Q);
     R.print();
 
 
+    Cyclic c(4,R);
+    Projection p(c);
+
+    
+    //icosahedral
+
+//    Matrix I(3,3);
+//    I << 1 << 0 << 0 <<
+//         0 << 1 << 0 <<
+//         0 << 0 << 1;
+//
+//    Matrix A(3,3);
+//    A << 0 << (1+sqrt(5))/(2*sqrt(2)*sqrt(3+sqrt(5))) << sqrt(3+sqrt(5))/(2*sqrt(2)) <<
+//
+//        -(1+sqrt(5))/(2*sqrt(2)*sqrt(3+sqrt(5))) << 0 << -1/(sqrt(2)*sqrt(3+sqrt(5))) <<
+//        -sqrt(3+sqrt(5))/(2*sqrt(2)) << 1/(sqrt(2)*sqrt(3+sqrt(5))) << 0;
+//
+//
+//// R = I + A*sin(M_PI) + (A^2)*(1-cos(M_PI));
+//    A.print();
+//    cout << " " << endl;
+//    cout << 1-cos(M_PI) << endl;
+//
+//    Matrix temp1=A;
+//    temp1 *= sin(M_PI);
+//
+//    Matrix temp2 = A^2;
+//    temp2.print();
+    // Matrix R = temp1 + temp2 + I ;
+
+//
+//    Matrix C(3,3);
+//    C << 0 << -(1+sqrt(5))/(sqrt(2)*sqrt(5+sqrt(5))) << sqrt((sqrt(5)-1)/(2*sqrt(5))) <<
+//        (1+sqrt(5))/(sqrt(2)*sqrt(5+sqrt(5))) << 0 << 0 <<
+//        -sqrt((sqrt(5)-1)/(2*sqrt(5))) << 0 << 0;
+//
+//    Matrix S(3,3);
+//// S = I + sin(2*pi/3)*C + (1-cos(2*pi/3))*C^2;
+//    temp1 = C*= sin(2*M_PI/3);
+//    temp2 = (C^2)*=(1-cos(2*M_PI/3));
+//    temp1 += temp2;
+//    temp1 += I;
+//    S = temp1;
+//
+//
+//    Matrix T(3,3);
+//// T = R * inv(S) * R * S * R * inv(S);
+//    Matrix temp3 = S.inv();
+//    Matrix temp4 = R * temp3 * R * S * R * temp3;
+//    T = temp4;
+//
+//    R.print();
+//
+//
+//
+    
+    
+    
+    
     
     
   // v(0) = 1.1231;
