@@ -31,17 +31,12 @@ int main(int argc, char** argv){
   
   // Create initial guess
   //Vector x0(3*N+3); //u,u',v,v'
-   Vector x0(3*N); 
+   Vector x0(3*N+1); 
 
   Vector para(8);
   double C = 1; double D = 1; double nu = 0.3;
-<<<<<<< Updated upstream
   double R = 1.0;
-  double rho = 1; double d = 1.6; double alpha = 0.52;
-=======
-  double R = 0.5;
   double rho = 1; double d = 2; double alpha = 0.52;
->>>>>>> Stashed changes
   para(0) = C; 
   para(1) = D;
   para(2) = nu;
