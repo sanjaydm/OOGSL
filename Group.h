@@ -46,6 +46,16 @@ public:
     Tetrahedral(Matrix g2, Matrix g3d);
     void constructGroup();
 };
- 
+
+class Projection{
+public:
+    Group _group;
+    Projection(Group group);
+    Matrix computeProjection();
+};
+
+
+
+
 
 #endif
