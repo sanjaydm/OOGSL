@@ -28,42 +28,34 @@ public:
 };
 int main(int argc, char** argv){
 
-  Matrix M(3,3);
+  Matrix M1(3,3);
   double alpha = 0.5;
-  M << 1 << 0 << 0 << 
-  0 << cos(alpha) << sin(alpha) <<
-  0 << -sin(alpha) << cos(alpha);
+
+  // M1 << 
+  //   cos(alpha) << -sin(alpha) << 0 <<
+  //   sin(alpha) << cos(alpha) << 0 <<
+  //   0 << 0 << 1;
+
+    M1 << 
+      cos(alpha) << 0 << sin(alpha) <<
+      0  << 1 << 0 <<
+      -sin(alpha) << 0 << cos(alpha);
+
+  
+  // M1 << 
+  //   1 << 0 << 0 <<
+  //   0 << cos(alpha) << sin(alpha) << 
+  //   0 << -sin(alpha)<< cos(alpha) ;
+   
 
 
-  Vector abc = computeEulerAngles(M);
+
+  Vector abc = computeEulerAngles(M1);
   abc.print();
     double alphaa = abc(0);
     double betaa  = abc(1);
     double gammaa = abc(2);
-  
-//  Wigner_d d(1, M_PI/4);
-//  d._d[1].print();
-   // cout << d.get_d(2,-1,0) << endl;
-//
-//    Matrix D = compute_D (1,M_PI/2,0.1,-M_PI/2,d);
-//    D.print();
-//
-//
-//    cout << -sin(0.1)/sqrt(2) << endl;
 
-
-    int ub = 2;
-    Wigner_d d(ub,betaa);
-    for (int i = 0; i <= ub; i++){
-        Matrix D = compute_D (i,alphaa,betaa,gammaa,d);
-        D.print();
-    }
-
-    Matrix R = compute_R(0,2,M);
-    R.print();
-
-
-    
     
   // v(0) = 1.1231;
   // v(1) = 2;
