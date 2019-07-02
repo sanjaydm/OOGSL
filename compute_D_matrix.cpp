@@ -83,10 +83,18 @@ Matrix compute_D (int l, double alpha, double beta, double gamma, Wigner_d& d){
 }
 
 Matrix compute_R(int lmin, int lmax, Matrix Q){
-    double alpha = atan2(Q(1,2),Q(0,2));
-    double gamma = atan2(Q(2,1),-Q(2,0));
-    double s2 = sqrt(Q(2,0)*Q(2,0)+Q(2,1)*Q(2,1));
-    double beta = atan2(s2,Q(2,2));
+//    double alpha = atan2(Q(1,2),Q(0,2));
+//    double gamma = atan2(Q(2,1),-Q(2,0));
+//    double s2 = sqrt(Q(2,0)*Q(2,0)+Q(2,1)*Q(2,1));
+//    double beta = atan2(s2,Q(2,2));
+    
+    double gamma = 2*M_PI/3;
+    double beta = 0;
+    double alpha = 0;
+    
+    cout << "alpha " << alpha << endl;
+    cout << "beta " << beta << endl;
+    cout << "gamaa " << gamma << endl;
     Wigner_d d(lmax,beta);
     int n = (lmin+lmax+1)*(lmax-lmin+1);
     Matrix R(n);

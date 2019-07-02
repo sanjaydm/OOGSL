@@ -70,17 +70,22 @@ int main(int argc, char** argv){
     // cyclic
     
     Matrix Q(3,3);
-    double alpha = 2*M_PI/4;
+    double alpha = 2*M_PI/3;
     Q << cos(alpha) << sin(alpha) << 0 <<
         -sin(alpha) << cos(alpha) << 0 <<
         0 << 0 << 1;
+    Q.print();
+    cout << " " << endl;
+    
+    Matrix R = compute_R(3, 3, Q.T());
 
-    Matrix R = compute_R(4, 4, Q);
-    R.print();
 
 
-    Cyclic c(4,R);
+    Cyclic c(3,R);
+    // c.listElements();
     Projection p(c);
+    p._P.print();
+    
 
     
     //icosahedral

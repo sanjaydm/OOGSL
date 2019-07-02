@@ -105,15 +105,15 @@ Projection:: Projection(Group group):_group(group){
     computeProjection();
 }
 
-Matrix Projection::computeProjection(){
+void Projection::computeProjection(){
     float n = _group._g.size();
-    Matrix sum = _group._g[0];
+    array<int,2> rc = _group._g[0].size();
+    _P.setDim(rc[0],rc[1]);
+    _P = _group._g[0];
     for (int i = 1; i < n; i++){
-        sum += (_group._g[i]);
+        _P += (_group._g[i]);
     }
-    sum *= (1/n);
-    
-    return sum;
+    _P *= (1/n);
 }
 
 
