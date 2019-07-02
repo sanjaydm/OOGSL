@@ -14,7 +14,8 @@ public:
 
   
   IndentedBC(Vector x, Vector para, vector<double> nodes, vector<Vector> conn): Problem(x,para) {
-    Vector xvs(x.size()+4);
+    Vector xvs(x.size()+3);
+
     //Vector xvs(x.size()+6); For cantilever
     _rho = para(3);
     _d = para(4);
