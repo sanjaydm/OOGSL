@@ -50,8 +50,9 @@ public:
 class Projection{
 public:
     Group _group;
+    Matrix _P;
     Projection(Group group);
-    Matrix computeProjection();
+    void computeProjection();
 };
 
 

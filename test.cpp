@@ -75,23 +75,23 @@ int main(int argc, char** argv){
     
     // cyclic
     
-    Matrix Q(3,3);
-    double alpha = 2*M_PI/4;
-    Q << cos(alpha) << sin(alpha) << 0 <<
-        -sin(alpha) << cos(alpha) << 0 <<
-        0 << 0 << 1;
-
-    Matrix R = compute_R(4, 4, Q);
-    R.print();
-
-  Vector abc = computeEulerAngles(M1);
-  abc.print();
-    double alphaa = abc(0);
-    double betaa  = abc(1);
-    double gammaa = abc(2);
-
-    Cyclic c(4,R);
-    Projection p(c);
+//    Matrix Q(3,3);
+//    double alpha = 2*M_PI/3;
+//    Q << cos(alpha) << sin(alpha) << 0 <<
+//        -sin(alpha) << cos(alpha) << 0 <<
+//        0 << 0 << 1;
+//    Q.print();
+//    cout << " " << endl;
+//
+//    Matrix R = compute_R(3, 3, Q.T());
+//
+//
+//
+//    Cyclic c(3,R);
+//    // c.listElements();
+//    Projection p(c);
+//    p._P.print();
+//
 
     
     //icosahedral
@@ -111,41 +111,69 @@ int main(int argc, char** argv){
 //// R = I + A*sin(M_PI) + (A^2)*(1-cos(M_PI));
 //    A.print();
 //    cout << " " << endl;
-//    cout << 1-cos(M_PI) << endl;
 //
-//    Matrix temp1=A;
+//    Matrix temp1 = A;
 //    temp1 *= sin(M_PI);
 //
 //    Matrix temp2 = A^2;
-//    temp2.print();
-    // Matrix R = temp1 + temp2 + I ;
-
+//    temp2 *= (1-cos(M_PI));
+//    Matrix g2 = temp1 + temp2 + I ;
+//
 //
 //    Matrix C(3,3);
 //    C << 0 << -(1+sqrt(5))/(sqrt(2)*sqrt(5+sqrt(5))) << sqrt((sqrt(5)-1)/(2*sqrt(5))) <<
 //        (1+sqrt(5))/(sqrt(2)*sqrt(5+sqrt(5))) << 0 << 0 <<
 //        -sqrt((sqrt(5)-1)/(2*sqrt(5))) << 0 << 0;
 //
-//    Matrix S(3,3);
+//
 //// S = I + sin(2*pi/3)*C + (1-cos(2*pi/3))*C^2;
-//    temp1 = C*= sin(2*M_PI/3);
-//    temp2 = (C^2)*=(1-cos(2*M_PI/3));
-//    temp1 += temp2;
-//    temp1 += I;
-//    S = temp1;
+//    temp1 = C;
+//    Matrix temp3 = C^2;
+//    temp1 *= sin(2*M_PI/3);
+//    temp3 *= (1-cos(2*M_PI/3));
+//    Matrix g5 = I + temp1 + temp3;
 //
-//
-//    Matrix T(3,3);
-//// T = R * inv(S) * R * S * R * inv(S);
-//    Matrix temp3 = S.inv();
-//    Matrix temp4 = R * temp3 * R * S * R * temp3;
-//    T = temp4;
-//
-//    R.print();
-//
-//
-//
+
+
     
+// T = R * inv(S) * R * S * R * inv(S);
+//    Matrix temp4 = S.inv();
+//    Matrix T = g2 * temp4 * g2 * g5 * g2 * temp4;
+//
+//    Matrix S2 = (g5^2);
+//    Matrix g3 = (g5^2) * g2 * (g5^3) * T; //g3
+//    Matrix g2 = R;
+    
+    
+    Matrix g2(3,3);
+    g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
+    << 0.500000000000000  <<  0.309016994374947 << -0.809016994374947
+    << -0.309016994374948 <<  -0.809016994374947 << -0.500000000000000;
+    
+    Matrix g3(3,3);
+    g3 <<   -0.499999999999997 <<  0.736685209782634 << -0.455296498655014
+   << -0.736685209782634 << -0.085410196624967  << 0.670820393249936
+    << 0.455296498655014 <<  0.670820393249936  << 0.585410196624968;
+    
+    
+
+    
+    
+    Matrix r2 = compute_R(3,3,g2);
+    Matrix r3 = compute_R(3,3,g3);
+    
+    Matrix temp = (r2^2);
+    temp.print();
+    
+    cout << fmod(6*2*M_PI+M_PI/4,2*M_PI) << endl;
+//    Icosahedral ico(r2,r3);
+//    Projection p(ico);
+//    p._P.print();
+    
+
+// T = g2d
+// S = g5
+// R = g2
     
     
     
