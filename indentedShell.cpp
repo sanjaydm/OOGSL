@@ -31,7 +31,7 @@ int main(int argc, char** argv){
   
   // Create initial guess
   //Vector x0(3*N+3); //u,u',v,v'
-   Vector x0(3*N+1); 
+   Vector x0(3*N); 
 
   Vector para(8);
   double C = 1; double D = 1; double nu = 0.3;
@@ -50,9 +50,9 @@ int main(int argc, char** argv){
   for (int i=0; i< x0.size(); i++){
     double rnd = double(rand())/RAND_MAX; 
     if (i%3==2)
-      x0(i) = 0;
+      x0(i) = rnd;
     else
-      x0(i) = 0;
+      x0(i) = rnd;
   }
   cout << "done. \033[0m\n";
 
@@ -61,18 +61,16 @@ int main(int argc, char** argv){
   IndentedBC* p = new  IndentedBC(x0, para, nodes, conn);
 
   p->fdf();
-  (p->vs)->_df.print();
-
   
   cout << "energy = " << p->_f << endl;
   p->checkConsistency();
 
-  
+
   MultiRoot rt("generic", p);
   rt._GSLRoot_Initialize();
   rt.GSLRoot_Solve();
   (p->vs)->_x.print();
-  cout << (p->vs)->_x.size() << endl;
+  //cout << (p->vs)->_x.size() << endl;
   //p->writeMesh("mesh_run.txt");
   (p->vs)->writeSolution("solution_run.py");
 

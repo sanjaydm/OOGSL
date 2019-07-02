@@ -65,6 +65,7 @@ int Problem::checkConsistency(double eps, double tol){
   //dfappx.print();
   //_df.print();
   absError.print();
+  //cout << "abs size = " << absError.size() << endl;
   cout << "energy = " << f0 << endl;
   //_df.print();
   //absError.print();
