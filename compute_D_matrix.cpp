@@ -71,7 +71,7 @@ double compute(int l, int m, int mp, double alpha, double beta, double gamma, Wi
 
 
 
-Matrix compute_D (int l, double alpha, double beta, double gamma, Wigner_d d){
+Matrix compute_D (int l, double alpha, double beta, double gamma, Wigner_d& d){
     Matrix D(2*l+1);
     for (int m = -l; m <= l; m++ ){
         for (int mp = -l; mp <= l; mp++){

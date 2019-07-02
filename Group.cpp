@@ -101,6 +101,21 @@ void Tetrahedral::constructGroup(){
 
 
 
+Projection:: Projection(Group group):_group(group){
+    computeProjection();
+}
+
+Matrix Projection::computeProjection(){
+    float n = _group._g.size();
+    Matrix sum = _group._g[0];
+    for (int i = 1; i < n; i++){
+        sum += (_group._g[i]);
+    }
+    sum *= (1/n);
+    
+    return sum;
+}
+
 
 
 
