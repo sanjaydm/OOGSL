@@ -43,7 +43,7 @@ void Indented :: fdf(){
       
       double T2 = _x(3*ele(1));
       double T3 = _x(3*ele(1)+1);
-      double F1 = _x(3*ele(1)+2);
+      //double F1 = _x(3*ele(1)+2);
 
       double S = _nodes[ele(0)]*N(0) + slope*N(1) + _nodes[ele(1)]*N(2) + slope*N(3); 
       double Jac = _nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3); 
@@ -71,7 +71,7 @@ void Indented :: fdf(){
       double t_s = (T0*DN(0)+T1*DN(1) + T2*DN(2) + T3*DN(3))/Jac1;
       double t_ss = (T0*D2N(0)+T1*D2N(1) + T2*D2N(2) + T3*D2N(3))/Jac2- t_s*Jac_xiJac2;
       
-      double fn = F0*L0(qj) + F1*L1(qj);
+      double fn = F0; //F0*L0(qj) + F1*L1(qj);
       
       /*
       fz = fn*(-sin(t) + _mu*cos(t));
@@ -102,23 +102,24 @@ void Indented :: fdf(){
 
       u_ss = 0;
       v_ss = t_ss;
-      
-      double Jacwj = Jac * wj;
-      // Strain measures
-      double es_lin = u_s*rho_s+z_s*v_s; //u' rho' + z' v'
-      double et_lin = u/rho; //u/rho
-      double phi = -z_s*u_s+rho_s*v_s; //-z' u' + rho' v'
-      double phi_s = -z_ss*u_s -z_s*u_ss + rho_ss*v_s + rho_s*v_ss;
-      double k_s = phi_s; //phi'
-      double k_t = v_s/rho; //v'/rho
 
-      est(0) = es_lin + 0.5*phi*phi;
-      est(1) = et_lin;
-      kst(0) = k_s;
-      kst(1) = k_t;
+      double Jacwj = Jac * wj;
+      // Strain measures for cylindrical indenter
+      double es_lin = u_s*rho_s+z_s*v_s; //u' rho' + z' v' = v'
+      double et_lin = u/rho; //u/rho = u
+      double phi = -z_s*u_s+rho_s*v_s; //-z' u' + rho' v' = 0
+      double phi_s = -z_ss*u_s -z_s*u_ss + rho_ss*v_s + rho_s*v_ss; //=0
+      double k_s = phi_s; //phi' = 0
+      double k_t = v_s/rho; //v'/rho = v'
+
+      est(0) = es_lin + 0.5*phi*phi; //v'
+      est(1) = et_lin; //u
+      kst(0) = k_s; //=0
+      kst(1) = k_t; //v'
 
       // Call material law
       NeoHookean(est, kst);
+
       // If Energy flag is on
       if (_fFlag){
 	_f +=  (_lclEnergyDensity*rho - rho*fr*u - rho*fz*v) * Jacwj;
@@ -164,7 +165,7 @@ void Indented :: fdf(){
 
 	//if (e!=0 || e!=numEle-1) {
 	dt0 = N(0); dt1 = N(1); dt2 = N(2); dt3 = N(3);
-	dfn0 = L0(qj); dfn1 = L1(qj);
+	dfn0 = 1;//L0(qj); //dfn1 = L1(qj);
 
 	dt0_s = DN(0)/Jac1; dt1_s = DN(1)/Jac1; dt2_s = DN(2)/Jac1; dt3_s = DN(3)/Jac1;
 
@@ -302,9 +303,10 @@ void Indented :: fdf(){
 				   (-sin(t) + _mu*cos(t))*v )*dfn1*rho*Jacwj ;
 
 	*/
+	/*----
 	_df(3*ele(1) + 2   ) +=   -(u + 
 				   _mu*v )*dfn1*rho*Jacwj ;
-
+	-----*/
 
 	/*
 	_df(3*ele(0)     ) +=  (- rhofr* du0 - rho*u*dfr0
@@ -345,10 +347,10 @@ void Indented :: NeoHookean (Vector& est, Vector& kst){
   }
   if (_dfFlag) {
     
-    _lclResidue(0) = _C*(es + _nu*et); //Ns
-    _lclResidue(1) = _C*(et + _nu*es); //Nt
-    _lclResidue(2) = _D*(ks + _nu*kt); //Ms
-    _lclResidue(3) = _D*(kt + _nu*ks); //Mt
+    _lclResidue(0) = _C*(es + _nu*et); //Ns = C (v' + nu u)
+    _lclResidue(1) = _C*(et + _nu*es); //Nt = C(u + nu v')
+    _lclResidue(2) = _D*(ks + _nu*kt); //Ms = D * nu * v'
+    _lclResidue(3) = _D*(kt + _nu*ks); //Mt = D * v'
     
   }
 }
