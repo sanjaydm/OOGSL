@@ -8,25 +8,23 @@ void IndentedBC :: fdf(){
   _df.setZero(); //reset residue to zero
   int numEle = vs->_conn.size();
   double slope = (vs->_nodes[1]-vs->_nodes[0])/2;
-  /// x = [f0 x1 x1' f1 x2 x2' f2 .... xn-1 xn-1' fn-1 xn  ||  fn]
-  //       0  1  2   3  4  5   6 ....  3n-5 3n-4  3n-3 3n-2||  3n-1
+  /// x = [x1 x1'x2 x2' .... xn-1 xn-1' xn  
+  //       0  1  2   3  .... 2n-3 2n-2  2n-1
 
-  //vsx = [x0 x0' f0 x1 x1' f1 .... xn   xn'  || fn]
-  //        0  1   2  3  4   5  .... 3n 3n+1  ||  3n+2
+  //vsx = [x0 x0' x1 x1'  .... xn   xn' 
+  //        0  1  2  3    .... 2n+1 2n+2
   // //Boundary conditions applied to "Indented dofs"
   vs->_x(0) = 0; //v(0) = 0
-  vs->_x(1) = 0.75*_x(1)-0.5*_x(2); //
-  vs->_x(2) = _x(0); //f0
+  vs->_x(1) = 0.75*_x(0)-0.5*_x(1); //
   // ------------------
-  for (int i=1; i<= N-2; i++){ //N-3 for Linear
+  for (int i=0; i<= 2*numEle-2; i++){ //N-3 for Linear
     // pass dofs to Indented's
     vs->_x(i+2) = _x(i);
   }
-  vs->_x(3*numEle) = _x(3*numEle-2);
+  vs->_x(2*numEle+1) = _x(2*numEle-1);
   double u = (vs->_d - vs->_r - 1);
   double T = 0;
-  vs->_x(3*numEle+1) = slope*(T - vs->_nu*u);  
-  //vs->_x(3*numEle+2) = _x(3*numEle-1);
+  vs->_x(2*numEle+2) = slope*(T - vs->_nu*u);  
 
   // Compute energy
   vs->fdf();
@@ -35,15 +33,14 @@ void IndentedBC :: fdf(){
     _f = vs->_f;
   }
   if (_dfFlag){
-    _df(0) = vs->_df(2);
-    _df(1) = vs->_df(3)+0.75*vs->_df(1);
-    _df(2) = -0.5*vs->_df(1)+vs->_df(4);
+    _df(0) = vs->_df(2)+0.75*vs->_df(1);
+    _df(1) = -0.5*vs->_df(1)+vs->_df(3);
     
-    for (int i=3; i<=N-2; i++){ //N-3 for linear
+    for (int i=2; i<=2*numEle-1; i++){ //N-3 for linear
       _df(i) = vs->_df(i+2);
     }
     
-    _df(3*numEle-2) = vs->_df(3*numEle) ;
+    //_df(3*numEle-2) = vs->_df(3*numEle) ;
     //_df(3*numEle-1) = vs->_df(3*numEle+2) ;
   }
 

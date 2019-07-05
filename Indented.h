@@ -17,7 +17,7 @@ public:
     _D = para(0); //reference from para;
     _C = para(1); //reference from para;
     _nu = para(2);
-    _mu = 0.5;
+    _mu = 0.3;
     _r = 1;
     _d = para(4);
 

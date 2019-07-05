@@ -37,12 +37,12 @@ void Indented :: fdf(){
       double slope = (_nodes[ele(1)]-_nodes[ele(0)])/2;
       // Compute u, v, u', v', u'', v'' using shape functions
       // For each node u,v,u' and v' are stored in this order
-      double T0 =  _x(3*ele(0));
-      double T1 = _x(3*ele(0)+1);
-      double F0 = _x(3*ele(0)+2);
+      double T0 =  _x(2*ele(0));
+      double T1 = _x(2*ele(0)+1);
+      //double F0 = _x(3*ele(0)+2);
       
-      double T2 = _x(3*ele(1));
-      double T3 = _x(3*ele(1)+1);
+      double T2 = _x(2*ele(1));
+      double T3 = _x(2*ele(1)+1);
       //double F1 = _x(3*ele(1)+2);
 
       double S = _nodes[ele(0)]*N(0) + slope*N(1) + _nodes[ele(1)]*N(2) + slope*N(3); 
@@ -71,7 +71,7 @@ void Indented :: fdf(){
       double t_s = (T0*DN(0)+T1*DN(1) + T2*DN(2) + T3*DN(3))/Jac1;
       double t_ss = (T0*D2N(0)+T1*D2N(1) + T2*D2N(2) + T3*D2N(3))/Jac2- t_s*Jac_xiJac2;
       
-      double fn = F0; //F0*L0(qj) + F1*L1(qj);
+      //double fn = F0; //F0*L0(qj) + F1*L1(qj);
       
       /*
       fz = fn*(-sin(t) + _mu*cos(t));
@@ -89,10 +89,6 @@ void Indented :: fdf(){
       v_ss = -_r*sin(t)*t_s*t_s + _r*cos(t)*t_ss;
       */
 
-      fz = _mu*fn;
-      fr = fn;
-      rhofr = rho*fr;
-      rhofz = rho*fz;
 
       u = (_d - _r - rho);
       v = t;
@@ -102,6 +98,12 @@ void Indented :: fdf(){
 
       u_ss = 0;
       v_ss = t_ss;
+
+      fz = -(_C+_D)*v_ss;
+      fr = fz/_mu;
+      rhofr = rho*fr;
+      rhofz = rho*fz;
+
 
       double Jacwj = Jac * wj;
       // Strain measures for cylindrical indenter
@@ -237,15 +239,17 @@ void Indented :: fdf(){
 	dv2_ss = dt2_ss;
 	dv3_ss = dt3_ss;
 
-	dfr0 = 0;
-	dfr1 = 0;
-	dfr2 = 0;
-	dfr3 = 0;
 
-	dfz0 = 0;
-	dfz1 = 0;
-	dfz2 = 0;
-	dfz3 = 0;
+	dfz0 = -(_C + _D)*dv0_ss;
+	dfz1 = -(_C + _D)*dv1_ss;
+	dfz2 = -(_C + _D)*dv2_ss;
+	dfz3 = -(_C + _D)*dv3_ss;
+
+	dfr0 = dfz0/_mu;
+	dfr1 = dfz1/_mu;
+	dfr2 = dfz2/_mu;
+	dfr3 = dfz3/_mu;
+
 
 	// ------------ END -------------------
 		
@@ -262,14 +266,14 @@ void Indented :: fdf(){
 	
 
 	
-	_df(3*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
+	_df(2*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
 				rho*Ms*dphi0U_s + 
 				(Nt - rhofr)* du0 - rho*u*dfr0) *Jacwj +
 	                        ((rhoNs * Tz)* dv0_s +
 				  rho*Ms*dphi0V_s + Mt*dv0_s
 				  - rhofz* dv0 - rho*v*dfz0) *Jacwj ;
 	
-	_df(3*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
+	_df(2*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
 				rho*Ms*dphi1U_s +
 				(Nt - rhofr)* du1 -rho*u*dfr1) *Jacwj + 	
 	                        ((rhoNs * Tz)* dv1_s +
@@ -280,18 +284,19 @@ void Indented :: fdf(){
 	_df(3*ele(0) + 2   ) +=   -((cos(t) + _mu*sin(t))*u + 
 				   (-sin(t) + _mu*cos(t))*v )*dfn0*rho*Jacwj ;
 	*/
+	/*
 	_df(3*ele(0) + 2   ) +=   -(u + 
 				   _mu*v )*dfn0*rho*Jacwj ;
+	*/
 
-
-	_df(3*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
+	_df(2*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
 				rho*Ms*dphi2U_s + 
 				(Nt - rhofr)* du2 - rho*u*dfr2) *Jacwj +
 	                        ((rhoNs * Tz)* dv2_s +
 				  rho*Ms*dphi2V_s + Mt*dv2_s
 				  - rhofz* dv2 - rho*v*dfz2) *Jacwj ;
 	
-	_df(3*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
+	_df(2*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
 				rho*Ms*dphi3U_s +
 				(Nt - rhofr)* du3 - rho*u*dfr3) *Jacwj +
 	                        ((rhoNs * Tz)* dv3_s +
@@ -397,15 +402,15 @@ void Indented::writeSolution(string filename){
   myfile << setprecision(15);
   myfile << "x = [";
   for (auto i = 0; i < _x.size(); i++) {
-    if (i % 3 == 0){
-      myfile << _nodes[i/3] << ",";
+    if (i % 2 == 0){
+      myfile << _nodes[i/2] << ",";
       //myfile <<_d - _r*cos(_x(i)) << ",";
     }
   }
   myfile << "]\n";
   myfile << "y = [";
   for (auto i = 0; i < _x.size(); i++) {
-    if (i%3 == 0){
+    if (i%2 == 0){
       myfile << _x(i)<< ",";
       //myfile << _r*sin(_x(i)) << ",";
     }

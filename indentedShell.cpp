@@ -10,7 +10,7 @@
 
 int main(int argc, char** argv){
 
-  int N =10; //Num of elements
+  int N =30; //Num of elements
   double a = 0; double b =1; // end points of domain
   vector<double> nodes;
   vector<Vector> conn;
@@ -31,12 +31,12 @@ int main(int argc, char** argv){
   
   // Create initial guess
   //Vector x0(3*N+3); //u,u',v,v'
-   Vector x0(3*N-1); 
+   Vector x0(2*N); 
 
   Vector para(8);
   double C = 1; double D = 1; double nu = 0.2;
   double R = 1.0;
-  double rho = 1; double d = 1.99; double alpha = 0.52;
+  double rho = 1; double d = 1.9; double alpha = 0.52;
   para(0) = C; 
   para(1) = D;
   para(2) = nu;
@@ -64,7 +64,7 @@ int main(int argc, char** argv){
   
   cout << "energy = " << p->_f << endl;
   p->checkConsistency();
-
+  /*
   MultiRoot rt("generic", p);
   rt._GSLRoot_Initialize();
   rt.GSLRoot_Solve();
@@ -72,9 +72,9 @@ int main(int argc, char** argv){
   //cout << (p->vs)->_x.size() << endl;
   //p->writeMesh("mesh_run.txt");
   (p->vs)->writeSolution("solution_run.py");
-
+  */
     
-  /*
+  
   MultiMin M("lbfgs", p);
   M._tol = 1e-4;
   M._LBFGSB_Initialize();
@@ -85,7 +85,7 @@ int main(int argc, char** argv){
   (p->vs)->writeSolution("solution_run.py");
   cout << "size of vs = " << (p->vs)->_x.size() << endl;
   cout << "size of s = " << (p->_x.size()) << endl;
-  */
+ 
   return 0;
   
 }

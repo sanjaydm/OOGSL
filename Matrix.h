@@ -41,13 +41,13 @@ public:
   Matrix& operator+= (double alpha);
   Matrix operator+ (Matrix& v2);
   Matrix operator* (Matrix& v2);
+  Vector operator* (Vector& v);
   Matrix inv();
   Matrix operator- (Matrix& v2);    
-  Matrix& operator= (Matrix& v2);
+  Matrix& operator= (Matrix v2);
   Matrix& operator<< (double val);
   Vector row(int i);
   Vector col(int i);
-  Vector operator* (Vector& v);
   int rank(double tol=1e-8);
   void print();
   int svd(Matrix& U, Matrix& V, Vector& S, double tol=1e-8);
