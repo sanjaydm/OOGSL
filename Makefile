@@ -21,11 +21,11 @@ Wigner: Wigner.cpp Vector.o Matrix.o libLBFGS
 compute_D_matrix: compute_D_matrix.cpp Vector.o Matrix.o libLBFGS
 	$(CC) $(DBG) $(OPT) -c Matrix.o Vector.o compute_D_matrix.cpp -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o compute_D_matrix.o
 
-testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
-	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
+testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o SymmReduced.o
+	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o SymmReduced.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 
-test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o 
-	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
+test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o
+	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
 SymmReduced.o: SymmReduced.cpp
 	$(CC) $(DBG) $(OPT) -c SymmReduced.cpp 

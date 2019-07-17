@@ -10,20 +10,27 @@
 
 class SymmReduced: public Problem {
 public:
- SymmReduced(Vector x0, Vector para, Matrix& bas, Matrix& Proj, Problem* prob) : Problem(x0,para) {
+ SymmReduced(Vector x0, Vector para, Matrix& bas, Problem* prob) {
     _bas = bas;
-    _P = Proj;
+
+    _basT = _bas.T();
+    //_P = Proj;
     array<int,2> rowCol = _bas.size();
-    Vector _fullX(rowCol[0]); //Initialize _fullX to the original dimension of the problem
+    _fullX.setDim(rowCol[0]); //Initialize _fullX to the original dimension of the problem
+    //_fullX = x0;
+    _x.setDim(rowCol[1]);
+    cout << _x.size() << endl;
+    _para = para;
   }
-  ~SymmReduced();
+  //~SymmReduced();
   void convertBasis2Full();
   void fdf();
   
   // Data 
   Vector _fullX; //"Full" dofs of the originial (non symmetry reduced problem)
   Matrix _bas; //Symmetry adapted basis
-  Matrix _P; // Projection matrix
+  //Matrix _P; // Projection matrix
+  Matrix _basT;
   Problem* _prob;
 
 };

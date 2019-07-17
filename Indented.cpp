@@ -100,7 +100,7 @@ void Indented :: fdf(){
       v_ss = t_ss;
 
       fz = -(_C+_D)*v_ss;
-      fr = fz/_mu;
+      fr = 0; fz/_mu;
       rhofr = rho*fr;
       rhofz = rho*fz;
 
@@ -240,15 +240,15 @@ void Indented :: fdf(){
 	dv3_ss = dt3_ss;
 
 
-	dfz0 = -(_C + _D)*dv0_ss;
-	dfz1 = -(_C + _D)*dv1_ss;
-	dfz2 = -(_C + _D)*dv2_ss;
-	dfz3 = -(_C + _D)*dv3_ss;
+	dfz0 = 0; //-(_C + _D)*dv0_ss;
+	dfz1 = 0;//-(_C + _D)*dv1_ss;
+	dfz2 = 0;//-(_C + _D)*dv2_ss;
+	dfz3 = 0;//-(_C + _D)*dv3_ss;
 
-	dfr0 = dfz0/_mu;
-	dfr1 = dfz1/_mu;
-	dfr2 = dfz2/_mu;
-	dfr3 = dfz3/_mu;
+	dfr0 = 0;//dfz0/_mu;
+	dfr1 = 0;//dfz1/_mu;
+	dfr2 = 0;//dfz2/_mu;
+	dfr3 = 0;//dfz3/_mu;
 
 
 	// ------------ END -------------------

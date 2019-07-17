@@ -7,6 +7,7 @@
 #include "MultiRoot.h"
 #include "wigner.cpp"
 #include "compute_D_matrix.cpp"
+#include "SymmReduced.h"
 #include <cmath>
 
 class P2: public Problem {
@@ -145,27 +146,27 @@ int main(int argc, char** argv){
 //    Matrix g2 = R;
     
     
-    Matrix g2(3,3);
-    g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
-    << 0.500000000000000  <<  0.309016994374947 << -0.809016994374947
-    << -0.309016994374948 <<  -0.809016994374947 << -0.500000000000000;
+   //  Matrix g2(3,3);
+   //  g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
+   //  << 0.500000000000000  <<  0.309016994374947 << -0.809016994374947
+   //  << -0.309016994374948 <<  -0.809016994374947 << -0.500000000000000;
     
-    Matrix g3(3,3);
-    g3 <<   -0.499999999999997 <<  0.736685209782634 << -0.455296498655014
-   << -0.736685209782634 << -0.085410196624967  << 0.670820393249936
-    << 0.455296498655014 <<  0.670820393249936  << 0.585410196624968;
+   //  Matrix g3(3,3);
+   //  g3 <<   -0.499999999999997 <<  0.736685209782634 << -0.455296498655014
+   // << -0.736685209782634 << -0.085410196624967  << 0.670820393249936
+   //  << 0.455296498655014 <<  0.670820393249936  << 0.585410196624968;
     
     
 
     
     
-    Matrix r2 = compute_R(3,3,g2);
-    Matrix r3 = compute_R(3,3,g3);
+   //  Matrix r2 = compute_R(3,3,g2);
+   //  Matrix r3 = compute_R(3,3,g3);
     
-    Matrix temp = (r2^2);
-    temp.print();
+   //  Matrix temp = (r2^2);
+   //  temp.print();
     
-    cout << fmod(6*2*M_PI+M_PI/4,2*M_PI) << endl;
+   //  cout << fmod(6*2*M_PI+M_PI/4,2*M_PI) << endl;
 //    Icosahedral ico(r2,r3);
 //    Projection p(ico);
 //    p._P.print();
@@ -217,11 +218,17 @@ int main(int argc, char** argv){
   // Matrix M(m);
   // M.print();
 
-  // Vector x0(2);
-  // x0(0) = .3223; x0(1) = .1;
-  // Vector para(1);
-  // P2* p = new  P2(x0, para);
-  
+  Vector x0(2);
+  x0(0) = .3223; x0(1) = .1;
+  Vector para(1);
+  P2* p = new  P2(x0, para);
+  Matrix bas(2,1);
+  bas << 1 << 0;
+  bas.print();
+
+  SymmReduced psym(x0, para, bas, p);
+  psym.fdf();
+  //psym._fullX.print();
   // MultiMin M("lbfgs", p);
   // M._LBFGSB_Initialize();
   // M.LBFGSB_Solve();
