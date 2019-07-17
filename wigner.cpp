@@ -23,7 +23,7 @@ Vector computeEulerAngles(Matrix& rotm){
     if (rotm(2,2) < 1) {
         if (rotm(2,2) > -1) {
             // Solution with positive sign, i.e. theta_y is in the range (0, pi):
-            eul(0) = atan2(rotm(1,2),  rotm(0,1));
+            eul(0) = atan2(rotm(1,2),  rotm(0,2));
             eul(1) = acos(rotm(2,2));
             eul(2) = atan2(rotm(2,1), -rotm(2,0));
         }

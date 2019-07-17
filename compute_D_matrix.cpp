@@ -84,12 +84,12 @@ Matrix compute_D (int l, double alpha, double beta, double gamma, Wigner_d& d){
 
 Matrix compute_R(int lmin, int lmax, Matrix Q){
     Vector v = computeEulerAngles(Q);
-    double alpha = v(0);
+    double alpha = -v(0);
     double beta = fmod(v(1), 2*M_PI);
-    double gamma = v(2);
-    cout << "alpha " << alpha << endl;
-    cout << "beta " << beta << endl;
-    cout << "gamma " << gamma << endl;
+    double gamma = -v(2);
+//    cout << "alpha " << alpha << endl;
+//    cout << "beta " << beta << endl;
+//    cout << "gamma " << gamma << endl;
     Wigner_d d(lmax,beta);
     int n = (lmin+lmax+1)*(lmax-lmin+1);
     Matrix R(n);
@@ -106,3 +106,45 @@ Matrix compute_R(int lmin, int lmax, Matrix Q){
     
     return R;
 }
+
+
+int inv_perm(vector<int> v, int pos){
+    int len = v.size();
+    for (int i = 0; i < len; i++){
+        if (v[i] == pos){
+            return i+1;
+        }
+    }
+}
+
+vector<int> inv_rep(vector<int> v){
+    int len = v.size();
+    vector<int> ret_v;
+    for (int i = 1; i <= len; i++){
+        ret_v.push_back(inv_perm(v,i));
+    }
+    return ret_v;
+}
+
+
+Matrix constructMat(vector<int> v, Matrix Q){
+    int size = 3*v.size();
+    Matrix R(size);
+    vector<int> pos = inv_rep(v);
+    int begin = 0;
+    for (int i = 0; i < v.size(); i++){
+        begin = (pos[i] - 1) *3;
+        int j = i*3;
+        R(j,begin) = Q(0,0);
+        R(j,begin+1) = Q(0,1);
+        R(j,begin+2) = Q(0,2);
+        R(j+1,begin) = Q(1,0);
+        R(j+1,begin+1) = Q(1,1);
+        R(j+1,begin+2) = Q(1,2);
+        R(j+2,begin) = Q(2,0);
+        R(j+2,begin+1) = Q(2,1);
+        R(j+2,begin+2) = Q(2,2);
+    }
+    return R;
+}
+

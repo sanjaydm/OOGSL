@@ -124,7 +124,7 @@ Matrix& Matrix::operator^= (int n){
 Matrix Matrix::operator^ (int n){
   Matrix ret(_dim1,_dim2);
   if (n==0){
-    gsl_matrix_set_identity (this->_gsl_mat);
+    gsl_matrix_set_identity (ret._gsl_mat);
   }
   else{
       ret = *this;
