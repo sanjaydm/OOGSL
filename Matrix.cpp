@@ -124,7 +124,7 @@ Matrix& Matrix::operator^= (int n){
 Matrix Matrix::operator^ (int n){
   Matrix ret(_dim1,_dim2);
   if (n==0){
-    gsl_matrix_set_identity (ret._gsl_mat);
+    gsl_matrix_set_identity (this->_gsl_mat);
   }
   else{
       ret = *this;
@@ -165,7 +165,7 @@ Matrix Matrix::operator -(Matrix& v2){
   return temp;
 
 }
-Matrix& Matrix::operator = (Matrix& v2){
+Matrix& Matrix::operator= (Matrix v2){
   array<int,2> dims = v2.size();
   if( size()[0]==0 && size()[1] ==0){
     setDim(dims[0],dims[1]);

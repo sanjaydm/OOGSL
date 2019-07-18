@@ -10,6 +10,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
+#include "SymmReduced.h"
 
 class P2: public Problem {
 public:
@@ -56,34 +57,80 @@ public:
 int main(int argc, char** argv){
 
     
+    //    Icosahedral im(g2_Mat,g3_Mat);
+    //    Projection pm(im);
+    //    cout << pm._P.rank() << endl;
+    //    pm._P.range().print();
+    
+    
+    Matrix R(6,6);
+    R <<
+    0     <<    0  << cos(2*M_PI/3)  << -sin(2*M_PI/3)    <<    0    <<     0 <<
+    0    <<     0  <<  sin(2*M_PI/3)  << cos(2*M_PI/3)     <<    0    <<     0 <<
+    0    <<     0  <<       0   <<      0  << cos(2*M_PI/3)  << -sin(2*M_PI/3)  <<
+    0    <<     0   <<      0     <<    0  <<  sin(2*M_PI/3)  << cos(2*M_PI/3) <<
+   cos(2*M_PI/3)  << -sin(2*M_PI/3)   <<      0    <<     0    <<     0   <<      0 <<
+    sin(2*M_PI/3)  << cos(2*M_PI/3)  <<      0    <<     0     <<    0   <<      0;
+    
+    R.print();
+    Cyclic g(3,R);
+    g.listElements();
+    Projection pj(g);
+    pj._P.range().print();
+    
+    
+    
     
     srand (time(NULL));
-    
-    
+
+
     Vector x(6);
     for (int i = 0; i < 6; i++){
-        x(i) =  rand() % 100 ;
+        x(i) =  0* rand() % 100 ;
     }
-    
+
 //    x(0) = 2.3; x(1) = 5;
 //    x(2) = 2.4; x(3) = 4.1;
 //    x(4) = 10; x(5) = 8;
     Vector para(1);
     P3* p = new  P3(x, para);
-    p -> df();
-    MultiMin M("lbfgs", p);
+    //p -> df();
+    
+    
+    Matrix bas = pj._P.range();
+    SymmReduced symmP(bas.T()*x,para,bas,p);
+   //symmP.df();
+    MultiMin M("lbfgs", &symmP);
     M._LBFGSB_Initialize();
     M.LBFGSB_Solve();
-    cout << "Starting point: " << endl;
-    x.print();
-    cout << "Solution: " << endl;
-    p -> _x.print();
-    cout << "Distance: " << endl;
-    cout << pow(p ->_x(0),2) + pow(p ->_x(1),2) << endl;
-    cout << pow(p ->_x(2),2) + pow(p ->_x(3),2) << endl;
-    cout << pow(p ->_x(4),2) + pow(p ->_x(5),2) << endl;
-
+    symmP._x.print();
     
+    Vector check = bas*symmP._x;
+    check.print();
+    cout << pow(check(0),2)+ pow(check(1),2) << endl;
+    cout << pow(check(2),2)+ pow(check(3),2) << endl;
+    cout << pow(check(4),2)+ pow(check(5),2) << endl;
+    
+    
+    
+//
+//    MultiMin M("lbfgs", p);
+//    M._LBFGSB_Initialize();
+//    M.LBFGSB_Solve();
+//    cout << "Starting point: " << endl;
+//    x.print();
+//    cout << "Solution: " << endl;
+//    p -> _x.print();
+//    cout << "Distance: " << endl;
+//    cout << pow(p ->_x(0),2) + pow(p ->_x(1),2) << endl;
+//    cout << pow(p ->_x(2),2) + pow(p ->_x(3),2) << endl;
+//    cout << pow(p ->_x(4),2) + pow(p ->_x(5),2) << endl;
+//
+    
+    
+    
+
+//
 //  Matrix M(3,3);
 //  double alpha = 0.5;
 //  M << 1 << 0 << 0 <<

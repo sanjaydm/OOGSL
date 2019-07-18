@@ -24,11 +24,15 @@ compute_D_matrix: compute_D_matrix.cpp Vector.o Matrix.o libLBFGS
 testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o
 	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 
-test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o 
-	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
+test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o
+	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o MultiMin.o MultiRoot.o SymmReduced.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
 MembLJ.o: MembLJ.cpp
 	$(CC) $(DBG) $(OPT) -c MembLJ.cpp 
+
+SymmReduced.o: SymmReduced.cpp
+	$(CC) $(DBG) $(OPT) -c SymmReduced.cpp 
+
 
 VirusShell.o: VirusShell.cpp
 	$(CC) $(DBG) $(OPT) -c VirusShell.cpp 

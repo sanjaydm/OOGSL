@@ -39,7 +39,7 @@ public:
   Vector& operator+= (double alpha);
   Vector operator+ (Vector& v2);
   Vector operator- (Vector& v2);
-  Vector& operator= (Vector v2);
+  Vector& operator= (Vector& v2);
   Vector& operator= (gsl_vector* v2);
   Vector& operator<< (double val);
   void setZero();

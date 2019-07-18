@@ -108,7 +108,7 @@ Vector Vector::operator- (Vector& v2){
   temp -= v2;
   return temp;
 }
-Vector& Vector::operator= (Vector v2){
+Vector& Vector::operator= (Vector& v2){
   if(size()==0){
     setDim(v2.size());
   }
