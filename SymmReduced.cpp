@@ -15,7 +15,8 @@ void SymmReduced::fdf(){
   //Convert symmetry reduced dofs to full
   convertBasis2Full();
   _prob->_x = _fullX;
-
+  _prob->_para = _para;
+  
   // Pass flags to full problem
   _prob->_fFlag = _fFlag;
   _prob->_dfFlag = _dfFlag;
@@ -24,8 +25,10 @@ void SymmReduced::fdf(){
   _prob->fdf();
 
   // Store values of returned from full into reduced
-  _f = _prob->_f;
-  _df = _basT*_prob->_df;
+  if (_fFlag)
+    _f = _prob->_f;
+  if (_dfFlag)
+    _df = _basT*_prob->_df;
+
   //_d2f = _prob->_d2f; Projection operators P^T d2f P, here?
-  
 }

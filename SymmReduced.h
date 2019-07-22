@@ -12,15 +12,19 @@ class SymmReduced: public Problem {
 public:
  SymmReduced(Vector x0, Vector para, Matrix& bas, Problem* prob) {
     _bas = bas;
-
     _basT = _bas.T();
-    //_P = Proj;
     array<int,2> rowCol = _bas.size();
     _fullX.setDim(rowCol[0]); //Initialize _fullX to the original dimension of the problem
-    //_fullX = x0;
     _x.setDim(rowCol[1]);
-    cout << _x.size() << endl;
+    _x = x0;
     _para = para;
+    _prob = prob;
+    _fFlag = true;
+    _dfFlag = true;
+    _f = 0.0;
+    _Ndof = _x.size();
+    _df.setDim(_Ndof);
+    _d2f.setDim(_Ndof, _Ndof);
   }
   //~SymmReduced();
   void convertBasis2Full();

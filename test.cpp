@@ -226,18 +226,20 @@ int main(int argc, char** argv){
   bas << 1 << 0;
   bas.print();
 
-  SymmReduced psym(x0, para, bas, p);
-  psym.fdf();
-  //psym._fullX.print();
-  // MultiMin M("lbfgs", p);
-  // M._LBFGSB_Initialize();
-  // M.LBFGSB_Solve();
-
+  SymmReduced psym(bas.T()*x0, para, bas, p);
+  // psym.fdf();
+  // psym._fullX.print();
+  // psym._prob->_df.print();
+  // cout << "energy = " << psym._prob->_f << endl;
+  MultiMin M("lbfgs", &psym);
+  M._LBFGSB_Initialize();
+  M.LBFGSB_Solve();
+  psym._x.print();
   // MultiRoot rt("generic", p);
   // rt._GSLRoot_Initialize();
   // rt.GSLRoot_Solve();
 
-  // p->_x.print();
+  
 
   //p.d2f();
   //p._d2f.print();

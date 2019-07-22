@@ -37,13 +37,19 @@ void Indented :: fdf(){
       double slope = (_nodes[ele(1)]-_nodes[ele(0)])/2;
       // Compute u, v, u', v', u'', v'' using shape functions
       // For each node u,v,u' and v' are stored in this order
-      double T0 =  _x(2*ele(0));
-      double T1 = _x(2*ele(0)+1);
-      //double F0 = _x(3*ele(0)+2);
+      double U0 =  _x(5*ele(0));
+      double U1 = _x(5*ele(0)+1);
+      double V0 =  _x(5*ele(0)+2);
+      double V1 = _x(5*ele(0)+3);
+
+      double U2 =  _x(5*ele(1));
+      double U3 = _x(5*ele(1)+1);
+      double V2 =  _x(5*ele(1)+2);
+      double V3 = _x(5*ele(1)+3);
+
+      double F0 = _x(5*ele(0)+4);
       
-      double T2 = _x(2*ele(1));
-      double T3 = _x(2*ele(1)+1);
-      //double F1 = _x(3*ele(1)+2);
+      double F1 = _x(5*ele(1)+4);
 
       double S = _nodes[ele(0)]*N(0) + slope*N(1) + _nodes[ele(1)]*N(2) + slope*N(3); 
       double Jac = _nodes[ele(0)]*DN(0) + slope*DN(1) + _nodes[ele(1)]*DN(2) + slope*DN(3); 
@@ -66,12 +72,17 @@ void Indented :: fdf(){
       double DL0 = -0.5;
       double DL1 = 0.5;
 
-      double t = T0*N(0)+T1*N(1) + T2*N(2) + T3*N(3);
+      u = U0*N(0)+U1*N(1) + U2*N(2) + U3*N(3);
+      v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
 
-      double t_s = (T0*DN(0)+T1*DN(1) + T2*DN(2) + T3*DN(3))/Jac1;
-      double t_ss = (T0*D2N(0)+T1*D2N(1) + T2*D2N(2) + T3*D2N(3))/Jac2- t_s*Jac_xiJac2;
+      u_s = (U0*DN(0)+U1*DN(1) + U2*DN(2) + U3*DN(3))/Jac1;
+      v_s = (V0*DN(0)+V1*DN(1) + V2*DN(2) + V3*DN(3))/Jac1;
+
+      u_ss = (U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3))/Jac2- u_s*Jac_xiJac2;
+      v_ss = (V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3))/Jac2 - v_s*Jac_xiJac2;
+     
       
-      //double fn = F0; //F0*L0(qj) + F1*L1(qj);
+      double fn = F0*L0(qj) + F1*L1(qj);
       
       /*
       fz = fn*(-sin(t) + _mu*cos(t));
@@ -90,17 +101,11 @@ void Indented :: fdf(){
       */
 
 
-      u = (_d - _r - rho);
-      v = t;
+      //u = (_d - _r - rho);
+      //v = t;
 
-      u_s = 0;
-      v_s = t_s;
-
-      u_ss = 0;
-      v_ss = t_ss;
-
-      fz = -(_C+_D)*v_ss;
-      fr = 0; fz/_mu;
+      fr = fn;
+      fz = _mu*fn;
       rhofr = rho*fr;
       rhofz = rho*fz;
 
@@ -124,7 +129,7 @@ void Indented :: fdf(){
 
       // If Energy flag is on
       if (_fFlag){
-	_f +=  (_lclEnergyDensity*rho - rho*fr*u - rho*fz*v) * Jacwj;
+	_f +=  (_lclEnergyDensity*rho - rho*fr*(u-(_d - _r - rho))- rho*fz*v) * Jacwj;
 	//_f +=  (- rho*fr*u - rho*fz*v) * Jacwj;
       }
       if (_dfFlag){
@@ -166,92 +171,21 @@ void Indented :: fdf(){
 	double dfz0, dfz1, dfz2, dfz3;
 
 	//if (e!=0 || e!=numEle-1) {
-	dt0 = N(0); dt1 = N(1); dt2 = N(2); dt3 = N(3);
-	dfn0 = 1;//L0(qj); //dfn1 = L1(qj);
-
-	dt0_s = DN(0)/Jac1; dt1_s = DN(1)/Jac1; dt2_s = DN(2)/Jac1; dt3_s = DN(3)/Jac1;
-
-	dt0_ss = D2N(0)/Jac2 - dt0_s*Jac_xiJac2;
-	dt1_ss = D2N(1)/Jac2 - dt1_s*Jac_xiJac2;
-	dt2_ss = D2N(2)/Jac2 - dt2_s*Jac_xiJac2;
-	dt3_ss = D2N(3)/Jac2 - dt3_s*Jac_xiJac2;
-
-
-	/*
-	// Dependence on du , dv s
-	du0 = _r*sin(t)*dt0; du1 = _r*sin(t)*dt1; du2 = _r*sin(t)*dt2; du3 = _r*sin(t)*dt3;
-	dv0 = _r*cos(t)*dt0; dv1 = _r*cos(t)*dt1; dv2 = _r*cos(t)*dt2; dv3 = _r*cos(t)*dt3;
-
-	du0_s = _r*cos(t)*t_s*dt0 + _r*sin(t)*dt0_s;
-	du1_s = _r*cos(t)*t_s*dt1 + _r*sin(t)*dt1_s;
-	du2_s = _r*cos(t)*t_s*dt2 + _r*sin(t)*dt2_s;
-	du3_s = _r*cos(t)*t_s*dt3 + _r*sin(t)*dt3_s;
-
-	dv0_s = -_r*sin(t)*t_s*dt0 + _r*cos(t)*dt0_s;
-	dv1_s = -_r*sin(t)*t_s*dt1 + _r*cos(t)*dt1_s;
-	dv2_s = -_r*sin(t)*t_s*dt2 + _r*cos(t)*dt2_s;
-	dv3_s = -_r*sin(t)*t_s*dt3 + _r*cos(t)*dt3_s;
-
-	du0_ss =  -_r*sin(t)*t_s*t_s*dt0 + _r*cos(t)*t_ss*dt0 + 2*_r*cos(t)*t_s*dt0_s + _r*sin(t)*dt0_ss;
-	du1_ss =  -_r*sin(t)*t_s*t_s*dt1 + _r*cos(t)*t_ss*dt1 + 2*_r*cos(t)*t_s*dt1_s + _r*sin(t)*dt1_ss;
-	du2_ss =  -_r*sin(t)*t_s*t_s*dt2 + _r*cos(t)*t_ss*dt2 + 2*_r*cos(t)*t_s*dt2_s + _r*sin(t)*dt2_ss;
-	du3_ss =  -_r*sin(t)*t_s*t_s*dt3 + _r*cos(t)*t_ss*dt3 + 2*_r*cos(t)*t_s*dt3_s + _r*sin(t)*dt3_ss;
-	  
-	dv0_ss = -_r*cos(t)*t_s*t_s*dt0 -_r*sin(t)*t_ss*dt0 -2*_r*sin(t)*t_s*dt0_s + _r*cos(t)*dt0_ss;
-	dv1_ss = -_r*cos(t)*t_s*t_s*dt1 -_r*sin(t)*t_ss*dt1 -2*_r*sin(t)*t_s*dt1_s + _r*cos(t)*dt1_ss;
-	dv2_ss = -_r*cos(t)*t_s*t_s*dt2 -_r*sin(t)*t_ss*dt2 -2*_r*sin(t)*t_s*dt2_s + _r*cos(t)*dt2_ss;
-	dv3_ss = -_r*cos(t)*t_s*t_s*dt3 -_r*sin(t)*t_ss*dt3 -2*_r*sin(t)*t_s*dt3_s + _r*cos(t)*dt3_ss;
-
-	dfr0 = fn*(-sin(t) + _mu*cos(t))*dt0;
-	dfr1 = fn*(-sin(t) + _mu*cos(t))*dt1;
-	dfr2 = fn*(-sin(t) + _mu*cos(t))*dt2;
-	dfr3 = fn*(-sin(t) + _mu*cos(t))*dt3;
-
-	dfz0 = -fn*(cos(t) + _mu*sin(t))*dt0;
-	dfz1 = -fn*(cos(t) + _mu*sin(t))*dt1;
-	dfz2 = -fn*(cos(t) + _mu*sin(t))*dt2;
-	dfz3 = -fn*(cos(t) + _mu*sin(t))*dt3;
-
-	*/
-
+	du0 = N(0); du1 = N(1); du2 = N(2); du3 = N(3);
+	dv0 = N(0); dv1 = N(1); dv2 = N(2); dv3 = N(3);
 	
-	// Dependence on du , dv s
-	du0 = 0;   du1 = 0;   du2 = 0;   du3 = 0;
-	dv0 = dt0; dv1 = dt1; dv2 = dt2; dv3 = dt3;
-
-	du0_s = 0;
-	du1_s = 0;
-	du2_s = 0;
-	du3_s = 0;
-
-	dv0_s = dt0_s;
-	dv1_s = dt1_s;
-	dv2_s = dt2_s;
-	dv3_s = dt3_s;
-
-	du0_ss =  0;
-	du1_ss =  0;
-	du2_ss =  0;
-	du3_ss =  0;
-	  
-	dv0_ss = dt0_ss;
-	dv1_ss = dt1_ss;
-	dv2_ss = dt2_ss;
-	dv3_ss = dt3_ss;
-
-
-	dfz0 = 0; //-(_C + _D)*dv0_ss;
-	dfz1 = 0;//-(_C + _D)*dv1_ss;
-	dfz2 = 0;//-(_C + _D)*dv2_ss;
-	dfz3 = 0;//-(_C + _D)*dv3_ss;
-
-	dfr0 = 0;//dfz0/_mu;
-	dfr1 = 0;//dfz1/_mu;
-	dfr2 = 0;//dfz2/_mu;
-	dfr3 = 0;//dfz3/_mu;
-
-
-	// ------------ END -------------------
+	du0_s = DN(0)/Jac1; du1_s = DN(1)/Jac1; du2_s = DN(2)/Jac1; du3_s = DN(3)/Jac1;
+	dv0_s = DN(0)/Jac1; dv1_s = DN(1)/Jac1; dv2_s = DN(2)/Jac1; dv3_s = DN(3)/Jac1;
+	
+	du0_ss = D2N(0)/Jac2 - du0_s*Jac_xiJac2;
+	du1_ss = D2N(1)/Jac2 - du1_s*Jac_xiJac2;
+	du2_ss = D2N(2)/Jac2 - du2_s*Jac_xiJac2;
+	du3_ss = D2N(3)/Jac2 - du3_s*Jac_xiJac2;
+	
+	dv0_ss = D2N(0)/Jac2 - dv0_s*Jac_xiJac2;
+	dv1_ss = D2N(1)/Jac2 - dv1_s*Jac_xiJac2;
+	dv2_ss = D2N(2)/Jac2 - dv2_s*Jac_xiJac2;
+	dv3_ss = D2N(3)/Jac2 - dv3_s*Jac_xiJac2;
 		
 	dphi0U_s = -z_ss* du0_s - z_s* du0_ss; 
 	dphi1U_s = -z_ss* du1_s - z_s* du1_ss;
@@ -264,76 +198,45 @@ void Indented :: fdf(){
 	dphi3V_s = rho_ss* dv3_s + rho_s* dv3_ss; 
 
 	
+	dfr0 = L0(qj);
+	dfr1 = L1(qj);
 
-	
-	_df(2*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
+	dfz0 = _mu*dfr0;
+	dfz1 = _mu*dfr1;
+
+	_df(5*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
 				rho*Ms*dphi0U_s + 
-				(Nt - rhofr)* du0 - rho*u*dfr0) *Jacwj +
-	                        ((rhoNs * Tz)* dv0_s +
-				  rho*Ms*dphi0V_s + Mt*dv0_s
-				  - rhofz* dv0 - rho*v*dfz0) *Jacwj ;
-	
-	_df(2*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
+				(Nt - rhofr)* du0) *Jacwj ;	
+	_df(5*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
 				rho*Ms*dphi1U_s +
-				(Nt - rhofr)* du1 -rho*u*dfr1) *Jacwj + 	
-	                        ((rhoNs * Tz)* dv1_s +
+				(Nt - rhofr)* du1) *Jacwj ;	
+	
+	_df(5*ele(0) + 2   ) +=  ((rhoNs * Tz)* dv0_s +
+				  rho*Ms*dphi0V_s + Mt*dv0_s
+				  - rhofz* dv0) *Jacwj ;
+	_df(5*ele(0) + 3   ) +=  ((rhoNs * Tz)* dv1_s +
 				  rho*Ms*dphi1V_s + Mt*dv1_s
-				  - rhofz* dv1 - rho*v*dfz1) *Jacwj ;
+				  - rhofz* dv1) *Jacwj ;
 
-	/*
-	_df(3*ele(0) + 2   ) +=   -((cos(t) + _mu*sin(t))*u + 
-				   (-sin(t) + _mu*cos(t))*v )*dfn0*rho*Jacwj ;
-	*/
-	/*
-	_df(3*ele(0) + 2   ) +=   -(u + 
-				   _mu*v )*dfn0*rho*Jacwj ;
-	*/
+	_df(5*ele(0) + 4)   += -rho*( (u-(_d-_r-rho))*dfr0 + 0*dfz0*v)*Jacwj;
 
-	_df(2*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
+	_df(5*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
 				rho*Ms*dphi2U_s + 
-				(Nt - rhofr)* du2 - rho*u*dfr2) *Jacwj +
-	                        ((rhoNs * Tz)* dv2_s +
-				  rho*Ms*dphi2V_s + Mt*dv2_s
-				  - rhofz* dv2 - rho*v*dfz2) *Jacwj ;
-	
-	_df(2*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
+				(Nt - rhofr)* du2) *Jacwj ;	
+	_df(5*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
 				rho*Ms*dphi3U_s +
-				(Nt - rhofr)* du3 - rho*u*dfr3) *Jacwj +
-	                        ((rhoNs * Tz)* dv3_s +
+				(Nt - rhofr)* du3) *Jacwj ;	
+	
+	_df(5*ele(1) + 2   ) +=  ((rhoNs * Tz)* dv2_s +
+				  rho*Ms*dphi2V_s + Mt*dv2_s
+				  - rhofz* dv2) *Jacwj ;
+	_df(5*ele(1) + 3   ) +=  ((rhoNs * Tz)* dv3_s +
 				  rho*Ms*dphi3V_s + Mt*dv3_s
-				  - rhofz* dv3 - rho*v*dfz3) *Jacwj ;
+				  - rhofz* dv3) *Jacwj ;
 
-	/*
-	_df(3*ele(1) + 2   ) +=  -((cos(t) + _mu*sin(t))*u +
-				   (-sin(t) + _mu*cos(t))*v )*dfn1*rho*Jacwj ;
-
-	*/
-	/*----
-	_df(3*ele(1) + 2   ) +=   -(u + 
-				   _mu*v )*dfn1*rho*Jacwj ;
-	-----*/
-
-	/*
-	_df(3*ele(0)     ) +=  (- rhofr* du0 - rho*u*dfr0
-				  - rhofz* dv0 - rho*v*dfz0) *Jacwj ;
-	
-	_df(3*ele(0) + 1 ) +=  ( - rhofr* du1 -rho*u*dfr1
-				  - rhofz* dv1 - rho*v*dfz1) *Jacwj ;
-
-	_df(3*ele(0) + 2   ) +=   -((cos(t) + _mu*sin(t))*u + 
-				   (-sin(t) + _mu*cos(t))*v )*dfn0*rho*Jacwj ;
+	_df(5*ele(1) + 4)   += -rho*( (u-(_d-_r-rho))*dfr1 + 0*dfz1*v)*Jacwj;
 
 
-	_df(3*ele(1)     ) +=  (- rhofr* du2 - rho*u*dfr2
-				  - rhofz* dv2 - rho*v*dfz2) *Jacwj ;
-	
-	_df(3*ele(1) + 1 ) +=  (- rhofr* du3 - rho*u*dfr3
-				  - rhofz* dv3 - rho*v*dfz3) *Jacwj ;
-	
-	_df(3*ele(1) + 2   ) +=  -((cos(t) + _mu*sin(t))*u +
-				   (-sin(t) + _mu*cos(t))*v )*dfn1*rho*Jacwj ;
-	
-	*/
       }
 
     } //end: for quadrature
@@ -401,16 +304,14 @@ void Indented::writeSolution(string filename){
   cout << "Writing solution to a file.\n";
   myfile << setprecision(15);
   myfile << "x = [";
-  for (auto i = 0; i < _x.size(); i++) {
-    if (i % 2 == 0){
-      myfile << _nodes[i/2] << ",";
+  for (auto i = 0; i < _nodes.size(); i++) {
+      myfile << _nodes[i] << ",";
       //myfile <<_d - _r*cos(_x(i)) << ",";
     }
-  }
   myfile << "]\n";
   myfile << "y = [";
   for (auto i = 0; i < _x.size(); i++) {
-    if (i%2 == 0){
+    if (i%5 == 3){
       myfile << _x(i)<< ",";
       //myfile << _r*sin(_x(i)) << ",";
     }
