@@ -21,10 +21,8 @@ class MembLJ: public Problem {
 public:
  MembLJ(Vector x0, Vector para) : Problem(x0,para) {
     _LJForce.setDim(3); 
-    _eps1 = 1;
-    _eps2 = 1;
-    _re1 = 1;
-    _re2 = 1.4;
+    _eps = 1;
+    _re = 1;
     _Lmax = 16;
     _NP = 12;
     _k1 = 1;
@@ -55,8 +53,7 @@ public:
   int _Ntot;
   
   // Lennard Jones Parameters
-  double _re1;  double _eps1;
-  double _re2;  double _eps2;
+  double _re;  double _eps;
   double _k1;
 
   // Spherical harmonic lookup table

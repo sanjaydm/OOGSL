@@ -27,8 +27,9 @@ void SymmReduced::fdf(){
   // Store values of returned from full into reduced
   if (_fFlag)
     _f = _prob->_f;
-  if (_dfFlag)
+    if (_dfFlag){
     _df = _basT*_prob->_df;
+    }
 
   //_d2f = _prob->_d2f; Projection operators P^T d2f P, here?
 }
