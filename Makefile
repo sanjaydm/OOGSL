@@ -1,4 +1,4 @@
-DBG = #-g #Debugger Option
+DBG = -g #Debugger Option
 OPT = -O0 # -pg 
 CC  = g++-9 -std=c++11 
 FF  = gfortran-9
@@ -26,6 +26,9 @@ testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o SymmReduced.o
 
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
+
+symmHelfLJ: symmHelfLJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o
+	$(CC) $(DBG)  $(OPT) symmHelfLJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJ.out 
 
 SymmReduced.o: SymmReduced.cpp
 	$(CC) $(DBG) $(OPT) -c SymmReduced.cpp 

@@ -11,7 +11,7 @@ void MembLJ::fdf(){
 
   _f = 0; // reset energy
   _df.setZero(); //reset residue to zero
-  
+
   //Initialize variables
   Vector uP(_NP);      //  Particle positions
   Vector uP_t(_NP);    //  Particle gradients
@@ -66,6 +66,7 @@ void MembLJ::fdf(){
     }
     delete[] plmP;
   }
+
   // END: Lookup table Sph Harm at Particles
   // Particle coordinates
   int arr_size = gsl_sf_legendre_array_n(_Lmax);
@@ -147,7 +148,7 @@ void MembLJ::fdf(){
   }
   // // Bypass and return particle energy (stored in energyPtr) if option=PARTICLE
   // if (option == PARTICLE) {return;}
-  
+
   //Initialize penatly related quantities
   double area = 0;
   double volume = 0;
@@ -320,41 +321,54 @@ void MembLJ::fdf(){
     // Energy
     // Volume is computed as a surface integral 1/3. <f,n>
     if (_fFlag) {
-     _f += ( _k1*H*H)*Sg*wt; 
-    //*energyPtr += ( _k1*H*H + gamma  +  pressure/3.*u*Rn )*Sg/st*wt-gamma*wt; 
+     _f += ( _k*H*H)*Sg*wt; 
+    //*energyPtr += ( _k*H*H + gamma  +  pressure/3.*u*Rn )*Sg/st*wt-gamma*wt; 
     }
     
     if (_dfFlag) {
       
       // START: Vectorization of residue
       // Variation of Sg
-      Vector Ylmqi = _Ylm.row(qi);
-      Vector Ylm_tqi = _Ylm_t.row(qi);
-      Vector Ylm_pqi = _Ylm_p.row(qi);
-      Vector Ylm_ttqi = _Ylm_tt.row(qi);
-      Vector Ylm_tpqi = _Ylm_tp.row(qi);
-      Vector Ylm_ppqi = _Ylm_pp.row(qi);
+      Vector Ylmqi(_Ylm.row(qi));
+      Vector Ylm_tqi( _Ylm_t.row(qi));
+      Vector Ylm_pqi( _Ylm_p.row(qi));
+      Vector Ylm_ttqi( _Ylm_tt.row(qi));
+      Vector Ylm_tpqi( _Ylm_tp.row(qi));
+      Vector Ylm_ppqi( _Ylm_pp.row(qi));
       
+      //Vector dSg(_Ntot);
       gsl_vector* dSg = gsl_vector_calloc(_Ntot);
+      //dSg += (gtt*u_t + gtp*u_p)*Ylm_tqi;
       gsl_blas_daxpy (gtt*u_t + gtp*u_p, Ylm_tqi._gsl_vec, dSg); //gtt*u_t*uti
+      //dSg += (gtp*u_t + gpp*u_p)*Ylm_pqi;
       gsl_blas_daxpy (gtp*u_t + gpp*u_p, Ylm_pqi._gsl_vec, dSg); //+gtp*u_t*upi
+      //dSg += (u*(gtt+st*st*gpp))*Ylmqi;
       gsl_blas_daxpy (u*(gtt+st*st*gpp), Ylmqi._gsl_vec, dSg); //+u*(gtt+st*st*gpp)*ui
 
       // Variation of H
+      //Vector dH(_Ntot);
       gsl_vector* dH = gsl_vector_calloc(_Ntot);
+      
       double temp_a = 0.5*((gtt*g_T+gtp*g_P)/(2*g) + (gtt_T+gtp_P));
       double temp_b = 0.5*((gtp*g_T+gpp*g_P)/(2*g) + (gtp_T+gpp_P));
 
+      //dH += (gtt*dTR+gtp*dPR + temp_a*Rn + gtt*Tn + gtp*st*Pn)*Ylm_tqi;
       gsl_blas_daxpy( gtt*dTR+gtp*dPR + temp_a*Rn + gtt*Tn + gtp*st*Pn, Ylm_tqi._gsl_vec, dH); 
-      gsl_blas_daxpy( gtp*dTR+gpp*dPR + temp_b*Rn + gtp*Tn + gpp*st*Pn, Ylm_pqi._gsl_vec, dH); 
+      //dH += (gtp*dTR+gpp*dPR + temp_b*Rn + gtp*Tn + gpp*st*Pn)*Ylm_pqi;
+      gsl_blas_daxpy( gtp*dTR+gpp*dPR + temp_b*Rn + gtp*Tn + gpp*st*Pn, Ylm_pqi._gsl_vec, dH);
+      //dH += (gtt*dTRT + gtp*(dTRP+dPRT) + gpp*dPRP + temp_a*Tn + temp_b*st*Pn +
+      //0.5*( -gtt*Rn + 2*gtp*ct*Pn  - gpp*st*(st*Rn + ct*Tn)))*Ylmqi;
       gsl_blas_daxpy( gtt*dTRT + gtp*(dTRP+dPRT) + gpp*dPRP + temp_a*Tn + temp_b*st*Pn +
-                      0.5*( -gtt*Rn + 2*gtp*ct*Pn  - gpp*st*(st*Rn + ct*Tn)), Ylmqi._gsl_vec, dH);
+		      0.5*( -gtt*Rn + 2*gtp*ct*Pn  - gpp*st*(st*Rn + ct*Tn)), Ylmqi._gsl_vec, dH);
+      //dH += ( 0.5*gtt*Rn)* Ylm_ttqi;
       gsl_blas_daxpy( 0.5*gtt*Rn, Ylm_ttqi._gsl_vec, dH);
-      gsl_blas_daxpy( gtp*Rn , Ylm_tpqi._gsl_vec, dH); 
+      //dH += (gtp*Rn)* Ylm_tpqi;
+      gsl_blas_daxpy( gtp*Rn , Ylm_tpqi._gsl_vec, dH);
+      //dH += (0.5*gpp*Rn)* Ylm_ppqi;
       gsl_blas_daxpy( 0.5*gpp*Rn , Ylm_ppqi._gsl_vec, dH); 
 
       Vector outview = _df.view(0, _Ntot);
-      gsl_blas_daxpy(2*wt*_k1*H*Sg, dH, outview._gsl_vec); gsl_blas_daxpy(wt*_k1*H*H*Sg, dSg, outview._gsl_vec); //out->data(i) += wt*( 2*_k1*H*dH + _k1*H*H * dSg )*Sg;     
+      gsl_blas_daxpy(2*wt*_k*H*Sg, dH, outview._gsl_vec); gsl_blas_daxpy(wt*_k*H*H*Sg, dSg, outview._gsl_vec); //out->data(i) += wt*( 2*_k*H*dH + _k*H*H * dSg )*Sg;     
       gsl_blas_daxpy(wt*Sg, dSg, ai._gsl_vec); //ai->data(i) += wt*dSg*Sg;
       gsl_blas_daxpy(wt*u*st*cp*Sg, dSg, xi._gsl_vec); gsl_blas_daxpy(wt*st*cp*Sg, Ylmqi._gsl_vec, xi._gsl_vec); //xi->data(i) += wt*(u*st*cp*dSg + st*cp*ui)*Sg;
       gsl_blas_daxpy(wt*Sg*u*st*sp, dSg, yi._gsl_vec); gsl_blas_daxpy(wt*Sg*st*sp, Ylmqi._gsl_vec, yi._gsl_vec);  //yi->data(i) += wt*(u*st*sp*dSg + st*sp*ui)*Sg;

@@ -1,5 +1,6 @@
 #include "Vector.h"
 Vector::Vector() {
+  //cout << "here\n";
   _dim = 0;
   _idx = 0;
 }
@@ -8,16 +9,17 @@ Vector::Vector(int n) : _dim(n){
   _idx = 0;
 }
 Vector::Vector(const Vector& v) {
+  //cout << "in copy constructor" << endl;
   _dim = const_cast<Vector&>(v).size();
   _idx = _dim;
   _gsl_vec = gsl_vector_alloc(_dim);
   gsl_vector_memcpy(_gsl_vec, v._gsl_vec);
-    
 }
 Vector::Vector(gsl_vector* v) {
   _dim = v->size;
   _idx = _dim;
-  _gsl_vec = v;
+  _gsl_vec = gsl_vector_alloc(_dim);
+   gsl_vector_memcpy(_gsl_vec, v);
 }
 Vector::Vector(double* v, int size) : _dim(size) {
   _gsl_vec = gsl_vector_alloc(_dim);
@@ -108,9 +110,10 @@ Vector Vector::operator- (Vector& v2){
   temp -= v2;
   return temp;
 }
-Vector& Vector::operator= (Vector v2){
+Vector& Vector::operator= (const Vector& v2){
+  //cout << "assignment constructor\n" ;
   if(size()==0){
-    setDim(v2.size());
+    setDim(const_cast<Vector&>(v2).size());
   }
   gsl_vector_memcpy(_gsl_vec, v2._gsl_vec );
   _idx = _dim-1;
@@ -155,3 +158,5 @@ Vector Vector::view(int i, int j){
   Vector ret(&_view.vector);
   return ret;
 }
+
+

@@ -39,12 +39,13 @@ public:
   Vector& operator+= (double alpha);
   Vector operator+ (Vector& v2);
   Vector operator- (Vector& v2);
-  Vector& operator= (Vector v2);
+  Vector& operator= (const Vector& v2);
   Vector& operator= (gsl_vector* v2);
   Vector& operator<< (double val);
   void setZero();
   double* data();
   void print();
   void write();
+  
 };
 #endif

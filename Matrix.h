@@ -44,7 +44,7 @@ public:
   Vector operator* (Vector& v);
   Matrix inv();
   Matrix operator- (Matrix& v2);    
-  Matrix& operator= (Matrix v2);
+  Matrix& operator= (const Matrix& v2);
   Matrix& operator<< (double val);
   Vector row(int i);
   Vector col(int i);

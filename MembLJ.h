@@ -19,13 +19,14 @@
 
 class MembLJ: public Problem {
 public:
- MembLJ(Vector x0, Vector para) : Problem(x0,para) {
+  MembLJ(Vector x0, Vector para, Vector discPara) : Problem(x0,para) {
     _LJForce.setDim(3); 
-    _eps = 1;
-    _re = 1;
-    _Lmax = 16;
-    _NP = 12;
-    _k1 = 1;
+    _k = para(0);
+    _eps = para(1);
+    _re = para(2);
+    
+    _Lmax = discPara(0);
+    _NP = discPara(1);
 
     _Ntot = (_Lmax + 1 )*(_Lmax + 1);
     generateCeliaReinaQuad(20, 2*_Lmax + 2);
@@ -54,7 +55,7 @@ public:
   
   // Lennard Jones Parameters
   double _re;  double _eps;
-  double _k1;
+  double _k;
 
   // Spherical harmonic lookup table
   vector<Vector> _plms;
