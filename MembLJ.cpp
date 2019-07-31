@@ -4,7 +4,7 @@
 using namespace std;
 
 // Fixed particle coordinates
-#define tN 1.0172220997017924 //PI/2
+#define tN M_PI-0.001
 #define pN 0.00
 
 void MembLJ::fdf(){
@@ -504,33 +504,37 @@ void MembLJ::LJ(Vector f12, double e){
   //   force(2) =  e*(r-rm)*f12(2)/r;
   // }
 
-    // --------------- Morse -----------------------
-  double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
-  //De = e
-  double a = 6/_re; //At this value r = 2re and exponent is e-1
-  double fact = (1-exp(-a*(r-_re)));
-  _LJEnergy = e* pow(fact,2);
-  //  cout << "\033[32m " << r << "\033[0m\n";
-  if (_dfFlag) {
-    double fact2 = 2*e*fact*exp(-a*(r-_re))*a/r;
-    _LJForce(0) =  fact2 * f12(0);
-    _LJForce(1) =  fact2 * f12(1);
-    _LJForce(2) =  fact2 * f12(2);
-  }
+  // --------------- Morse -----------------------
+  // e = _eps;
+  // double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
+  // //De = e
+  // double a = 6/_re; //At this value r = 2re and exponent is e-1
+  // double fact = (1-exp(-a*(r-_re)));
+  // if (_fFlag)
+  //   _LJEnergy = e* pow(fact,2);
+  // //  cout << "\033[32m " << r << "\033[0m\n";
+  // if (_dfFlag) {
+  //   double fact2 = 2*e*fact*exp(-a*(r-_re))*a/r;
+  //   _LJForce(0) =  fact2 * f12(0);
+  //   _LJForce(1) =  fact2 * f12(1);
+  //   _LJForce(2) =  fact2 * f12(2);
+  // }
 
 
   // // --------------- LJ -----------------------
-  // double sigma = _re*pow(2,-1./6.);
-  // double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
-  // double sigma_r6 = pow(sigma/r,6);
-  // *energy = 4*e*( pow(sigma_r6,2) - sigma_r6 );
-  // //  cout << "\033[32m " << r << "\033[0m\n";
-  // if (option==RESIDUE) {
-  //   double fact = 24 *e/r * sigma_r6 * (1-2*sigma_r6)/r ;
-  //   force(0) =  fact * f12(0);
-  //   force(1) =  fact * f12(1);
-  //   force(2) =  fact * f12(2);
-  // }
+  e = _eps;
+  double sigma = _re*pow(2,-1./6.);
+  double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
+  double sigma_r6 = pow(sigma/r,6);
+  if (_fFlag)
+    _LJEnergy = 4*e*( pow(sigma_r6,2) - sigma_r6 );
+
+  if (_dfFlag) {
+    double fact = 24 *e/r * sigma_r6 * (1-2*sigma_r6)/r ;
+    _LJForce(0) =  fact * f12(0);
+    _LJForce(1) =  fact * f12(1);
+    _LJForce(2) =  fact * f12(2);
+  }
 
   // //---------------- Truncated and Shifted LJ ----------------
   // double sigma = _re*pow(2,-1./6.);

@@ -20,7 +20,7 @@ int main(int argc, char** argv){
   double eps = 1;
 
   int N = 6;
-  int NP = 1;
+  int NP = 2;
   int Ntot= (N+1)*(N+1);
   
   Vector in(Ntot+2*NP-2);     // -2 because one particle is fixed
@@ -39,18 +39,69 @@ int main(int argc, char** argv){
     in(i) = 0.00*rand()/RAND_MAX;
   }
   for (int j=0; j< NP-1; j++) {
-    in(Ntot + 2*j) = /*PI/(NP-1)*j+0.3;*/double(rand())/RAND_MAX*PI;
-    in(Ntot + 2*j+1) = /*PI/(NP-1)*j;*/(0.5-double(rand())/RAND_MAX)*2*PI;
+    in(Ntot + 2*j) = double(rand())/RAND_MAX*PI;
+    in(Ntot + 2*j+1) = (0.5-double(rand())/RAND_MAX)*2*PI;
     //cout << in->data[Ntot + 2*j]*180/PI << " " << in->data[Ntot + 2*j + 1]*180/PI << endl;
   }
 
   MembLJ prob(in, para, discPara);
-  prob.fdf();
-  prob._df.print();
-  // Matrix mat(2,3);
-  // mat << 1 << 2 << 3 <<4 << 5 << 6;
-  // Vector v = mat.row(1);
-  // v.print();
-  // cout << v(1) << endl;
-  return 0;
+  prob.checkConsistency();
+  //prob.fdf();
+  //prob._df.print();
+
+   // Matrix R(6,6);
+   //  R <<
+   //  0     <<    0  << cos(2*M_PI/3)  << -sin(2*M_PI/3)    <<    0    <<     0 <<
+   //  0    <<     0  <<  sin(2*M_PI/3)  << cos(2*M_PI/3)     <<    0    <<     0 <<
+   //  0    <<     0  <<       0   <<      0  << cos(2*M_PI/3)  << -sin(2*M_PI/3)  <<
+   //  0    <<     0   <<      0     <<    0  <<  sin(2*M_PI/3)  << cos(2*M_PI/3) <<
+   // cos(2*M_PI/3)  << -sin(2*M_PI/3)   <<      0    <<     0    <<     0   <<      0 <<
+   //  sin(2*M_PI/3)  << cos(2*M_PI/3)  <<      0    <<     0     <<    0   <<      0;
+    
+   //  Cyclic g(3,R);
+   //  Projection pj(g);
+   //  cout << pj._P.rank() << endl;;
+    
+      
+  //icosahedral
+
+   int l = 6;
+
+   Matrix g2(3,3);
+   g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
+   << 0.500000000000000 <<  0.309016994374947 << -0.809016994374947
+   << -0.309016994374948 << -0.809016994374947 << -0.500000000000000;
+
+   Matrix g3(3,3);
+   g3 <<   -0.0000  <<  -0.0000  <<  -1.0000
+      <<    1.0000  <<   0.0000  <<  -0.0000
+      <<      0     <<  -1.0000  <<   0.0000;
+
+   Matrix r2 = compute_R(l,l,g2);
+   Matrix r3 = compute_R(l,l,g3);
+
+   Icosahedral ico(r2,r3);
+   Projection p(ico);
+
+   cout << p._P.rank() << endl;
+   //p._P.range().print();
+   // cout << ";" << endl;
+
+   // vector<int> g3p = {8,5,6,9,7,12,2,10,11,1,4,3};
+   // vector<int> g2p = {7,5,8,12,2,10,1,3,11,6,9,4};
+
+   // Matrix g2_Mat = constructMat(g2p,g2);
+   // Matrix g3_Mat = constructMat(g3p,g3);
+
+   // Icosahedral im(g2_Mat,g3_Mat);
+   // Projection pm(im);
+   // cout << pm._P.rank() << endl;
+   //Matrix bas = pj._P.range();
+   //SymmReduced symmP(bas.T()*x,para,bas,p);
+
+
+  // MultiMin M("lbfgs", &prob);
+  // M._LBFGSB_Initialize();
+  // M.LBFGSB_Solve();
+  // return 0;
 }
