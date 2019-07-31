@@ -77,10 +77,11 @@ int main(int argc, char** argv){
       <<    1.0000  <<   0.0000  <<  -0.0000
       <<      0     <<  -1.0000  <<   0.0000;
 
-   Matrix r2 = compute_R(l,l,g2);
-   Matrix r3 = compute_R(l,l,g3);
+   //Matrix r2 = compute_R(l,l,g2);
+   //Matrix r3 = compute_R(l,l,g3);
 
-   Icosahedral ico(r2,r3);
+   Icosahedral ico(g2,g3);
+   ico.listElements();
    Projection p(ico);
 
    cout << p._P.rank() << endl;

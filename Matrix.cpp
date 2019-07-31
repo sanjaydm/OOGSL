@@ -127,15 +127,15 @@ Matrix Matrix::operator^ (int n){
     gsl_matrix_set_identity (this->_gsl_mat);
   }
   else{
-      ret = *this;
-      for (int i=1; i<n; i++) {
-          ret *= (*this);
-      }
-//    Matrix tempOriginal = *this;
-//    for (int i=1; i<n; i++){
-//      Matrix tempAccumulator = *this;
-//      gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, tempAccumulator._gsl_mat, tempOriginal._gsl_mat, 0.0, ret._gsl_mat);
-//    }
+    ret = *this;
+    for (int i=1; i<n; i++) {
+      ret *= (*this);
+    }
+    Matrix tempOriginal = *this;
+    for (int i=1; i<n; i++){
+      Matrix tempAccumulator = *this;
+      gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, tempAccumulator._gsl_mat, tempOriginal._gsl_mat, 0.0, ret._gsl_mat);
+    }
   }
   return ret;
 }
