@@ -55,15 +55,18 @@ int Problem::checkConsistency(double eps, double tol){
   //cout << "f0 = " << f0 << endl;
   for (int i=0; i<_Ndof; i++){
     _x(i) += eps;
-    dfappx(i) = (f()-f0)/eps;
-    //cout << "\033[32m" << f() << " " << f0 << " " << (f()-f0) << "\033[0m\n";
-    _x(i) -= eps;
+    double fp = f();
+    _x(i) -= 2*eps;
+    double fm = f();
+    dfappx(i) = (fp-fm)/(2*eps);
+    //cout << "\033[32m" << fp << " " << fm << " " << (fp-fm) << "\033[0m\n";
+    _x(i) += eps;
   }
   df();
   Vector absError = (dfappx- _df);
   double absErrorNrm = absError.norm();
-  //dfappx.print();
-  //_df.print();
+  dfappx.print();
+  _df.print();
   absError.print();
   //cout << "abs size = " << absError.size() << endl;
   cout << "energy = " << f0 << endl;

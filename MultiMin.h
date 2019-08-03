@@ -31,7 +31,7 @@ public:
   int _dim; //dimension of the system
   string _type;
   double _stepSize = 0.1;
-  double _tol = 1e-8;
+  double _tol = 1e-5;
   double _lineSearchTol = 0.1;
   void _setMinimizerType(string type);
   Problem* _problem;
@@ -42,14 +42,14 @@ public:
   vector<int> _nbd;
   vector<double> _wa;
   vector<int> _iwa;
-  int _m = 5;
-  double _factr = 0.1;
+  int _m = 30;
+  double _factr = 1;
   char _csave[60];
   char _task[60];
   int _lsave[4];
   double _dsave[29];
   int _isave[44];
-  int _iprint=1;
+  int _iprint=50;
     
 public:
   MultiMin();

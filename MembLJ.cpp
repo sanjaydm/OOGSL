@@ -1,18 +1,22 @@
 #include "MembLJ.h"
 #include<gsl/gsl_sf.h>
+#include <iomanip>
+#include <iostream>
+#include <string.h>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
-
-// Fixed particle coordinates
-#define tN M_PI-0.001
-#define pN 0.00
 
 void MembLJ::fdf(){
 
   _f = 0; // reset energy
   _df.setZero(); //reset residue to zero
+  _k = _para(0);
+  _eps = _para(1);
+  _re = _para(2);
 
-  //Initialize variables
+   //Initialize variables
   Vector uP(_NP);      //  Particle positions
   Vector uP_t(_NP);    //  Particle gradients
   Vector uP_p(_NP);    //      - do - 
@@ -26,20 +30,14 @@ void MembLJ::fdf(){
   
   // Size of the system
   int Total_len = _Ntot;       // Global variable, number of modes
-  double eps = 1e4;
+  double eps = 1e3;
   // START: Lookup table Sph Harm at Particles
   Matrix YlmP(_NP, _Ntot);
 
   for (int pi=0; pi < _NP; pi++){
     double ctP, pPi;
-    if (pi == (_NP-1)) {
-      ctP = cos(tN);
-      pPi = pN;
-    }
-    else{
-      ctP = cos(_x(_Ntot+2*pi));
-      pPi = _x(_Ntot+2*pi + 1);
-    }
+    ctP = cos(_x(_Ntot+2*pi));
+    pPi = _x(_Ntot+2*pi + 1);
     double* plmP;
     int arr_size = gsl_sf_legendre_array_n(_Lmax);
     plmP = new double[arr_size];
@@ -73,15 +71,9 @@ void MembLJ::fdf(){
   double* plmP = new double[arr_size]; 
   double* plmP_1 = new double[arr_size];
   for (int pid=0; pid < _NP; pid++) {
-    // The particle position follows modal coeffs
-    if (pid == _NP-1 ){
-      tP(pid) = tN;
-      pP(pid) = pN;
-    }
-    else{
       tP(pid) = _x(_Ntot+2*pid);
       pP(pid) = _x(_Ntot+2*pid+1);
-    }
+
     // Cos and sin values at particle pos.
     double ctP = cos(tP(pid));
     double stP = sin(tP(pid));
@@ -155,11 +147,12 @@ void MembLJ::fdf(){
   double X0 = 0;
   double Y0 = 0;
   double Z0 = 0 ;
-  double refArea = 4*PI;
-  double refVolume = 4*PI/3.0;
+  double refArea = 4*M_PI;
+  double refVolume = 4*M_PI/3.0;
   
   // START: Compute surface pos, derivatives at all quad points as a vector
   Vector clm = _x.view (0, _Ntot);
+
   //Vector u_vec(_qThetas.size());
   // Ylm must be defined outside
   Vector u_vec = _Ylm*clm;
@@ -207,6 +200,7 @@ void MembLJ::fdf(){
     int absm, idx;
 
     //START: Using vectorized version
+    //cout << "uvec(" << qi <<")=" << u_vec(qi) << endl;
     u = u_vec(qi)+1;
     u_t = ut_vec(qi);
     u_tt = utt_vec(qi);
@@ -311,7 +305,6 @@ void MembLJ::fdf(){
     double uiA = 0;
     double uiB = 0;
     i = 0;
-
     area += Sg*wt;
     //volume += u/3*(Rn)*Sg*wt;
     X0 += u*st*cp*Sg*wt;
@@ -439,14 +432,14 @@ void MembLJ::fdf(){
                     double fAp_y = (uA_p*stA*spA + uA*stA*cpA);
                     double fAp_z =  uA_p*ctA;
 
-                    if (pidB != (_NP-1)){
+                    //if (pidB != (_NP-1)){
                       _df(_Ntot+pidB*2)   +=   (PBA(0)*fBt_x + PBA(1)*fBt_y + PBA(2)*fBt_z);
                       _df(_Ntot+pidB*2+1) += (PBA(0)*fBp_x + PBA(1)*fBp_y + PBA(2)*fBp_z);
-                    }
-                    if (pidA!=(_NP-1)){
+		      //}
+		      //if (pidA!=(_NP-1)){
 		      _df(_Ntot+pidA*2)   +=   -(PBA(0)*fAt_x + PBA(1)*fAt_y + PBA(2)*fAt_z);
 		      _df(_Ntot+pidA*2+1) += -(PBA(0)*fAp_x + PBA(1)*fAp_y + PBA(2)*fAp_z);
-                      }
+                      //}
                 
                   } // end if i==0
                 }
@@ -466,6 +459,9 @@ void MembLJ::fdf(){
   // Energy contribution from penalty
   _f += pow(area - refArea, 2)*0.5*eps;
   //_f += 0*pow(volume - refVolume,2)*0.5*eps;
+  //cout << scientific << setprecision(10);
+  //cout << " f = " << _f << endl;
+
   _f += (pow(X0,2)+pow(Y0,2) + pow(Z0,2) )*0.5*eps;
   //_f += (pow(tP[_NP-1]-PI/2,2) + pow(pP[_NP-1],2) )*0.5*eps;
   //_f += (pow(_x[1],2) + pow(_x[2],2) + pow(_x[3],2) )*0.5*eps; // setting l=1 modes to zero
@@ -489,7 +485,6 @@ void MembLJ::fdf(){
     gsl_blas_daxpy(lambZ, zi._gsl_vec, outview._gsl_vec);
     // END: Vectorizatoin      
   }
-
 }
 
 
@@ -529,12 +524,12 @@ void MembLJ::LJ(Vector f12, double e){
   if (_fFlag)
     _LJEnergy = 4*e*( pow(sigma_r6,2) - sigma_r6 );
 
-  if (_dfFlag) {
+   if (_dfFlag) {
     double fact = 24 *e/r * sigma_r6 * (1-2*sigma_r6)/r ;
     _LJForce(0) =  fact * f12(0);
     _LJForce(1) =  fact * f12(1);
     _LJForce(2) =  fact * f12(2);
-  }
+    }
 
   // //---------------- Truncated and Shifted LJ ----------------
   // double sigma = _re*pow(2,-1./6.);
@@ -568,14 +563,14 @@ void MembLJ::LJ(Vector f12, double e){
 
 // --------- Helper function: PRINT DATA TO VTK FILE ---------------
 void MembLJ::printToVTK(string filename){
-  /*
+
   ifstream inp("sphere_2562_nodes.dat");
   ifstream inpConn("sphere_2562_conn.dat");
   string filenameExt = filename + ".vtk";
   string filenamePartExt = filename + "_Ps.vtk";
   ofstream out(filenameExt.c_str());
   ofstream outAB(filenamePartExt.c_str());
-  double* arg = uvec->data;
+  
   
   int NNodes =0;
   int dim = 0;
@@ -591,23 +586,20 @@ void MembLJ::printToVTK(string filename){
 
   double x, y, z;
   double t, p;
-  vector <double> uP(_NP);
-  vector <double> tP(_NP);
-  vector <double> pP(_NP);
+  Vector uP(_NP);
+  Vector tP(_NP);
+  Vector pP(_NP);
 
   // Read Quadrature Rule
   //string lebfile("quad.dat");
+  double* plmP;
+  int arr_size = gsl_sf_legendre_array_n(_Lmax);
+  plmP = new double[arr_size];
 
   // Particle coordinates
   for (int pid=0; pid < _NP; pid++) {
-    if (pid == (_NP-1) ){
-      tP(pid) = tN;
-      pP(pid) = pN;
-    }
-    else{
-      tP(pid) = arg[_Ntot+2*pid];
-      pP(pid) = arg[_Ntot+2*pid+1];
-    }
+    tP(pid) = _x(_Ntot+2*pid);
+    pP(pid) = _x(_Ntot+2*pid+1);
     double ctP = cos(tP(pid));
     double stP = sin(tP(pid));
     double cpP = cos(pP(pid));
@@ -627,13 +619,13 @@ void MembLJ::printToVTK(string filename){
         idx = gsl_sf_legendre_array_index(l,absm);
         if (m<0){
 
-          uP(pid) +=   S2*plmP[idx]*sin(absm*pP(pid))*arg(i);
+          uP(pid) +=   S2*plmP[idx]*sin(absm*pP(pid))*_x(i);
         }
         if (m==0){
-          uP(pid) +=   plmP[idx]*arg(i);
+          uP(pid) +=   plmP[idx]*_x(i);
         }
         if (m>0){
-          uP(pid) +=   S2*plmP[idx]*cos(m*pP(pid))*arg(i);
+          uP(pid) +=   S2*plmP[idx]*cos(m*pP(pid))*_x(i);
         }
         i ++;
       }// end loop m 
@@ -653,6 +645,9 @@ void MembLJ::printToVTK(string filename){
     int md_i = 0;
     double ct=cos(t); double st=sin(t);
     double cp=cos(p); double sp=sin(p);
+    double* plm;
+    int arr_size = gsl_sf_legendre_array_n(_Lmax);
+    plm = new double[arr_size];
 
     gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SPHARM, _Lmax, ct,
 				       CSPHASE,  plm);
@@ -663,15 +658,15 @@ void MembLJ::printToVTK(string filename){
 	int absm = abs(m);
 	idx = gsl_sf_legendre_array_index(l,absm);
 	if (m<0){
-	  u +=   S2*plm[idx]*sin(absm*p)*arg[md_i];
+	  u +=   S2*plm[idx]*sin(absm*p)*_x(md_i);
 	  
 	}
 	if (m==0){
-	  u +=   plm[idx]*arg[md_i];
+	  u +=   plm[idx]*_x(md_i);
 	}
 	if (m>0){
 
-	  u +=   S2*plm[idx]*cos(m*p)*arg[md_i];
+	  u +=   S2*plm[idx]*cos(m*p)*_x(md_i);
 	}
 	md_i++;
       }
@@ -679,7 +674,7 @@ void MembLJ::printToVTK(string filename){
     }
     //u=u+1; // In the following (u,v,w) represents current configuration
     out << u*st*cp << " " << u*st*sp << " " << u*ct<< endl;
-        
+     delete[] plm;     
   }
 
   int NFaces =0;
@@ -710,7 +705,7 @@ void MembLJ::printToVTK(string filename){
   outAB.close();
   inp.close();
   inpConn.close();
-  */
+  delete[] plmP;
 }
 
 void MembLJ::printModes(string filename){

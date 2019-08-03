@@ -26,7 +26,7 @@ Matrix::Matrix(int n, char c) : _dim1(n), _dim2(n){
 Matrix::Matrix(const Matrix& v) {
   array<int,2> ret = const_cast<Matrix&>(v).size();
   _dim1 = ret[0]; _dim2 = ret[1]; 
-  _gsl_mat = gsl_matrix_alloc(_dim1,_dim2);
+  _gsl_mat = gsl_matrix_calloc(_dim1,_dim2);
   gsl_matrix_memcpy(_gsl_mat, v._gsl_mat);
   _idx1 = 0; _idx2 = 0;
   
@@ -124,17 +124,12 @@ Matrix& Matrix::operator^= (int n){
 Matrix Matrix::operator^ (int n){
   Matrix ret(_dim1,_dim2);
   if (n==0){
-    gsl_matrix_set_identity (this->_gsl_mat);
+    gsl_matrix_set_identity (ret._gsl_mat);
   }
   else{
     ret = *this;
     for (int i=1; i<n; i++) {
       ret *= (*this);
-    }
-    Matrix tempOriginal = *this;
-    for (int i=1; i<n; i++){
-      Matrix tempAccumulator = *this;
-      gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, tempAccumulator._gsl_mat, tempOriginal._gsl_mat, 0.0, ret._gsl_mat);
     }
   }
   return ret;

@@ -1,28 +1,33 @@
 #include "Vector.h"
+#include <iomanip>
+
+using namespace std;
+
 Vector::Vector() {
   //cout << "here\n";
   _dim = 0;
   _idx = 0;
 }
 Vector::Vector(int n) : _dim(n){
-  _gsl_vec = gsl_vector_alloc(n);
+  _gsl_vec = gsl_vector_calloc(n);
   _idx = 0;
 }
 Vector::Vector(const Vector& v) {
   //cout << "in copy constructor" << endl;
   _dim = const_cast<Vector&>(v).size();
   _idx = _dim;
-  _gsl_vec = gsl_vector_alloc(_dim);
+  _gsl_vec = gsl_vector_calloc(_dim);
   gsl_vector_memcpy(_gsl_vec, v._gsl_vec);
 }
 Vector::Vector(gsl_vector* v) {
   _dim = v->size;
   _idx = _dim;
-  _gsl_vec = gsl_vector_alloc(_dim);
-   gsl_vector_memcpy(_gsl_vec, v);
+  _gsl_vec = gsl_vector_calloc(_dim);
+  _gsl_vec->data = v->data;
+  //gsl_vector_memcpy(_gsl_vec, v);
 }
 Vector::Vector(double* v, int size) : _dim(size) {
-  _gsl_vec = gsl_vector_alloc(_dim);
+  _gsl_vec = gsl_vector_calloc(_dim);
   _gsl_vec->data = v;
   _idx = _dim;
 }
@@ -137,6 +142,7 @@ double* Vector::data(){
 }
 void Vector::print(){
   // Print to screen
+  cout << scientific << setprecision(10);
   cout << "[\n";
   for (int i=0; i<_dim; i++){
     cout << (*this)(i) << ", " << endl;

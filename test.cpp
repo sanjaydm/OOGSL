@@ -99,7 +99,7 @@ int main(int argc, char** argv){
     
     Matrix bas = pj._P.range();
     SymmReduced symmP(bas.T()*x,para,bas,p);
-   //symmP.df();
+    symmP.checkConsistency();
     MultiMin M("lbfgs", &symmP);
     M._LBFGSB_Initialize();
     M.LBFGSB_Solve();
