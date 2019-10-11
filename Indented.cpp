@@ -16,7 +16,7 @@ void Indented :: fdf(){
   double z_s = 1; double z_ss = 0;
   double fr = 0; double fz = 0;
   double rhofr = rho*fr; double rhofz = rho*fz;
-  
+
   Shape hermite(1, 0);
   int modelOption = 2;
   for (int e=0; e< numEle; e++){
@@ -69,21 +69,33 @@ void Indented :: fdf(){
       
 
       
-      double DL0 = -0.5;
-      double DL1 = 0.5;
+      //double DL0 = -0.5;
+      //double DL1 = 0.5;
 
       u = U0*N(0)+U1*N(1) + U2*N(2) + U3*N(3);
-      v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
 
+      
+      
+      v = V0*N(0)+V1*N(1) + V2*N(2) + V3*N(3);
+      
       u_s = (U0*DN(0)+U1*DN(1) + U2*DN(2) + U3*DN(3))/Jac1;
       v_s = (V0*DN(0)+V1*DN(1) + V2*DN(2) + V3*DN(3))/Jac1;
 
       u_ss = (U0*D2N(0)+U1*D2N(1) + U2*D2N(2) + U3*D2N(3))/Jac2- u_s*Jac_xiJac2;
       v_ss = (V0*D2N(0)+V1*D2N(1) + V2*D2N(2) + V3*D2N(3))/Jac2 - v_s*Jac_xiJac2;
-     
+
       
       double fn = F0*L0(qj) + F1*L1(qj);
-      
+      /*
+      u = -0.1;
+      v = -_nu*u*S/(_C+_D);
+      u_s = 0;
+      v_s = -_nu*u/(_C+_D);
+      u_ss = 0;
+      v_ss = 0;
+
+      fn = (u+_nu*v_s);
+      */
       /*
       fz = fn*(-sin(t) + _mu*cos(t));
       fr = fn*(cos(t) + _mu*sin(t));
@@ -130,7 +142,7 @@ void Indented :: fdf(){
       // If Energy flag is on
       if (_fFlag){
 	_f +=  (_lclEnergyDensity*rho - rho*fr*(u-(_d - _r - rho))- rho*fz*v) * Jacwj;
-	//_f +=  (- rho*fr*u - rho*fz*v) * Jacwj;
+
       }
       if (_dfFlag){
 
@@ -204,6 +216,7 @@ void Indented :: fdf(){
 	dfz0 = _mu*dfr0;
 	dfz1 = _mu*dfr1;
 
+
 	_df(5*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
 				rho*Ms*dphi0U_s + 
 				(Nt - rhofr)* du0) *Jacwj ;	
@@ -218,8 +231,10 @@ void Indented :: fdf(){
 				  rho*Ms*dphi1V_s + Mt*dv1_s
 				  - rhofz* dv1) *Jacwj ;
 
-	_df(5*ele(0) + 4)   += -rho*( (u-(_d-_r-rho))*dfr0 + 0*dfz0*v)*Jacwj;
+        
+	_df(5*ele(0) + 4)   += -rho*( (u-(_d-_r-rho))*dfr0 + dfz0*v)*Jacwj;
 
+        //cout << -rho*( (u-(_d-_r-rho))*dfr0 + dfz0*v)*Jacwj << endl;
 	_df(5*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
 				rho*Ms*dphi2U_s + 
 				(Nt - rhofr)* du2) *Jacwj ;	
@@ -234,7 +249,7 @@ void Indented :: fdf(){
 				  rho*Ms*dphi3V_s + Mt*dv3_s
 				  - rhofz* dv3) *Jacwj ;
 
-	_df(5*ele(1) + 4)   += -rho*( (u-(_d-_r-rho))*dfr1 + 0*dfz1*v)*Jacwj;
+	_df(5*ele(1) + 4)   += -rho*( (u-(_d-_r-rho))*dfr1 + dfz1*v)*Jacwj;
 
 
       }
@@ -305,13 +320,16 @@ void Indented::writeSolution(string filename){
   myfile << setprecision(15);
   myfile << "x = [";
   for (auto i = 0; i < _nodes.size(); i++) {
+    //if (i%5 == 0)
       myfile << _nodes[i] << ",";
+      //myfile << _r + _x(i)<< ",";
+      
       //myfile <<_d - _r*cos(_x(i)) << ",";
     }
   myfile << "]\n";
   myfile << "y = [";
   for (auto i = 0; i < _x.size(); i++) {
-    if (i%5 == 3){
+    if (i%5 == 4){
       myfile << _x(i)<< ",";
       //myfile << _r*sin(_x(i)) << ",";
     }

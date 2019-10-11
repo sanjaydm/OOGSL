@@ -1,5 +1,5 @@
 DBG = -g #Debugger Option
-OPT = -O2 # -pg 
+OPT = -O0 # -pg 
 CC  = g++-9 -std=c++11 
 FF  = gfortran-9
 #NOWARN = 2>&1 >/dev/null | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'

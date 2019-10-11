@@ -10,7 +10,7 @@
 
 int main(int argc, char** argv){
 
-  int N =50; //Num of elements
+  int N =40; //Num of elements
   double a = 0; double b =1; // end points of domain
   vector<double> nodes;
   vector<Vector> conn;
@@ -34,7 +34,7 @@ int main(int argc, char** argv){
   Vector x0(5*N-2); //u,u',v,v'
 
   Vector para(8);
-  double C = 1; double D = 1; double nu = 0.2;
+  double C = 1.0; double D = 1.0; double nu = 0.2;
   double R = 1.0;
   double rho = 1; double d = 1.9; double alpha = 0.52;
   para(0) = C; 
@@ -49,10 +49,12 @@ int main(int argc, char** argv){
   srand (time(NULL));
   for (int i=0; i< x0.size(); i++){
     double rnd = double(rand())/RAND_MAX; 
-    if (i%3==2)
-      x0(i) = 0*rnd;
+    if (i%5==0)
+      x0(i) = 0;
+    if(i%5 == 1)
+      x0(i) = 0.0*rnd;
     else
-      x0(i) = 0*rnd;
+      x0(i) = 0;
   }
   cout << "done. \033[0m\n";
 
@@ -60,8 +62,19 @@ int main(int argc, char** argv){
   //Indented* p = new  Indented(x0, para, nodes, conn);
   IndentedBC* p = new  IndentedBC(x0, para, nodes, conn);
 
+  /*
+  p->f();
+  cout << "energy = " << p->_f << endl;
+  (p)->df();
+  (p)->_df.print();
+
+  (p->vs)->df();
+  (p->vs)->_df.print();
+  return 0;
+  */
   cout << "energy = " << p->_f << endl;
   p->checkConsistency();
+
   
   MultiRoot rt("generic", p);
   rt._GSLRoot_Initialize();
@@ -70,11 +83,12 @@ int main(int argc, char** argv){
   //cout << (p->vs)->_x.size() << endl;
   //p->writeMesh("mesh_run.txt");
   (p->vs)->writeSolution("solution_run.py");
+  cout << "Norm = " << (p->_df).norm()<< endl;
   
-    
+  
   /*
   MultiMin M("lbfgs", p);
-  M._tol = 1e-4;
+  M._tol = 1e-6;
   M._LBFGSB_Initialize();
   M.LBFGSB_Solve();
   

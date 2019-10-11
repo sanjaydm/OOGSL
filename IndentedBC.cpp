@@ -16,12 +16,12 @@ void IndentedBC :: fdf(){
   //      
   // //Boundary conditions applied to "Indented dofs"
  double u = (vs->_d - vs->_r - 1);
- double T = 0;
- 
+ double T = 0; // Cannot be nonzero, there must be a balancing force on the other end
+
   vs->_x(0) = u;
   vs->_x(1) = 0;
   vs->_x(2) = 0; 
-  vs->_x(3) = 0.75*_x(3)-0.5*_x(4); //
+  vs->_x(3) = (0.75*_x(3)-0.5*_x(4)); //
   // ------------------
   for (int i=4; i<= 5*numEle-1; i++){ 
     // pass dofs to Indented's
@@ -30,7 +30,7 @@ void IndentedBC :: fdf(){
   vs->_x(5*numEle) = u;
   vs->_x(5*numEle+1) = 0;
   vs->_x(5*numEle+2) = _x(5*numEle-4);
-  vs->_x(5*numEle+3) = slope*(T - vs->_nu*u);
+  vs->_x(5*numEle+3) = slope*(T -u*vs->_nu)/(vs->_C+vs->_D);
   vs->_x(5*numEle+4) = _x(5*numEle-3);
 
   // Compute energy
