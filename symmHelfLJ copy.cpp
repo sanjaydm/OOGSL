@@ -92,82 +92,6 @@ int main(int argc, char** argv){
     
     Matrix rp_Mat = constructMat(rp,r);
 
-    
-    Cyclic C_sh(3,rr);
-    Cyclic C_p(3,rp_Mat);
-    
-    Projection p_sp(C_sh);
-    Projection p_p(C_p);
-    
-    Matrix rg_sh = p_sp._P.range(); // bases for spherical coordinates
-    Matrix rg_p = p_p._P.range(); // bases for particles in cartesian
-    
-    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
-    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
-    
-    
-    cout << rg_sh.rank() << endl;
-    rg_sh.print();
-    
-    
-    cout << rg_p.rank() << endl;
-    rg_p.print();
-    
-    cout << " " << endl;
-    
-    
-    // bruteforce a bases matrix for particles
-    Matrix rgp_bf(NP*3,rg_prk);
-    for (int j=0; j<rg_prk/2; j++){
-        for (int i=0; i<NP*3; i++){
-            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
-            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
-        }
-    }
-    
-    
-    
-    
-    
-    // Convert rg_p to spherical coordinates
-    
-    Matrix rg_sc(NP*2,rg_prk);
-    for (int j=0; j<rg_prk; j++){
-        for (int ip = 0; ip < NP; ip++){
-            double z = rgp_bf(ip*3+2,j);
-            double x = rgp_bf(ip*3,j);
-            double y = rgp_bf(ip*3+1,j);
-            double r = sqrt(x*x+y*y+z*z);
-            cout << ip << " " << r << endl;
-            rg_sc(ip*2,j) = acos(z/r);
-            rg_sc(ip*2+1,j) = atan2(y, x);
-        }
-    }
-    
-    rg_sc.print();
-
-    int n_p = rg_sc.rank();
-    cout << n_p << endl;
-    cout << rg_sc.size()[0] << " " << rg_sc.size()[1]<< endl;
-    
-    
-    Matrix bs(rg_sh.size()[0]+rg_sc.size()[0],rg_sh.size()[1]+rg_sc.size()[1]);
-    for (int i=0; i<rg_sh.size()[0]+rg_sc.size()[0]; i++){
-        for (int j=0; j<n_sh+n_p; j++){
-            if (i<rg_sh.size()[0] && j<rg_sh.size()[1]){
-                bs(i,j) = rg_sh(i,j);
-            }
-            if (i>=rg_sh.size()[0] && j>= rg_sh.size()[1]){
-                bs(i,j) = rg_sc(i-rg_sh.size()[0],j-rg_sh.size()[1]);
-            }
-        }
-    }
-    
-    bs.print();
-    cout << bs.size()[0] << " " << bs.size()[1] << endl;
- 
-    
-
 //
 //   // Icosahedral group-rep on spherical harmonics+particles
 //   int GN = r2.size()[0] +g2_Mat.size()[0];
@@ -189,86 +113,82 @@ int main(int argc, char** argv){
 //   Icosahedral im(G2,G3);
     
 
-//    // Cyclic group-rep on spherical harmonics+particles
-//    int GN = rr.size()[0] +rp_Mat.size()[0];
-//    Matrix RR(GN, GN);
-//    for (int i=0; i <GN; i++){
-//      for (int j=0; j<GN; j++){
-//        if(i<rr.size()[0] && j < rr.size()[0]){
-//      RR(i,j) = rr(i,j);
-//        }
-//        if(i>=rr.size()[0] && j >= rr.size()[0]){
-//      RR(i,j) = rp_Mat(i-rr.size()[0],j-rr.size()[0]);
-//        }
-//      }
-//    }
-//
-//    Cyclic C3(3,RR);
+    // Cyclic group-rep on spherical harmonics+particles
+    int GN = rr.size()[0] +rp_Mat.size()[0];
+    Matrix RR(GN, GN);
+    for (int i=0; i <GN; i++){
+      for (int j=0; j<GN; j++){
+        if(i<rr.size()[0] && j < rr.size()[0]){
+      RR(i,j) = rr(i,j);
+        }
+        if(i>=rr.size()[0] && j >= rr.size()[0]){
+      RR(i,j) = rp_Mat(i-rr.size()[0],j-rr.size()[0]);
+        }
+      }
+    }
+
+    Cyclic C3(3,RR);
 
 
-//   // Construct projection operators
-//   Projection pm(C3);
-//   Matrix rg = pm._P.range();
+   // Construct projection operators
+   Projection pm(C3);
+   Matrix rg = pm._P.range();
+    
+    
 
     
    // cout << "projection size" << rg.size()[0]<< "  " << rg.size()[1] << endl;
-//   int nn = 7;
+   int nn = 12;
 
 
     
     
-//   // Basis vectors adapted for spherical coordinates
-//   Matrix bas((N+1)*(N+1)+NP*2, nn);
-//   for (int j=0; j<=nn-1; j++){
-//     for (int i=0; i < (N+1)*(N+1)+NP*2; i ++) {
-//       if (i < (N+1)*(N+1) && j<nn-6){
-//	 bas(i,j)=rg(i,j);
-//       }
-//       if (j>=nn-6 && i >= (N+1)*(N+1)) {
-//	 double z = rg(3*((i-(N+1)*(N+1))/2) + 2 + (N+1)*(N+1),j);
-//	 double x = rg(3*((i-(N+1)*(N+1))/2) + (N+1)*(N+1),j);
-//	 double y = rg(3*((i-(N+1)*(N+1))/2) + 1 + (N+1)*(N+1),j);
-//	 double r = sqrt(x*x+y*y+z*z);
-//	 //cout << 3*((i-(N+1)*(N+1))/2) <<" :" << x << ";" << y << ";" << z <<endl;
-//
-//	 if ((i-(N+1)*(N+1))%2==0)
-//	   bas(i,j) = acos(z/r);
-//
-//	 else
-//	   bas(i,j) = atan2(y, x);
-//       }
-//     }
-//   }
-
+   // Basis vectors adapted for spherical coordinates
+   Matrix bas((N+1)*(N+1)+NP*2, nn);
+   for (int j=0; j<=nn-1; j++){
+     for (int i=0; i < (N+1)*(N+1)+NP*2; i ++) {
+       if (i < (N+1)*(N+1) && j<nn-1){
+	 bas(i,j)=rg(i,j);
+       }
+       if (j==nn-1 && i >= (N+1)*(N+1)) {
+	 double z = rg(3*((i-(N+1)*(N+1))/2) + 2 + (N+1)*(N+1),nn-1);
+	 double x = rg(3*((i-(N+1)*(N+1))/2) + (N+1)*(N+1),nn-1);
+	 double y = rg(3*((i-(N+1)*(N+1))/2) + 1 + (N+1)*(N+1),nn-1);
+	 double r = sqrt(x*x+y*y+z*z);
+	 //cout << 3*((i-(N+1)*(N+1))/2) <<" :" << x << ";" << y << ";" << z <<endl;
+           
+	 if ((i-(N+1)*(N+1))%2==0)
+	   bas(i,j) = acos(z/r);
+	 
+	 else
+	   bas(i,j) = atan2(y, x);
+       }
+     }
+   }
     
    // cout << bas.size()[0] << bas.size()[1]<< endl;
 
    // Construct symmetry reduced problem
-   Vector x0 = bs.T()*in;
-    bs.print();
-
+   Vector x0 = bas.T()*in;
+    bas.print();
+    return 0;
 
 
    // cout << "initial vector size" << x0.size() << endl;
     
 
-//   x0(nn-1) = 1;
-//   x0(0) = 1;
-    x0(0) = 0.0;
-    x0(1) = 0.0;
-    x0(2) = 0.0;
-    x0(3) = 0.0;
-    x0(4) = 0.0;
-    x0(5) = 0.0;
-
-    for (int i = 0; i<rg_sc.size()[1]; i++){
-        x0(i+rg_sh.size()[1]) = 0.1;
-    }
-    
-    x0.print();
+   x0(nn-1) = 1;
+   x0(0) = 1;
+//    x0(0) = 0.5;
+//    x0(1) = 0.5;
+//    x0(2) = 0.5;
+//    x0(3) = 0.5;
+//    x0(4) = 0.5;
+//    x0(5) = 0.5;
+//    x0(6) = 0.5;
 
     
-   SymmReduced symmP(x0,para,bs,&prob);
+   SymmReduced symmP(x0,para,bas,&prob);
    // symmP.checkConsistency();
     symmP.fdf();
     symmP._df.print();
