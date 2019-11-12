@@ -78,45 +78,45 @@ int main(int argc, char** argv){
 //   Matrix g3_Mat = constructMat(g3p,g3);
 
     
-    // Generators of C3
-    Matrix r(3,3);
-    r << cos(2*PI/3) << -sin(2*PI/3) << 0
-      << sin(2*PI/3) << cos(2*PI/3) << 0
-      << 0 << 0 << 1;
-
-    // Construct cyclic group-rep on spherical harmonics
-    Matrix rr = compute_R(0,N,r);
-
-
-    // Construct permutation representation
-    vector<int> rp = {2,3,1,5,6,4};
-
-    Matrix rp_Mat = constructMat(rp,r);
-
-
-    Cyclic C_sh(3,rr);
-    Cyclic C_p(3,rp_Mat);
-
-    Projection p_sp(C_sh);
-    Projection p_p(C_p);
-
-    Matrix rg_sh = p_sp._P.range(); // bases for spherical coordinates
-    Matrix rg_p = p_p._P.range(); // bases for particles in cartesian
-
-    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
-    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
-
-
-    cout << rg_sh.rank() << endl;
-    rg_sh.print();
-
-
-    cout << rg_p.rank() << endl;
-    rg_p.print();
-
-    cout << " " << endl;
-
+//    // Generators of C3
+//    Matrix r(3,3);
+//    r << cos(2*PI/3) << -sin(2*PI/3) << 0
+//      << sin(2*PI/3) << cos(2*PI/3) << 0
+//      << 0 << 0 << 1;
 //
+//    // Construct cyclic group-rep on spherical harmonics
+//    Matrix rr = compute_R(0,N,r);
+//
+//
+//    // Construct permutation representation
+//    vector<int> rp = {2,3,1,5,6,4};
+//
+//    Matrix rp_Mat = constructMat(rp,r);
+//
+//
+//    Cyclic C_sh(3,rr);
+//    Cyclic C_p(3,rp_Mat);
+//
+//    Projection p_sp(C_sh);
+//    Projection p_p(C_p);
+//
+//    Matrix rg_sh = p_sp._P.range(); // bases for spherical coordinates
+//    Matrix rg_p = p_p._P.range(); // bases for particles in cartesian
+//
+//    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
+//    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
+//
+//
+//    cout << rg_sh.rank() << endl;
+//    rg_sh.print();
+//
+//
+//    cout << rg_p.rank() << endl;
+//    rg_p.print();
+//
+//    cout << " " << endl;
+//
+////
 //
 //    // Generators of D5
 //    Matrix r(3,3);
@@ -152,19 +152,19 @@ int main(int argc, char** argv){
 //    Matrix rg_sh = p_sh._P.range()
 //    Matrix rg_p = p_p._P.range()
 //
-//
-//
-//
-//    // bruteforce a bases matrix for particles
-//    Matrix rgp_bf(NP*3,rg_prk);
-//    for (int j=0; j<rg_prk/2; j++){
-//        for (int i=0; i<NP*3; i++){
-//            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
-//            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
-//        }
-//    }
-//
-//    return 0;
+
+
+
+    // bruteforce a bases matrix for particles
+    Matrix rgp_bf(NP*3,rg_prk);
+    for (int j=0; j<rg_prk/2; j++){
+        for (int i=0; i<NP*3; i++){
+            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
+            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
+        }
+    }
+
+    return 0;
     
     
     
