@@ -22,7 +22,7 @@ using namespace std;
 int main(int argc, char** argv){
   // Number of modes and particles  
   int N = 3;
-  int NP = 6;
+  int NP = 10;
   int Ntot= (N+1)*(N+1);
   Vector in(Ntot+2*NP); 
   Vector para(3);
@@ -78,42 +78,81 @@ int main(int argc, char** argv){
 //   Matrix g3_Mat = constructMat(g3p,g3);
 
     
-    // Generators of C3
+//    // Generators of C3
+//    Matrix r(3,3);
+//    r << cos(2*PI/3) << -sin(2*PI/3) << 0
+//      << sin(2*PI/3) << cos(2*PI/3) << 0
+//      << 0 << 0 << 1;
+//
+//    // Construct cyclic group-rep on spherical harmonics
+//    Matrix rr = compute_R(0,N,r);
+//
+//
+//    // Construct permutation representation
+//    vector<int> rp = {2,3,1,5,6,4};
+//
+//    Matrix rp_Mat = constructMat(rp,r);
+//
+//
+//    Cyclic C_sh(3,rr);
+//    Cyclic C_p(3,rp_Mat);
+//
+//    Projection p_sp(C_sh);
+//    Projection p_p(C_p);
+//
+//    Matrix rg_sh = p_sp._P.range(); // bases for spherical coordinates
+//    Matrix rg_p = p_p._P.range(); // bases for particles in cartesian
+//
+//    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
+//    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
+//
+//
+//    cout << rg_sh.rank() << endl;
+//    rg_sh.print();
+//
+//
+//    cout << rg_p.rank() << endl;
+//    rg_p.print();
+//
+//    cout << " " << endl;
+//
+//
+    
+    // Generators of D5
     Matrix r(3,3);
-    r << cos(2*PI/3) << -sin(2*PI/3) << 0
-      << sin(2*PI/3) << cos(2*PI/3) << 0
+    r << cos(2*PI/5) << -sin(2*PI/5) << 0
+      << sin(2*PI/5) << cos(2*PI/5) << 0
       << 0 << 0 << 1;
     
-    // Construct cyclic group-rep on spherical harmonics
+    Matrix s(3,3);
+    s << 1 << 0 << 0
+      << 0 <<-1 << 0
+      << 0 << 0 << -1;
+    
+    // Construct D5 group-rep on spherical harmonics
     Matrix rr = compute_R(0,N,r);
+    Matrix ss = compute_R(0,N,s);
     
-    // Construct permutation representation
-    vector<int> rp = {2,3,1,5,6,4};
+    vector<int> rp = {2,3,4,5,1,7,8,9,10,6};
+    vector<int> sp = {6,10,9,8,7,1,5,4,3,2};
     
+    // Construct D5 group-rep on particles
     Matrix rp_Mat = constructMat(rp,r);
-
+    Matrix sp_Mat = constructMat(sp,s);
     
-    Cyclic C_sh(3,rr);
-    Cyclic C_p(3,rp_Mat);
+    // group construction
+    D5 D5_p(sp_Mat,rp_Mat);
+    D5 D5_sh(ss,rr);
     
-    Projection p_sp(C_sh);
-    Projection p_p(C_p);
+    // Projection operator
+    Projection p_sh(D5_sh);
+    Projection p_p(D5_p);
     
-    Matrix rg_sh = p_sp._P.range(); // bases for spherical coordinates
-    Matrix rg_p = p_p._P.range(); // bases for particles in cartesian
-    
-    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
-    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
-    
-    
-    cout << rg_sh.rank() << endl;
-    rg_sh.print();
+    // bases in cartesian
+    Matrix rg_sh = p_sh._P.range()
+    Matrix rg_p = p_p._P.range()
     
     
-    cout << rg_p.rank() << endl;
-    rg_p.print();
-    
-    cout << " " << endl;
     
     
     // bruteforce a bases matrix for particles
@@ -125,6 +164,7 @@ int main(int argc, char** argv){
         }
     }
     
+    return 0;
     
     
     
