@@ -33,7 +33,7 @@ public:
   void df();
   virtual void fdf() {;};
   void d2f();
-  int checkConsistency(double eps = 1e-8, double tol=1e-6);
+  int checkConsistency(double eps = 1e-6, double tol=1e-6);
   static double _C_gsl_f(const gsl_vector* x,void* classNParams){
     CCallbackHolder* temp = static_cast<CCallbackHolder*>(classNParams);
     return temp->cls->_gsl_f(x, temp->params);

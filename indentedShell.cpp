@@ -10,7 +10,7 @@
 
 int main(int argc, char** argv){
 
-  int N =40; //Num of elements
+  int N =30; //Num of elements
   double a = 0; double b =1; // end points of domain
   vector<double> nodes;
   vector<Vector> conn;
@@ -19,6 +19,7 @@ int main(int argc, char** argv){
   cout << "\033[32m" << "Creating mesh and connectivity table ...";
   for (int i=0; i <= N; i++) {
     nodes.push_back((b-a)/N * i + a );
+    //cout << (b-a)/N * i + a << endl;
     if (i != N) {
       Vector ele(2);
       ele(0) = i; ele(1) = i+1;
@@ -34,9 +35,9 @@ int main(int argc, char** argv){
   Vector x0(5*N-2); //u,u',v,v'
 
   Vector para(8);
-  double C = 1.0; double D = 1.0; double nu = 0.2;
+  double C = 1.0; double D = 1.0; double nu = 0.3;
   double R = 1.0;
-  double rho = 1; double d = 1.9; double alpha = 0.52;
+  double rho = 1; double d = 0.7+rho; double alpha = 0.52;
   para(0) = C; 
   para(1) = D;
   para(2) = nu;
@@ -50,11 +51,11 @@ int main(int argc, char** argv){
   for (int i=0; i< x0.size(); i++){
     double rnd = double(rand())/RAND_MAX; 
     if (i%5==0)
-      x0(i) = 0;
+      x0(i) = .1*rnd;;
     if(i%5 == 1)
-      x0(i) = 0.0*rnd;
+      x0(i) = .1*rnd;
     else
-      x0(i) = 0;
+      x0(i) = .1*rnd;
   }
   cout << "done. \033[0m\n";
 
@@ -75,6 +76,8 @@ int main(int argc, char** argv){
   cout << "energy = " << p->_f << endl;
   p->checkConsistency();
 
+  //return 0;
+
   
   MultiRoot rt("generic", p);
   rt._GSLRoot_Initialize();
@@ -88,7 +91,7 @@ int main(int argc, char** argv){
   
   /*
   MultiMin M("lbfgs", p);
-  M._tol = 1e-6;
+  M._tol = 1e-1;
   M._LBFGSB_Initialize();
   M.LBFGSB_Solve();
   

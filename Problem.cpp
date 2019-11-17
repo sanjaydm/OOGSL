@@ -65,8 +65,8 @@ int Problem::checkConsistency(double eps, double tol){
   df();
   Vector absError = (dfappx- _df);
   double absErrorNrm = absError.norm();
-  dfappx.print();
-  _df.print();
+  //dfappx.print();
+  //_df.print();
   absError.print();
   //cout << "abs size = " << absError.size() << endl;
   cout << "energy = " << f0 << endl;

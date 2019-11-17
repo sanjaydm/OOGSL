@@ -16,7 +16,7 @@
 #include<string.h>
 #include <sstream>
 #include <fstream>
-
+#include"continuation.h"
 
 using namespace std;
 int main(int argc, char** argv){
@@ -101,7 +101,6 @@ int main(int argc, char** argv){
    Projection pm(im);
    Matrix rg = pm._P.range();
    int nn = 4;
-
    // Basis vectors adapted for spherical coordinates
    Matrix bas((N+1)*(N+1)+NP*2, nn);
    for (int j=0; j<=nn-1; j++){
@@ -126,8 +125,11 @@ int main(int argc, char** argv){
 
    // Construct symmetry reduced problem
    Vector x0 = bas.T()*in;
+   x0.print();
    x0(nn-1) = 1;
    x0(0) = 0;
+   (bas*x0).print();
+   //return 0;
    SymmReduced symmP(x0,para,bas,&prob);
    symmP.checkConsistency();
 
@@ -145,7 +147,7 @@ int main(int argc, char** argv){
    ofstream outFileAp("Energy.txt", ofstream::app);
    outFileAp << "kappa\t rm\t Total Energy\t Projg\n";
    outFileAp.close();
-   for (int i=0; i<30; i++) {
+   for (int i=0; i<5; i++) {
      // Update parameter re
      symmP._para(2) = symmP._para(2) + 0.05*(i/30.0);
      cout << "re = " << prob._re << endl;
