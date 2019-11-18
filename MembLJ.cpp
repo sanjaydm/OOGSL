@@ -36,8 +36,21 @@ void MembLJ::fdf(){
 
   for (int pi=0; pi < _NP; pi++){
     double ctP, pPi;
-    ctP = cos(_x(_Ntot+2*pi));
-    pPi = _x(_Ntot+2*pi + 1);
+    double xp = _x(_Ntot+3*pi);
+    double yp = _x(_Ntot+3*pi + 1);
+    double zp = _x(_Ntot+3*pi + 2);
+
+    double rp2 = xp*xp+yp*yp+zp*zp;
+    double rp = sqrt(rp2);
+    _f += 0.5*eps*pow(rp2 - 1, 2);
+    _df(_Ntot+pi*3)   +=  2*eps*(rp2-1)*xp;
+    _df(_Ntot+pi*3+1) += 2*eps*(rp2-1)*yp;
+    _df(_Ntot+pi*3+2) += 2*eps*(rp2-1)*zp;
+		    
+    
+    double theta_p = acos(zp/rp);
+    ctP = cos(theta_p);
+    pPi = atan2(yp,xp);
     double* plmP;
     int arr_size = gsl_sf_legendre_array_n(_Lmax);
     plmP = new double[arr_size];
@@ -71,9 +84,14 @@ void MembLJ::fdf(){
   double* plmP = new double[arr_size]; 
   double* plmP_1 = new double[arr_size];
   for (int pid=0; pid < _NP; pid++) {
-      tP(pid) = _x(_Ntot+2*pid);
-      pP(pid) = _x(_Ntot+2*pid+1);
 
+    double xp = _x(_Ntot+3*pid);
+    double yp = _x(_Ntot+3*pid + 1);
+    double zp = _x(_Ntot+3*pid + 2);
+    double rp = sqrt(xp*xp+yp*yp+zp*zp);
+    tP(pid) = acos(zp/rp); 
+    pP(pid) = atan2(yp,xp);
+    
     // Cos and sin values at particle pos.
     double ctP = cos(tP(pid));
     double stP = sin(tP(pid));
@@ -380,8 +398,7 @@ void MembLJ::fdf(){
                 if (pidA != pidB) {
                   double enBA   = 0;
                   Vector fBA(3);
-                 
-
+		  
                   double ctA = cos(tP(pidA));
                   double stA = sin(tP(pidA));
                   double cpA = cos(pP(pidA));
@@ -407,6 +424,16 @@ void MembLJ::fdf(){
                                      PBA(2)*(ctB*uiB-ctA*uiA));
                   if (i==0) {
                     // Particle-Particle Residue
+		    double xA = _x(_Ntot+3*pidA);
+		    double yA = _x(_Ntot+3*pidA + 1);
+		    double zA = _x(_Ntot+3*pidA + 2);
+		    double rA = sqrt(xA*xA+yA*yA+zA*zA);
+		    
+		    double xB = _x(_Ntot+3*pidB);
+		    double yB = _x(_Ntot+3*pidB + 1);
+		    double zB = _x(_Ntot+3*pidB + 2);
+		    double rB = sqrt(xB*xB+yB*yB+zB*zB);
+		    
                     // Only once per residue computation
                     double uA_t = uP_t(pidA); double uB_t = uP_t(pidB);
                     double uA_p = uP_p(pidA); double uB_p = uP_p(pidB);
@@ -428,17 +455,48 @@ void MembLJ::fdf(){
                     double fBp_y = (uB_p*stB*spB + uB*stB*cpB);
                     double fBp_z =  uB_p*ctB;
 
+
                     double fAp_x = (uA_p*stA*cpA - uA*stA*spA);
                     double fAp_y = (uA_p*stA*spA + uA*stA*cpA);
                     double fAp_z =  uA_p*ctA;
 
-                    //if (pidB != (_NP-1)){
-                      _df(_Ntot+pidB*2)   +=   (PBA(0)*fBt_x + PBA(1)*fBt_y + PBA(2)*fBt_z);
-                      _df(_Ntot+pidB*2+1) += (PBA(0)*fBp_x + PBA(1)*fBp_y + PBA(2)*fBp_z);
+		    double DFBt = (PBA(0)*fBt_x + PBA(1)*fBt_y + PBA(2)*fBt_z);
+		    double DFBp = (PBA(0)*fBp_x + PBA(1)*fBp_y + PBA(2)*fBp_z);
+
+		    double dtdxB = xB*zB/(pow(rB,3)*sqrt(1-zB*zB/(rB*rB)));
+		    double dtdyB = yB*zB/(pow(rB,3)*sqrt(1-zB*zB/(rB*rB)));
+		    double dtdzB = -sqrt(xB*xB + yB*yB)/pow(rB,2);
+
+		    double dtdxA = xA*zA/(pow(rA,3)*sqrt(1-zA*zA/(rA*rA)));
+		    double dtdyA = yA*zA/(pow(rA,3)*sqrt(1-zA*zA/(rA*rA)));
+		    double dtdzA = -sqrt(xA*xA + yA*yA)/pow(rA,2);
+
+		    double dpdxB = -yB/(xB*xB+yB*yB);
+		    double dpdyB = xB/(xB*xB+yB*yB);
+		    double dpdzB = 0;
+
+		    double dpdxA = -yA/(xA*xA+yA*yA);
+		    double dpdyA = xA/(xA*xA+yA*yA);
+		    double dpdzA = 0;
+
+		    
+		    //if (pidB != (_NP-1)){
+		    //_df(_Ntot+pidB*2)   +=   (PBA(0)*fBt_x + PBA(1)*fBt_y + PBA(2)*fBt_z);
+		    //_df(_Ntot+pidB*2+1) += (PBA(0)*fBp_x + PBA(1)*fBp_y + PBA(2)*fBp_z);
+		    _df(_Ntot+pidB*3)   += DFBt*dtdxB+DFBp*dpdxB;
+		    _df(_Ntot+pidB*3+1) += DFBt*dtdyB+DFBp*dpdyB;
+		    _df(_Ntot+pidB*3+2) += DFBt*dtdzB+DFBp*dpdzB;
+		    
 		      //}
 		      //if (pidA!=(_NP-1)){
-		      _df(_Ntot+pidA*2)   +=   -(PBA(0)*fAt_x + PBA(1)*fAt_y + PBA(2)*fAt_z);
-		      _df(_Ntot+pidA*2+1) += -(PBA(0)*fAp_x + PBA(1)*fAp_y + PBA(2)*fAp_z);
+		    //_df(_Ntot+pidA*2)   +=   -(PBA(0)*fAt_x + PBA(1)*fAt_y + PBA(2)*fAt_z);
+		    //_df(_Ntot+pidA*2+1) += -(PBA(0)*fAp_x + PBA(1)*fAp_y + PBA(2)*fAp_z);
+
+		    double DFAt = -(PBA(0)*fAt_x + PBA(1)*fAt_y + PBA(2)*fAt_z);
+		    double DFAp = -(PBA(0)*fAp_x + PBA(1)*fAp_y + PBA(2)*fAp_z);
+		    _df(_Ntot+pidA*3)   += DFAt*dtdxA + DFAp*dpdxA;
+		    _df(_Ntot+pidA*3+1) += DFAt*dtdyA + DFAp*dpdyA;
+		    _df(_Ntot+pidA*3+2) += DFAt*dtdzA + DFAp*dpdzA;
                       //}
                 
                   } // end if i==0
@@ -598,8 +656,14 @@ void MembLJ::printToVTK(string filename){
 
   // Particle coordinates
   for (int pid=0; pid < _NP; pid++) {
-    tP(pid) = _x(_Ntot+2*pid);
-    pP(pid) = _x(_Ntot+2*pid+1);
+
+    double xp = _x(_Ntot+3*pid);
+    double yp = _x(_Ntot+3*pid + 1);
+    double zp = _x(_Ntot+3*pid + 2);
+    double rp = sqrt(xp*xp+yp*yp+zp*zp);
+    tP(pid) = acos(zp/rp); 
+    pP(pid) = atan2(yp,xp);
+    
     double ctP = cos(tP(pid));
     double stP = sin(tP(pid));
     double cpP = cos(pP(pid));

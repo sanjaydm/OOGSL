@@ -21,10 +21,10 @@
 using namespace std;
 int main(int argc, char** argv){
   // Number of modes and particles  
-  int N = 11;
+  int N = 12;
   int NP = 12;
   int Ntot= (N+1)*(N+1);
-  Vector in(Ntot+2*NP); 
+  Vector in(Ntot+3*NP); 
   Vector para(3);
   Vector discPara(2); //Discretization parameters
   discPara(0) = N; //Lmax
@@ -46,14 +46,16 @@ int main(int argc, char** argv){
     in(i) = 0.0;//*rand()/RAND_MAX;
   }
   for (int j=0; j< NP; j++) {
-    in(Ntot + 2*j) =  double(rand())/RAND_MAX*PI;
-    in(Ntot + 2*j+1) = (0.5-double(rand())/RAND_MAX)*2*PI;
+    in(Ntot + 3*j) =  double(rand())/RAND_MAX;
+    in(Ntot + 3*j+1) = double(rand())/RAND_MAX;
+    in(Ntot + 3*j+2) = double(rand())/RAND_MAX;
   }
 
   // Construct the model
   MembLJ prob(in, para, discPara);
-  //prob.checkConsistency();
-  
+  prob.checkConsistency();
+
+  //return 0;
 
   // Generators of Icosahedral Group
     Matrix g2(3,3);
@@ -100,39 +102,44 @@ int main(int argc, char** argv){
    // Construct projection operators
    Projection pm(im);
    Matrix rg = pm._P.range();
-   int nn = 4;
-   // Basis vectors adapted for spherical coordinates
-   Matrix bas((N+1)*(N+1)+NP*2, nn);
-   for (int j=0; j<=nn-1; j++){
-     for (int i=0; i < (N+1)*(N+1)+NP*2; i ++) {
-       if (i < (N+1)*(N+1) && j<nn-1){
-	 bas(i,j)=rg(i,j);
-       }
-       if (j==nn-1 && i >= (N+1)*(N+1)) {
-	 double z = rg(3*((i-(N+1)*(N+1))/2) + 2 + (N+1)*(N+1),nn-1);
-	 double x = rg(3*((i-(N+1)*(N+1))/2) + (N+1)*(N+1),nn-1);
-	 double y = rg(3*((i-(N+1)*(N+1))/2) + 1 + (N+1)*(N+1),nn-1);
-	 double r = sqrt(x*x+y*y+z*z);
-	 //cout << 3*((i-(N+1)*(N+1))/2) <<" :" << x << ";" << y << ";" << z <<endl;
-	 if ((i-(N+1)*(N+1))%2==0)
-	   bas(i,j) = acos(z/r);
-	 
-	 else
-	   bas(i,j) = atan2(y, x);
-       }
-     }
-   }
+   rg.print();
+   
+   int nn = 1;
 
+   // // Basis vectors adapted for spherical coordinates
+   // Matrix bas((N+1)*(N+1)+NP*2, nn);
+   // for (int j=0; j<=nn-1; j++){
+   //   for (int i=0; i < (N+1)*(N+1)+NP*2; i ++) {
+   //     if (i < (N+1)*(N+1) && j<nn-1){
+   // 	 bas(i,j)=rg(i,j);
+   //     }
+   //     if (j==nn-1 && i >= (N+1)*(N+1)) {
+   // 	 double z = rg(3*((i-(N+1)*(N+1))/2) + 2 + (N+1)*(N+1),nn-1);
+   // 	 double x = rg(3*((i-(N+1)*(N+1))/2) + (N+1)*(N+1),nn-1);
+   // 	 double y = rg(3*((i-(N+1)*(N+1))/2) + 1 + (N+1)*(N+1),nn-1);
+   // 	 double r = sqrt(x*x+y*y+z*z);
+   // 	 //cout << 3*((i-(N+1)*(N+1))/2) <<" :" << x << ";" << y << ";" << z <<endl;
+   // 	 if ((i-(N+1)*(N+1))%2==0)
+   // 	   bas(i,j) = acos(z/r);
+	 
+   // 	 else
+   // 	   bas(i,j) = atan2(y, x);
+   //     }
+   //   }
+   // }
+
+   
    // Construct symmetry reduced problem
-   Vector x0 = bas.T()*in;
+   Vector x0 = rg.T()*in;
    x0.print();
    x0(nn-1) = 1;
    x0(0) = 0;
-   (bas*x0).print();
-   //return 0;
-   SymmReduced symmP(x0,para,bas,&prob);
+   //(rg*x0).print();
+
+   SymmReduced symmP(x0,para,rg,&prob);
    symmP.checkConsistency();
 
+   //return 0;
    MultiMin M("lbfgs", &symmP);
    M._LBFGSB_Initialize();
    // Optionally constrain the particle coordinates to lie within spherical coordinate domain
@@ -147,7 +154,7 @@ int main(int argc, char** argv){
    ofstream outFileAp("Energy.txt", ofstream::app);
    outFileAp << "kappa\t rm\t Total Energy\t Projg\n";
    outFileAp.close();
-   for (int i=0; i<5; i++) {
+   for (int i=0; i<15; i++) {
      // Update parameter re
      symmP._para(2) = symmP._para(2) + 0.05*(i/30.0);
      cout << "re = " << prob._re << endl;
