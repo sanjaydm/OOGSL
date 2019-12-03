@@ -16,6 +16,7 @@
 #include<string.h>
 #include <sstream>
 #include <fstream>
+#include "kbhit.h"
 #include"continuation.h"
 
 using namespace std;
@@ -139,18 +140,13 @@ int main(int argc, char** argv){
 
    MultiMin M("lbfgs", &symmP);
    M._LBFGSB_Initialize();
-   // Optionally constrain the particle coordinates to lie within spherical coordinate domain
-   // M._l(2) = 1;
-   // M._u(2) = 1;
-   // M._l(2) = 1;
-   // M._u(2) = 1;
-   // M._nbd[2] = 2;
-   // M._nbd[2] = 2;  
-
+  
    //Print Energy to output
    ofstream outFileAp("Energy.txt", ofstream::app);
-   outFileAp << "kappa\t rm\t Total Energy\t Projg\n";
+   outFileAp << "kappa\t rm\t Total Energy\n";
    outFileAp.close();
+
+   // One step LBFGS minimization
    for (int i=0; i<1; i++) {
      // Update parameter re
      symmP._para(2) = symmP._para(2) + 0.05*(i/30.0);
@@ -179,6 +175,7 @@ int main(int argc, char** argv){
 
    }
 
+   // Numerical Continuation Starts
    double* trivial = new double[sz+sz_para];
    for (int i=0; i< sz; i++)
      trivial[i] = symmP._x(i);
@@ -193,14 +190,67 @@ int main(int argc, char** argv){
    c.noOfIndVar = 0;
    c.noOfPara=sz_para;
    c.performQuad = false;
-   c.posOfPara=sz+2;  //Corresponds to l (~1/eps)
+   c.posOfPara=sz+2;  //Corresponds to re
    c.correctorType="quasi-newton";
 	
 		
    c.setInitialSolution(trivial);
-   c.Continue();
-   return 0;
+   int key;
+   int i=1;
+   do{
+     if(kbhit())
+       {
+	 key = fgetc(stdin);
+	 if (key == 'i'){
+	   c.stepSize += .01;
+	   cout<< "\n \033[1;35m Step Size increased to "<< c.stepSize<<"\033[m\n\n";
+	 }
+	 else if(key=='d'){
+	   c.stepSize -= .01;
+	   cout<< "\n \033[1;36m Step Size decreased to "<< c.stepSize<<"\033[m\n\n";
+	 }
+	 else if(key=='r'){
+	   c.stepSize=-c.stepSize;
+	   cout<< "\n \033[1;36m Step Size reversed \033[m\n\n";
+	 }
+	 else if(key =='n'){
+	   c.stepSize = 2*c.stepSize;
+	   cout<< "\n \033[1;36m Step Size doubled to"<<c.stepSize<<" \033[m\n\n";
+	 }
+	 else if(key =='h'){
+	   c.stepSize = c.stepSize/2.0;
+	   cout<< "\n \033[1;33m Step Size halved to"<<c.stepSize<<" \033[m\n\n";
+	 }
+	 fflush(stdin);
+       } 
+     else{
+       c.Continue();
+       for (int j=0; j<sz; j++){
+	 symmP._x(j) = c.solution[j];
+       }
+       for (int j=0; j<sz_para; j++)
+	 symmP._para(j) = c.solution[sz+j];
 
+       //Print Energy to output
+       ofstream outFileAp("Energy.txt", ofstream::app);
+
+       outFileAp.setf(ios_base::scientific);
+       double enTot = symmP.f();
+       outFileAp << symmP._para(0) << " \t " << symmP._para(2)<< "\t" << enTot << "\t" << endl;
+       outFileAp.close();
+
+       // Print to VTK file
+       ostringstream toStringNP, toStringCntr; 
+       toStringNP << NP;
+       toStringCntr << i;
+       string temp("Icosa");
+       temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
+     
+       prob.printToVTK(temp);
+       i++;
+     }
+
+   }while(key!='x');
    
    //MultiMin M("lbfgs", &prob);
    //M._LBFGSB_Initialize();

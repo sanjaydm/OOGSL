@@ -308,10 +308,10 @@ void NonlinearSolver::quasiNewtonMethod(double* Args){
 	gsl_matrix_memcpy(jacobian,H_temp);
 	//gsl_matrix_fprintf(stdout, H_temp, "%f");
 	//H_k from now is actually the inverse of the jacobian
-	printf("---here---2\n");
+	//printf("---here---2\n");
 	gsl_linalg_LU_decomp(H_temp,p,&s);
 	gsl_linalg_LU_invert(H_temp,p,H_k);
-	printf("---here---2^\n");
+	//printf("---here---2^\n");
 	//gsl_matrix_set_identity(H_k);
 	
 	array2vector(args,x_k); F(args,F_k);
@@ -383,9 +383,9 @@ void NonlinearSolver::predict(double* args){
 		gsl_vector_set(vecPredict,(int)jacobian->size1-1, 1.0);
 		memcpy(solution,args,sizeof(double)*noOfInArgs);
 		//gsl_matrix_fprintf(stdout, jacobian, "%le");
-		printf("---here---\n");
+		//printf("---here---\n");
 		linSolve(jacobian,vecPredict,tangent);
-		printf("---here---^\n");
+		//printf("---here---^\n");
 		/* If the tangent points in the opposite direction of increasign arc
 		length, then reverse the direction
 		*/
@@ -665,6 +665,38 @@ int Continuer::Continue(){
 	memcpy(solution_toSave,solution,sizeof(double)*noOfInArgs);
 	int BPnum=0;
 	int key;
+	predict(solution);
+	correct(solution);
+	gsl_vector * eval = gsl_vector_alloc(jacobian->size1);
+	gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (jacobian->size1);
+	gsl_matrix * evec = gsl_matrix_alloc(jacobian->size1, jacobian->size2);
+	gsl_matrix* Jac =gsl_matrix_alloc(jacobian->size1, jacobian->size2);
+			
+	gsl_matrix_memcpy(Jac, jacobian);
+	gsl_eigen_symmv(Jac, eval, evec, w);
+	gsl_eigen_gensymmv_sort (eval, evec,GSL_EIGEN_SORT_ABS_DESC);
+	//printf(" -------------------------Lowest Eigen Value = %lf \n", eval->data[eval->size-1]);
+	//printf(" -------------------------Highest Eigen Value = %lf \n", eval->data[0]);
+	printf("Condition Number: %le\n\n", fabs(eval->data[0]/eval->data[eval->size-1]));
+	//gsl_vector_fprintf(stdout, eval, "%f");
+	gsl_eigen_symmv_free(w);
+	gsl_vector_free(eval);
+	gsl_matrix_free(evec);
+	gsl_matrix_free(Jac);
+	//------------------------------------------------------------
+	char sing_pt=checkSingularPt(solution_toSave,tgt_BP);
+	cout<<solution[posOfPara]<<" "<<sing_pt<<endl;
+			
+	if(sing_pt=='L'){ 
+	  cout<<"\033[1;34m Limit Pt\033[m Detected"<<endl;
+	}
+	else if(sing_pt=='B'){
+	  BPnum=BPnum+1;
+	  cout<<"\033[1;33m Branch Pt\033[m Detected"<<endl;
+	  save_BP(BPFileName,solution_toSave,tgt_BP,noOfInArgs,BPnum);
+	}
+	savearray(DataFileName,solution,noOfInArgs);
+	/*
 	do{
 		if(kbhit())
 		{
@@ -726,7 +758,7 @@ int Continuer::Continue(){
 		
 		
 		savearray(DataFileName,solution,noOfInArgs);
-	}while(key!='x');
+	}while(key!='x');*/
 };
 int Continuer::load_BP(const char* filename,int BPnum){
 	string fname(filename);
