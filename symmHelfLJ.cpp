@@ -19,6 +19,27 @@
 #include"continuation.h"
 
 using namespace std;
+int sz, sz_para;
+SymmReduced symmP;
+
+int f_wrapper(double* indvar, double* invar, gsl_vector* out){
+  /* Wrapper for the fdf function so that it can be used with continuation code */
+  Vector in(invar, sz);
+  Vector par(sz_para);
+  for (int i=0; i < sz_para; i++)
+    par(i) = invar[sz+i];
+
+  symmP._para = par;
+  symmP._x = in;
+  symmP.fdf();
+
+  // TODO: This for loop must be replaced by an efficient alternative
+  for (int i=0; i<sz; i++)
+    out->data[i] = symmP._df(i);
+  
+  return 0;
+};
+
 int main(int argc, char** argv){
   // Number of modes and particles  
   int N = 12;
@@ -102,44 +123,20 @@ int main(int argc, char** argv){
    // Construct projection operators
    Projection pm(im);
    Matrix rg = pm._P.range();
-   rg.print();
+   //rg.print();
    
    int nn = 1;
-
-   // // Basis vectors adapted for spherical coordinates
-   // Matrix bas((N+1)*(N+1)+NP*2, nn);
-   // for (int j=0; j<=nn-1; j++){
-   //   for (int i=0; i < (N+1)*(N+1)+NP*2; i ++) {
-   //     if (i < (N+1)*(N+1) && j<nn-1){
-   // 	 bas(i,j)=rg(i,j);
-   //     }
-   //     if (j==nn-1 && i >= (N+1)*(N+1)) {
-   // 	 double z = rg(3*((i-(N+1)*(N+1))/2) + 2 + (N+1)*(N+1),nn-1);
-   // 	 double x = rg(3*((i-(N+1)*(N+1))/2) + (N+1)*(N+1),nn-1);
-   // 	 double y = rg(3*((i-(N+1)*(N+1))/2) + 1 + (N+1)*(N+1),nn-1);
-   // 	 double r = sqrt(x*x+y*y+z*z);
-   // 	 //cout << 3*((i-(N+1)*(N+1))/2) <<" :" << x << ";" << y << ";" << z <<endl;
-   // 	 if ((i-(N+1)*(N+1))%2==0)
-   // 	   bas(i,j) = acos(z/r);
-	 
-   // 	 else
-   // 	   bas(i,j) = atan2(y, x);
-   //     }
-   //   }
-   // }
-
    
    // Construct symmetry reduced problem
    Vector x0 = rg.T()*in;
-   x0.print();
-   x0(nn-1) = 1;
-   x0(0) = 0;
-   //(rg*x0).print();
-
-   SymmReduced symmP(x0,para,rg,&prob);
+   //x0.print();
+   
+   symmP = SymmReduced(x0,para,rg,&prob);
    symmP.checkConsistency();
+   sz = x0.size();
+   sz_para = para.size();
+   
 
-   //return 0;
    MultiMin M("lbfgs", &symmP);
    M._LBFGSB_Initialize();
    // Optionally constrain the particle coordinates to lie within spherical coordinate domain
@@ -154,7 +151,7 @@ int main(int argc, char** argv){
    ofstream outFileAp("Energy.txt", ofstream::app);
    outFileAp << "kappa\t rm\t Total Energy\t Projg\n";
    outFileAp.close();
-   for (int i=0; i<15; i++) {
+   for (int i=0; i<1; i++) {
      // Update parameter re
      symmP._para(2) = symmP._para(2) + 0.05*(i/30.0);
      cout << "re = " << prob._re << endl;
@@ -181,6 +178,30 @@ int main(int argc, char** argv){
      prob.printToVTK(temp);
 
    }
+
+   double* trivial = new double[sz+sz_para];
+   for (int i=0; i< sz; i++)
+     trivial[i] = symmP._x(i);
+   for (int i=0; i< sz_para; i++)
+     trivial[i+sz] = para(i);
+
+   Continuer c;
+   c.ptr_F = f_wrapper;
+
+   c.setNoOfUnknownVar(sz);
+   c.setNoOfInArgs(sz+sz_para);
+   c.noOfIndVar = 0;
+   c.noOfPara=sz_para;
+   c.performQuad = false;
+   c.posOfPara=sz+2;  //Corresponds to l (~1/eps)
+   c.correctorType="quasi-newton";
+	
+		
+   c.setInitialSolution(trivial);
+   c.Continue();
+   return 0;
+
+   
    //MultiMin M("lbfgs", &prob);
    //M._LBFGSB_Initialize();
   // // // Set bounds
