@@ -126,13 +126,13 @@ int main(int argc, char** argv){
 //      << sin(2*PI/5) << cos(2*PI/5) << 0
 //      << 0 << 0 << 1;
 
-<<<<<<< HEAD
+
     // Generators of D9
     Matrix r(3,3);
     r << cos(2*PI/9) << -sin(2*PI/9) << 0
       << sin(2*PI/9) << cos(2*PI/9) << 0
       << 0 << 0 << 1;
-=======
+
    // Icosahedral im(G2,G3);
 
    // // Construct projection operators
@@ -173,18 +173,17 @@ int main(int argc, char** argv){
 
 
 
-    // bruteforce a bases matrix for particles
-    Matrix rgp_bf(NP*3,rg_prk);
-    for (int j=0; j<rg_prk/2; j++){
-        for (int i=0; i<NP*3; i++){
-            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
-            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
-        }
-    }
-
-    return 0;
-    
->>>>>>> 16109ecda5fd0f61bf04a36887ef01f54c00a1af
+//    // bruteforce a bases matrix for particles
+//    Matrix rgp_bf(NP*3,rg_prk);
+//    for (int j=0; j<rg_prk/2; j++){
+//        for (int i=0; i<NP*3; i++){
+//            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
+//            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
+//        }
+//    }
+//
+//    return 0;
+//
     
     // Tetrahedral
 //    Matrix r(3,3);

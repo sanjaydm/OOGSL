@@ -1,6 +1,6 @@
 DBG = -g #Debugger Option
 OPT = -O0 # -pg 
-CC  = g++-9 -std=c++11 
+CC  = g++-9 -std=c++11
 FF  = gfortran-9
 #NOWARN = 2>&1 >/dev/null | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'
 
@@ -24,11 +24,17 @@ compute_D_matrix: compute_D_matrix.cpp Vector.o Matrix.o libLBFGS
 testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o SymmReduced.o
 	$(CC) $(DBG)  $(OPT) testgroup.cpp Vector.o Matrix.o Problem.o Group.o SymmReduced.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o testgroup.out 
 
-test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o
+test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o 
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
-symmHelfLJ: symmHelfLJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o continuation.o kbhit.o
-	$(CC) $(DBG)  $(OPT) symmHelfLJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o continuation.o kbhit.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJ.out 
+symmHelfLJ: symmHelfLJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o libCont
+	$(CC) $(DBG)  $(OPT) symmHelfLJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lCont -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJ.out 
+
+symmHelfLJSJ: symmHelfLJSJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o libCont
+	$(CC) $(DBG)  $(OPT) symmHelfLJSJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lCont -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJSJ.out 
+
+contHelfLJ: contHelfLJ.cpp libCont
+	$(CC) contHelfLJ.cpp -L ./ -lCont -lgsl -lgslcblas -o test.out $(DBG) -O2
 
 SymmReduced.o: SymmReduced.cpp
 	$(CC) $(DBG) $(OPT) -c SymmReduced.cpp 
@@ -91,11 +97,15 @@ libLBFGS: lbfgsb-routines.o blas.o linpack.o timer.o
 	ar cru libLBFGS.a lbfgsb-routines.o blas.o linpack.o timer.o
 	ranlib libLBFGS.a
 
+libCont: continuation.o kbhit.o
+	ar cru libCont.a continuation.o kbhit.o
+	ranlib libCont.a
+
 continuation.o: continuation.h continuation.cpp
-	g++ -c continuation.h continuation.cpp -lgsl -lgslcblas $(DBG) $(OPT)
+	$(CC) -c continuation.h continuation.cpp -lgsl -lgslcblas $(DBG) $(OPT)
 
 kbhit.o: kbhit.h kbhit.c
-	g++ -c kbhit.h kbhit.c $(DBG) $(OPT)
+	$(CC) -c kbhit.h kbhit.c $(DBG) $(OPT)
 
 clean:
 	rm -r *.o *.gch *.vtk *.out *.a *.txt *.dSYM

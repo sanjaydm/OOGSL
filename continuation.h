@@ -114,33 +114,4 @@ int save_BP(const char* filename,double* array,gsl_vector*,int dim,int BPnum);
 void pprintMat(gsl_matrix* M);
 void printarray(double* A,int dim,char* format);
 void printMatrix(gsl_matrix*);
-/*
-class EnergyProblem:public Problem{
-	public:
-		int r_len;
-		int phi_len;
-		int myFun(double*,double*,gsl_vector*);
-};
-
-double Plm(int l,int m,double x);
-double Plm_t(int l,int m,double x);
-double Plm_tt(int l,int m, double x);
-double Ylm(int l,int m,double t,double p);
-double Ylm_t(int l,int m,double t,double p);
-double Ylm_tt(int l,int m,double t,double p);
-double rad(double* c,double t,double p,int dim);
-double rad_t(double* c,double t,double p,int dim);
-double rad_tt(double* c,double t,double p,int dim);
-double r_i(int i,double t,double p);
-double rp_i(int i,double t,double p);
-double rt_i(int i,double t,double p);
-double rtt_i(int i,double t,double p);
-double rtp_i(int i,double t,double p);
-double rpp_i(int i,double t,double p);
-double W(double Phi,double beta,double m1,double m2);
-double Wprime(double Phi,double beta,double m1,double m2);
-double W2prime(double Phi,double beta,double m1,double m2);
-double stiffness(double Phi,double m1,double m2,double k1,double k2);
-double stiffness_prime(double Phi,double m1,double m2,double k1,double k2);
-*/
 #endif

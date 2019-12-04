@@ -10,11 +10,10 @@
 #include<sstream>
 #include"kbhit.h"
 #include"gausslegendre.h"
-#define PI (3.141592653589793)
-extern FILE* fid_toerase, *fid_toerase2;
+
 using namespace std;
 Quadr::Quadr(){
-	order=101;
+	order=23;
 }
 void Quadr::lebedevQuad(int (*fun)(double*,double*,gsl_vector*), double* args,gsl_vector* out){
 	string lebfile("Lebedev/OurLebedev");
@@ -33,11 +32,10 @@ void Quadr::lebedevQuad(int (*fun)(double*,double*,gsl_vector*), double* args,gs
 	while(fscanf(pfile,"%lf %lf %lf",&p,&t,&weight)!=EOF){
 		if(t==0.0) t=1e-4;
 		if(t==180.0) t=180.0-1e-4;
-		tp[0]=t*PI/180;
-		tp[1]=p*PI/180;
+		tp[0]=t;
+		tp[1]=p;
 		fun(tp,args,temp);
 		//out<--out+weight*temp
-		//-------------should not include st term in the function--------------
 		gsl_blas_daxpy(weight,temp,out);
 	}
 	gsl_blas_dscal(4*M_PI,out);
@@ -52,13 +50,13 @@ void Quadr::gaussLegendreQuad(int (*fun)(double*, double*, gsl_vector*),double* 
 	int n = 1024/2; //THIS NEEDS TO BE MODIFIED
 	double tp[2]={0.,0.};
 	for (int i=0; i< n; i++){
-		tp[0] = (1+ x1024[i])*PI/2; // in degrees
+		tp[0] = (1+ x1024[i])*180.0/2; // in degrees
 		fun(tp,args,temp);
 		//out <-- out+weight*temp
 		gsl_blas_daxpy(w1024[i]*M_PI/2,temp,out);
 		
 		//Now for PI-theta. The weights from PI-theta and theta are the same
-		tp[0]=(1-x1024[i])*PI/2;
+		tp[0]=(1-x1024[i])*180.0/2;
 		fun(tp,args,temp);
 		//out <-- out+weight*temp
 		gsl_blas_daxpy(w1024[i]*M_PI/2,temp,out);
@@ -84,105 +82,12 @@ void Quadr::gaussLegendreQuad(int (*fun)(double*, double*, gsl_vector*),double* 
 	gsl_blas_dscal(2*M_PI,out); //this step accounts for integration in phi. Very simple for axisymmetric version
 	gsl_vector_free(temp);
 };
-void Quadr::gaussLegendreQuad_hess(int (*fun)(double*, double*, gsl_matrix*),double* args, gsl_matrix* out){
-	gsl_matrix* temp = gsl_matrix_calloc(out->size1,out->size2); //temp =[0,0,...,0]_size
-	gsl_matrix_scale(out,0); //resetting out =0
-	
-	int n = 1024/2; //THIS NEEDS TO BE MODIFIED
-	double tp[2]={0.,0.};
-	
-	for (int i=0; i< n; i++){
-		tp[0] = (1+ x1024[i])*PI/2 ; // in degrees
-		fun(tp,args,temp);
-		//out <-- out+weight*temp
-		gsl_matrix_scale(temp,w1024[i]*PI/2); //temp <--- weight*temp
-		gsl_matrix_add(out,temp); //out <-- out+temp 
-		
-		//Now for PI-theta. The weights from PI-theta and theta are the same
-		tp[0]=(1-x1024[i])*PI/2;
-		fun(tp,args,temp);
-		//out <-- out+weight*temp
-		gsl_matrix_scale(temp,w1024[i]*PI/2); //temp <--- weight*temp
-		gsl_matrix_add(out,temp); //out <-- out+temp 
-		
-	}
-	
-	gsl_matrix_scale(out,2*PI); //this step accounts for integration in phi. Very simple for axisymmetric version
-	gsl_matrix_free(temp);
-};
-void Quadr::adaptiveQuad_hess(int (*fun)(double*, double*, gsl_matrix*),double* args, double a, double b, double tau, gsl_matrix* out){
-        //printf("----Adaptive Quadr-----\n");
-        gsl_matrix* temp = gsl_matrix_calloc(out->size1,out->size2); //temp =[0,0,...,0]_size
-        gsl_matrix_scale(out,0);
-	gsl_matrix* out1 = gsl_matrix_calloc(out->size1,out->size2); //out1 =[0,0,...,0]_size
-	// Lower order quad 
-	int n = 12/2; 
-	double tp[2]={0.,0.};
-	gsl_matrix_scale(temp,0); //temp =0 
-	for (int i=0; i< n; i++){
-		tp[0] = ((a+b)/2.0 + (b-a)/2.0*x12[i]); // in degrees
-		fun(tp,args,temp);
-		//out1 <-- out1+weight*temp
-		
-		gsl_matrix_scale(temp,w12[i]*(b-a)/2); //temp <--- weight*temp
-		gsl_matrix_add(out1,temp); //out1 <-- out1+temp 
-		
-		//Now for PI-theta. The weights from PI-theta and theta are the same
-		tp[0]=((a+b)/2-x12[i]*(b-a)/2);
-		fun(tp,args,temp);
-		//out1 <-- out1+weight*temp
-		
-		gsl_matrix_scale(temp,w12[i]*(b-a)/2); //temp <--- weight*temp
-		gsl_matrix_add(out1,temp); //out1 <-- out1+temp 
-		
-	}
-	gsl_matrix_scale(out1,2*M_PI); //this step accounts for integration in phi. Very simple for axisymmetric version
-	// Higher order quad 
-	n = 16/2; 
-	gsl_matrix_scale(temp,0);
-	for (int i=0; i< n; i++){
-		tp[0] = ((a+b)/2+ x16[i]*(b-a)/2); // in degrees
-		fun(tp,args,temp);
-		//out <-- out+weight*temp
-		
-		gsl_matrix_scale(temp,w16[i]*(b-a)/2); //temp <--- weight*temp
-		gsl_matrix_add(out,temp); //out <-- out+temp 
-		
-		//Now for PI-theta. The weights from PI-theta and theta are the same
-		tp[0]=((a+b)/2-x16[i]*(b-a)/2);
-		fun(tp,args,temp);
-		//out <-- out+weight*temp
-		gsl_matrix_scale(temp,w16[i]*(b-a)/2); //temp <--- weight*temp
-		gsl_matrix_add(out,temp); //out <-- out+temp 
-		
-	}
-	gsl_matrix_scale(out,2*M_PI); //this step accounts for integration in phi. Very simple for axisymmetric version
-	gsl_matrix_memcpy(temp,out1);
-	gsl_matrix_sub(temp,out);
-	//gsl_matrix_add(temp,out);
-	double max_matrix = gsl_matrix_max(temp);
-	double min_matrix = gsl_matrix_min(temp);
-	double abs_max = max(fabs(max_matrix),fabs(min_matrix));
-	//printf("max error = %e\n", tau);
-	if(abs_max > tau && (b-a)> 1e-4 ){
-		adaptiveQuad_hess(fun, args, a, (a+b)/2, tau/2, out1);
-		adaptiveQuad_hess(fun, args, (a+b)/2, b, tau/2, out);
-		//out<--out1+out
-		gsl_matrix_add(out,out1);
-	}
-	gsl_matrix_free(temp);
-	gsl_matrix_free(out1);
-	//gsl_vector_free(temp);
-	return;
-
-};
-
 void Quadr::adaptiveQuad(int (*fun)(double*, double*, gsl_vector*),double* args, double a, double b, double tau, gsl_vector* out){
 	gsl_vector* temp = gsl_vector_calloc(out->size); //temp =[0,0,...,0]_size
 	gsl_vector_set_zero(out);
 	// out1 - vector to store lower order quad
 	// out - vector stores higher order quad
-	gsl_vector* out1 = gsl_vector_calloc(out->size); //out1 =[0,0,...,0]_size
+	gsl_vector* out1 = gsl_vector_calloc(out->size); //temp =[0,0,...,0]_size
 	// Lower order quad 
 	int n = 12/2; 
 	double tp[2]={0.,0.};
@@ -191,13 +96,13 @@ void Quadr::adaptiveQuad(int (*fun)(double*, double*, gsl_vector*),double* args,
 		tp[0] = ((a+b)/2.0 + (b-a)/2.0*x12[i]); // in degrees
 		fun(tp,args,temp);
 		//out <-- out+weight*temp
-		gsl_blas_daxpy(w12[i]*(b-a)/2,temp,out1);
+		gsl_blas_daxpy(w12[i]*(b-a)*M_PI/(2*180.0),temp,out1);
 		
 		//Now for PI-theta. The weights from PI-theta and theta are the same
 		tp[0]=((a+b)/2-x12[i]*(b-a)/2);
 		fun(tp,args,temp);
 		//out <-- out+weight*temp
-		gsl_blas_daxpy(w12[i]*(b-a)/2,temp,out1);
+		gsl_blas_daxpy(w12[i]*(b-a)*M_PI/(2*180),temp,out1);
 		
 	}
 	gsl_blas_dscal(2*M_PI,out1); //this step accounts for integration in phi. Very simple for axisymmetric version
@@ -208,37 +113,36 @@ void Quadr::adaptiveQuad(int (*fun)(double*, double*, gsl_vector*),double* args,
 		tp[0] = ((a+b)/2+ x16[i]*(b-a)/2); // in degrees
 		fun(tp,args,temp);
 		//out <-- out+weight*temp
-		gsl_blas_daxpy(w16[i]*(b-a)/2,temp,out);
+		gsl_blas_daxpy(w16[i]*(b-a)*M_PI/(2*180),temp,out);
 		
 		//Now for PI-theta. The weights from PI-theta and theta are the same
 		tp[0]=((a+b)/2-x16[i]*(b-a)/2);
 		fun(tp,args,temp);
 		//out <-- out+weight*temp
-		gsl_blas_daxpy(w16[i]*(b-a)/2,temp,out);
+		gsl_blas_daxpy(w16[i]*(b-a)*M_PI/(2*180),temp,out);
 		
 	}
 	gsl_blas_dscal(2*M_PI,out); //this step accounts for integration in phi. Very simple for axisymmetric version
 	gsl_vector_memcpy(temp,out1);
 	gsl_blas_daxpy(-1,out,temp);
-	if(gsl_blas_dnrm2(temp) > tau && (b-a)> 1e-4 ){
+	if(gsl_blas_dnrm2(temp) > tau && (b-a)> 1e-3 ){
+		gsl_vector_free(temp);
 		adaptiveQuad(fun, args, a, (a+b)/2, tau/2, out1);
 		adaptiveQuad(fun, args, (a+b)/2, b, tau/2, out);
 		//out<--out1+out
 		gsl_blas_daxpy(1.0,out1,out);
 	}
-	gsl_vector_free(temp);
 	gsl_vector_free(out1);
-	//gsl_vector_free(temp);
 	return;
 
 };
 //* SOLVER*/
 double LinearSolver::luSolve(gsl_matrix* A, gsl_vector* b,gsl_vector* x){
+	
 	//I don't want to change the matrix A when I leave this fun.
 	gsl_matrix* temp=gsl_matrix_alloc(A->size1,A->size2);
 	gsl_matrix_memcpy(temp,A);
-	
-	
+		
 	gsl_permutation* p=gsl_permutation_alloc(b->size);
 	int s;
 	gsl_linalg_LU_decomp(temp,p,&s); //After this line A is an "LU-ed" matrix
@@ -270,7 +174,7 @@ NonlinearSolver::NonlinearSolver(){
 	solver="LU";
 	maxIterations=50;
 	noOfIterations=0;
-	tolerance=1e-8;
+	tolerance=1e-7;
 	eps=1e-5;
 	indVar=NULL;
 	
@@ -288,9 +192,9 @@ int NonlinearSolver::setNoOfInArgs(int n){
 	return 0;
 }
 NonlinearSolver::~NonlinearSolver(){
-	delete[] solution;
-	gsl_vector_free(tangent);
-	gsl_matrix_free(jacobian);
+	//delete[] solution;
+	//gsl_vector_free(tangent);
+	//gsl_matrix_free(jacobian);
 	}
 /*
 void NonlinearSolver::setNoOfIndVar(int n){
@@ -399,12 +303,15 @@ void NonlinearSolver::quasiNewtonMethod(double* Args){
 	double numerator;
 	gsl_vector* temp_x=gsl_vector_alloc(jacobian->size1);
 	gsl_vector* temp_F=gsl_vector_alloc(jacobian->size1);
-	
+
 	Jac(args,H_temp); 
 	gsl_matrix_memcpy(jacobian,H_temp);
+	//gsl_matrix_fprintf(stdout, H_temp, "%f");
 	//H_k from now is actually the inverse of the jacobian
+	//printf("---here---2\n");
 	gsl_linalg_LU_decomp(H_temp,p,&s);
 	gsl_linalg_LU_invert(H_temp,p,H_k);
+	//printf("---here---2^\n");
 	//gsl_matrix_set_identity(H_k);
 	
 	array2vector(args,x_k); F(args,F_k);
@@ -467,7 +374,7 @@ void NonlinearSolver::predict(double* args){
 		
 		//input: args, outputs: jacobian
 		Jac(args, jacobian); 
-		
+		//gsl_matrix_fprintf(stdout, jacobian, "%f");
 		//jacobian->size1=no. of rows
 		gsl_vector* vecPredict=gsl_vector_calloc(jacobian->size1);
 		
@@ -475,8 +382,10 @@ void NonlinearSolver::predict(double* args){
 		
 		gsl_vector_set(vecPredict,(int)jacobian->size1-1, 1.0);
 		memcpy(solution,args,sizeof(double)*noOfInArgs);
-		
+		//gsl_matrix_fprintf(stdout, jacobian, "%le");
+		//printf("---here---\n");
 		linSolve(jacobian,vecPredict,tangent);
+		//printf("---here---^\n");
 		/* If the tangent points in the opposite direction of increasign arc
 		length, then reverse the direction
 		*/
@@ -548,7 +457,6 @@ int Continuer::F(double* args,gsl_vector* out){
 		array2vector(args,v1);
 		array2vector(solution,v2);
 		//v1<--v1-v2
-		
 		gsl_blas_daxpy(-1.,v2,v1);
 		//Pseudo-arc equation
 		double v1DotTgt;
@@ -561,12 +469,14 @@ int Continuer::F(double* args,gsl_vector* out){
 		// NOW I NEED TO PERFROM QUADRATURE
 		if(performQuad==true){
 			//Quad.lebedevQuad(ptr_F,args,out);
-			//Quad.gaussLegendreQuad(ptr_F,args,out);
-			Quad.adaptiveQuad(ptr_F, args, 0.0, PI, 1e-6, out);
+			Quad.gaussLegendreQuad(ptr_F,args,out);
+			//Quad.adaptiveQuad(ptr_F, args, 0.0, 180.0, 1e-6, out);
 
 		}
 		else{
 			ptr_F(NULL,args,out);
+			//gsl_vector_fprintf(stdout, out, "%lf");
+			
 		}
 		//set the last equation(value) to be the pseudo-arc equation
 		out->data[noOfUnknownVar]=N;
@@ -576,6 +486,7 @@ int Continuer::F(double* args,gsl_vector* out){
 }
 
 int Continuer::Jac(double* args,gsl_matrix* out){
+
 	//cout<<"In Continuer::Jac\n"<<noOfUnknownVar<<endl;
 	int row=(int)out->size1;
 	int col=(int)out->size2;
@@ -583,6 +494,8 @@ int Continuer::Jac(double* args,gsl_matrix* out){
 	gsl_vector* f0=gsl_vector_calloc(row);
 	double temp_x;
 	F(args,f0);
+	//cout << "here2\n";
+
 	//Part of the Jacobian by varying unknowns
 	for(int i=0;i<noOfUnknownVar;i++){
 		temp_x=args[i];
@@ -596,7 +509,6 @@ int Continuer::Jac(double* args,gsl_matrix* out){
 		gsl_matrix_set_col(out,i,temp_v);
 		//reset the perturbation
 		args[i]=temp_x;
-		//cout<<"HERE "<<i<<endl;
 	}
 	//Part of the jacobian by varying parameter
 	temp_x=args[posOfPara];
@@ -613,7 +525,6 @@ int Continuer::Jac(double* args,gsl_matrix* out){
 	
 	//The last row of th Jacobian contains the tangent vector
 	gsl_matrix_set_row(out,out->size1-1,tangent);
-	
 	gsl_vector_free(temp_v);
 	gsl_vector_free(f0);
 	return 0;
@@ -728,6 +639,7 @@ void Continuer::setInitialSolution(double* args){
 	find the tangential direction to move
 	*/
 	//gsl_matrix_transpose(jacobian);
+	
 	gsl_matrix_view jac_clip_view=gsl_matrix_submatrix(jacobian,0,0,jacobian->size1,jacobian->size2);
 	gsl_matrix* jac_clip=gsl_matrix_alloc(jacobian->size1,jacobian->size2);
 	gsl_matrix_memcpy(jac_clip,&jac_clip_view.matrix);
@@ -753,6 +665,38 @@ int Continuer::Continue(){
 	memcpy(solution_toSave,solution,sizeof(double)*noOfInArgs);
 	int BPnum=0;
 	int key;
+	predict(solution);
+	correct(solution);
+	gsl_vector * eval = gsl_vector_alloc(jacobian->size1);
+	gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (jacobian->size1);
+	gsl_matrix * evec = gsl_matrix_alloc(jacobian->size1, jacobian->size2);
+	gsl_matrix* Jac =gsl_matrix_alloc(jacobian->size1, jacobian->size2);
+			
+	gsl_matrix_memcpy(Jac, jacobian);
+	gsl_eigen_symmv(Jac, eval, evec, w);
+	gsl_eigen_gensymmv_sort (eval, evec,GSL_EIGEN_SORT_ABS_DESC);
+	//printf(" -------------------------Lowest Eigen Value = %lf \n", eval->data[eval->size-1]);
+	//printf(" -------------------------Highest Eigen Value = %lf \n", eval->data[0]);
+	printf("Condition Number: %le\n\n", fabs(eval->data[0]/eval->data[eval->size-1]));
+	//gsl_vector_fprintf(stdout, eval, "%f");
+	gsl_eigen_symmv_free(w);
+	gsl_vector_free(eval);
+	gsl_matrix_free(evec);
+	gsl_matrix_free(Jac);
+	//------------------------------------------------------------
+	char sing_pt=checkSingularPt(solution_toSave,tgt_BP);
+	cout<<solution[posOfPara]<<" "<<sing_pt<<endl;
+			
+	if(sing_pt=='L'){ 
+	  cout<<"\033[1;34m Limit Pt\033[m Detected"<<endl;
+	}
+	else if(sing_pt=='B'){
+	  BPnum=BPnum+1;
+	  cout<<"\033[1;33m Branch Pt\033[m Detected"<<endl;
+	  save_BP(BPFileName,solution_toSave,tgt_BP,noOfInArgs,BPnum);
+	}
+	savearray(DataFileName,solution,noOfInArgs);
+	/*
 	do{
 		if(kbhit())
 		{
@@ -780,52 +724,25 @@ int Continuer::Continue(){
 			fflush(stdin);
 		} 
 		else{
-			
 			predict(solution);
 			correct(solution);
-			printf("------------\n");
-			/*  Eigen values */
-			/*
 			gsl_vector * eval = gsl_vector_alloc(jacobian->size1);
 			gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (jacobian->size1);
 			gsl_matrix * evec = gsl_matrix_alloc(jacobian->size1, jacobian->size2);
 			gsl_matrix* Jac =gsl_matrix_alloc(jacobian->size1, jacobian->size2);
-	
+			
 			gsl_matrix_memcpy(Jac, jacobian);
 			gsl_eigen_symmv(Jac, eval, evec, w);
 			gsl_eigen_gensymmv_sort (eval, evec,GSL_EIGEN_SORT_ABS_DESC);
-			gsl_vector_fprintf(stdout, eval, "%f");
-			printf("\n \033[1;33m Condition Number \033[m= %le \n", fabs(eval->data[0]/eval->data[eval->size-1]));
+			//printf(" -------------------------Lowest Eigen Value = %lf \n", eval->data[eval->size-1]);
+			//printf(" -------------------------Highest Eigen Value = %lf \n", eval->data[0]);
+			printf("Condition Number: %le\n\n", fabs(eval->data[0]/eval->data[eval->size-1]));
+			//gsl_vector_fprintf(stdout, eval, "%f");
 			gsl_eigen_symmv_free(w);
 			gsl_vector_free(eval);
 			gsl_matrix_free(evec);
 			gsl_matrix_free(Jac);
-			
-			//------------------------------------------
-			/*
-			gsl_vector* vec =gsl_vector_calloc(noOfUnknownVar+1);
-			//printf(fid_toerase,"[\n");
-			F(solution,vec);
-			gsl_vector_fprintf(stdout,vec,"%le");
-			*/
-			
-			//fprintf(fid_toerase,"]\n");
-			
-			/*
-			printf("-----post processing------\n");
-			solution[noOfUnknownVar+2]=1;
-			gsl_vector* vec2 =gsl_vector_calloc(noOfUnknownVar+1);
-			//fprintf(fid_toerase2,"[\n");
-			F(solution,vec2);
-			gsl_vector_fprintf(stdout,vec2,"%le");
-			//printf("%1.8e %1.8e\n",vec2->data[0],solution[30+30+3+2]);
-			gsl_vector_free(vec2);
-			//fprintf(fid_toerase2,"]\n");
-			printf("====================\n");
-			solution[noOfUnknownVar+2]=2;
-			exit(0);
-			*/
-			//----------------------------------------
+			//------------------------------------------------------------
 			char sing_pt=checkSingularPt(solution_toSave,tgt_BP);
 			cout<<solution[posOfPara]<<" "<<sing_pt<<endl;
 			
@@ -839,9 +756,9 @@ int Continuer::Continue(){
 			}
 		}
 		
+		
 		savearray(DataFileName,solution,noOfInArgs);
-		//post_process_sol(*this);
-	}while(key!='x');
+	}while(key!='x');*/
 };
 int Continuer::load_BP(const char* filename,int BPnum){
 	string fname(filename);
@@ -913,23 +830,21 @@ int loadarray(const char* filename,double* out,int dim){
 	return 0;
 }
 void pprintMat(gsl_matrix* M){
-    cout<<"["<<endl;
-  double val;
-  for(int i=0;i<M->size1;i++){
-    cout<<"[";
-    for(int j=0;j<M->size2;j++){
-      val=gsl_matrix_get(M,i,j);
-      if(fabs(val)<1e-2){ 
-	printf("%1.15e, ",val);
-      }
-      else{
-	//printf("\033[1;33m%1.2e \033[m ",val);
-	printf("%1.15e, ",val);
-      }
-    }
-    cout<<"],";
-  }
-  cout<<"]";
+	cout<<endl;
+	double val;
+	for(int i=0;i<M->size1;i++){
+		for(int j=0;j<M->size2;j++){
+			val=gsl_matrix_get(M,i,j);
+			if(fabs(val)<1e-10){ 
+				printf("%1.5f ",val);
+			}
+			else{
+			  //printf("\033[1;33m%1.2f\033[m ",val);
+			  printf("%1.5f ",val);
+			}
+		}
+		cout<<endl;
+	}
 }
 void printarray(double* A,int dim,char* format){
 	for(int i=0;i<dim;i++)
