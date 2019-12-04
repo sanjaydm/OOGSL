@@ -76,6 +76,26 @@ void D5::constructGroup(){
     }
 }
 
+/* --------------- D9 -------------- */
+
+D9::D9(Matrix g2, Matrix g9){
+    _g2 = g2;
+    _g9 = g9;
+    _gen.push_back(_g2);
+    _gen.push_back(_g9);
+    constructGroup();
+}
+
+void D9::constructGroup(){
+    for (int nu = 0; nu <= 8; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            Matrix g9_nu = _g9^nu;
+            Matrix g2_sigma = _g2^sigma;
+            _g.push_back( g9_nu * g2_sigma );
+        }
+    }
+}
+
 /* --------------- Tetrahedral ------------- */
 
 Tetrahedral:: Tetrahedral(Matrix g2, Matrix g3d){

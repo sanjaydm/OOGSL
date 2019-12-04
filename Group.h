@@ -39,6 +39,14 @@ public:
     void constructGroup();
 };
 
+class D9: public Group{
+public:
+    Matrix _g2;
+    Matrix _g9;
+    D9(Matrix g2, Matrix g9);
+    void constructGroup();
+};
+
 class Tetrahedral: public Group{
 public:
     Matrix _g2;

@@ -21,10 +21,10 @@
 using namespace std;
 int main(int argc, char** argv){
   // Number of modes and particles  
-  int N = 3;
-  int NP = 10;
+  int N = 9;
+  int NP = 18;
   int Ntot= (N+1)*(N+1);
-  Vector in(Ntot+2*NP); 
+  Vector in(Ntot+3*NP);
   Vector para(3);
   Vector discPara(2); //Discretization parameters
   discPara(0) = N; //Lmax
@@ -46,9 +46,11 @@ int main(int argc, char** argv){
     in(i) = 0.0;//*rand()/RAND_MAX;
   }
   for (int j=0; j< NP; j++) {
-    in(Ntot + 2*j) =  double(rand())/RAND_MAX*PI;
-    in(Ntot + 2*j+1) = (0.5-double(rand())/RAND_MAX)*2*PI;
+    in(Ntot + 3*j) =  double(rand())/RAND_MAX;
+    in(Ntot + 3*j+1) =  double(rand())/RAND_MAX;
+    in(Ntot + 3*j+2) = (double(rand())/RAND_MAX);
   }
+    
 
   // Construct the model
   MembLJ prob(in, para, discPara);
@@ -123,90 +125,112 @@ int main(int argc, char** argv){
 //    r << cos(2*PI/5) << -sin(2*PI/5) << 0
 //      << sin(2*PI/5) << cos(2*PI/5) << 0
 //      << 0 << 0 << 1;
-//
-//    Matrix s(3,3);
-//    s << 1 << 0 << 0
-//      << 0 <<-1 << 0
-//      << 0 << 0 << -1;
-//
-//    // Construct D5 group-rep on spherical harmonics
-//    Matrix rr = compute_R(0,N,r);
-//    Matrix ss = compute_R(0,N,s);
-//
-//    vector<int> rp = {2,3,4,5,1,7,8,9,10,6};
-//    vector<int> sp = {6,10,9,8,7,1,5,4,3,2};
-//
-//    // Construct D5 group-rep on particles
-//    Matrix rp_Mat = constructMat(rp,r);
-//    Matrix sp_Mat = constructMat(sp,s);
-//
-//    // group construction
-//    D5 D5_p(sp_Mat,rp_Mat);
-//    D5 D5_sh(ss,rr);
-//
-//    // Projection operator
-//    Projection p_sh(D5_sh);
-//    Projection p_p(D5_p);
-//
-//    // bases in cartesian
-//    Matrix rg_sh = p_sh._P.range()
-//    Matrix rg_p = p_p._P.range()
-//
+
+    // Generators of D9
+    Matrix r(3,3);
+    r << cos(2*PI/9) << -sin(2*PI/9) << 0
+      << sin(2*PI/9) << cos(2*PI/9) << 0
+      << 0 << 0 << 1;
+    
+    // Tetrahedral
+//    Matrix r(3,3);
+//    r << 0 << 1 << 0
+//      << 0 << 0 << 1
+//      << 1 << 0 << 0;
+
+    
+    Matrix s(3,3);
+    s << 1 << 0 << 0
+      << 0 <<-1 << 0
+      << 0 << 0 << -1;
+
+    // Construct D5 group-rep on spherical harmonics
+    Matrix rr = compute_R(0,N,r);
+    Matrix ss = compute_R(0,N,s);
+    
+    //candidate for D9
+    vector<int> rp = {2,3,4,5,6,7,8,9,1,11,12,13,14,15,16,17,18,10};
+    vector<int> sp = {18,17,16,15,14,13,12,11,10,9,8,7,6,14,5,3,2,1};
+
+    // Tetrahedral
+//    vector<int> rp = {2,3,1,5,6,4,8,9,7,10};
+//    vector<int> sp = {1,8,9,5,4,10,7,2,3,6};
+
+    // Construct D5 group-rep on particles
+    Matrix rp_Mat = constructMat(rp,r);
+    Matrix sp_Mat = constructMat(sp,s);
+
+    // group construction
+    D9 D9_p(sp_Mat,rp_Mat);
+    D9 D9_sh(ss,rr);
+
+    // Projection operator
+    Projection p_sh(D9_sh);
+    Projection p_p(D9_p);
+
+    // bases in cartesian
+    Matrix rg_sh = p_sh._P.range();
+    Matrix rg_p = p_p._P.range();
+    
+    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
+    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
+    
 
 
 
-    // bruteforce a bases matrix for particles
-    Matrix rgp_bf(NP*3,rg_prk);
-    for (int j=0; j<rg_prk/2; j++){
-        for (int i=0; i<NP*3; i++){
-            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
-            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
-        }
-    }
+//    // bruteforce a bases matrix for particles
+//    Matrix rgp_bf(NP*3,rg_prk);
+//    for (int j=0; j<rg_prk/2; j++){
+//        for (int i=0; i<NP*3; i++){
+//            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
+//            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
+//        }
+//    }
+//
 
-    return 0;
-    
-    
-    
-    
-    // Convert rg_p to spherical coordinates
-    
-    Matrix rg_sc(NP*2,rg_prk);
-    for (int j=0; j<rg_prk; j++){
-        for (int ip = 0; ip < NP; ip++){
-            double z = rgp_bf(ip*3+2,j);
-            double x = rgp_bf(ip*3,j);
-            double y = rgp_bf(ip*3+1,j);
-            double r = sqrt(x*x+y*y+z*z);
-            cout << ip << " " << r << endl;
-            rg_sc(ip*2,j) = acos(z/r);
-            rg_sc(ip*2+1,j) = atan2(y, x);
-        }
-    }
-    
-    rg_sc.print();
+    cout << "Bases in cartesian" << endl;
+    rg_p.print();
 
-    int n_p = rg_sc.rank();
-    cout << n_p << endl;
-    cout << rg_sc.size()[0] << " " << rg_sc.size()[1]<< endl;
+
+//    // Convert rg_p to spherical coordinates
+//
+//    Matrix rg_sc(NP*2,rg_prk);
+//    for (int j=0; j<rg_prk; j++){
+//        for (int ip = 0; ip < NP; ip++){
+//            double z = rg_p(ip*3+2,j);
+//            double x = rg_p(ip*3,j);
+//            double y = rg_p(ip*3+1,j);
+//            double r = sqrt(x*x+y*y+z*z);
+//            // cout << ip << " " << r << endl;
+//            rg_sc(ip*2,j) = acos(z/r);
+//            rg_sc(ip*2+1,j) = atan2(y, x);
+//        }
+//    }
+//    cout << "Bases in spherical" << endl;
+//    rg_sc.print();
+//
+    int n_p = rg_p.rank();
+//    cout << "Size of projection matrix for particles in spherical coord. " << rg_sc.size()[0] << " " << rg_sc.size()[1]<< endl;
+
     
-    
-    Matrix bs(rg_sh.size()[0]+rg_sc.size()[0],rg_sh.size()[1]+rg_sc.size()[1]);
-    for (int i=0; i<rg_sh.size()[0]+rg_sc.size()[0]; i++){
+    // Combine the bases for particles and spherical harmonics into one
+    Matrix bs(rg_sh.size()[0]+rg_p.size()[0],rg_sh.size()[1]+rg_p.size()[1]);
+    for (int i=0; i<rg_sh.size()[0]+rg_p.size()[0]; i++){
         for (int j=0; j<n_sh+n_p; j++){
             if (i<rg_sh.size()[0] && j<rg_sh.size()[1]){
                 bs(i,j) = rg_sh(i,j);
             }
             if (i>=rg_sh.size()[0] && j>= rg_sh.size()[1]){
-                bs(i,j) = rg_sc(i-rg_sh.size()[0],j-rg_sh.size()[1]);
+                bs(i,j) = rg_p(i-rg_sh.size()[0],j-rg_sh.size()[1]);
             }
         }
     }
+
     
     bs.print();
-    cout << bs.size()[0] << " " << bs.size()[1] << endl;
- 
-    
+    cout << "Size of bases " << bs.size()[0] << " " << bs.size()[1] << endl;
+
+
 
 //
 //   // Icosahedral group-rep on spherical harmonics+particles
@@ -285,7 +309,7 @@ int main(int argc, char** argv){
 
    // Construct symmetry reduced problem
    Vector x0 = bs.T()*in;
-    bs.print();
+
 
 
 
@@ -294,16 +318,31 @@ int main(int argc, char** argv){
 
 //   x0(nn-1) = 1;
 //   x0(0) = 1;
-    x0(0) = 0.0;
-    x0(1) = 0.0;
-    x0(2) = 0.0;
-    x0(3) = 0.0;
-    x0(4) = 0.0;
-    x0(5) = 0.0;
-
-    for (int i = 0; i<rg_sc.size()[1]; i++){
-        x0(i+rg_sh.size()[1]) = 0.1;
+    
+    srand(time(NULL));
+    for (int j=0; j< 4; j++) {
+        x0(j) =  double(rand())/RAND_MAX;
     }
+      
+//    x0(0) = 0.1;
+//    x0(1) = 0.1;
+//    x0(2) = 0.1;
+//    x0(3) = 0.1;
+//    x0(4) = 0.1;
+//    x0(5) = 0.1;
+//    x0(6) = 0.1;
+//    x0(7) = 0.1;
+//    x0(8) = 0.1;
+//    x0(9) = 0.1;
+//    x0(10) = 0.1;
+//    x0(11) = 0.1;
+//    x0(12) = 0.1;
+//
+
+
+//    for (int i = 0; i<rg_sc.size()[1]; i++){
+//        x0(i+rg_sh.size()[1]) = 0.1;
+//    }
     
     x0.print();
 
@@ -351,7 +390,7 @@ int main(int argc, char** argv){
      ostringstream toStringNP, toStringCntr; 
      toStringNP << NP;
      toStringCntr << i;
-     string temp("C3");
+     string temp("D9");
      temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
      prob.printToVTK(temp);
 
