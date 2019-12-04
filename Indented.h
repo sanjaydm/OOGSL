@@ -18,7 +18,7 @@ public:
     _C = para(1); //reference from para;
     _nu = para(2);
     _mu = 0.00;
-    _r = 1;
+    _r = para(3);
     _d = para(4);
 
     cout << "\033[32m " 

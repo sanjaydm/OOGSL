@@ -16,7 +16,7 @@
 #include<string.h>
 #include <sstream>
 #include <fstream>
-
+#include"continuation.h"
 
 using namespace std;
 int main(int argc, char** argv){
@@ -126,11 +126,65 @@ int main(int argc, char** argv){
 //      << sin(2*PI/5) << cos(2*PI/5) << 0
 //      << 0 << 0 << 1;
 
+<<<<<<< HEAD
     // Generators of D9
     Matrix r(3,3);
     r << cos(2*PI/9) << -sin(2*PI/9) << 0
       << sin(2*PI/9) << cos(2*PI/9) << 0
       << 0 << 0 << 1;
+=======
+   // Icosahedral im(G2,G3);
+
+   // // Construct projection operators
+   // Projection pm(im);
+   // Matrix rg = pm._P.range();
+   // int nn = 4;
+   // // Basis vectors adapted for spherical coordinates
+   // Matrix bas((N+1)*(N+1)+NP*2, nn);
+   // for (int j=0; j<=nn-1; j++){
+   //   for (int i=0; i < (N+1)*(N+1)+NP*2; i ++) {
+   //     if (i < (N+1)*(N+1) && j<nn-1){
+   // 	 bas(i,j)=rg(i,j);
+   //     }
+   //     if (j==nn-1 && i >= (N+1)*(N+1)) {
+   // 	 double z = rg(3*((i-(N+1)*(N+1))/2) + 2 + (N+1)*(N+1),nn-1);
+   // 	 double x = rg(3*((i-(N+1)*(N+1))/2) + (N+1)*(N+1),nn-1);
+   // 	 double y = rg(3*((i-(N+1)*(N+1))/2) + 1 + (N+1)*(N+1),nn-1);
+   // 	 double r = sqrt(x*x+y*y+z*z);
+   // 	 //cout << 3*((i-(N+1)*(N+1))/2) <<" :" << x << ";" << y << ";" << z <<endl;
+   // 	 if ((i-(N+1)*(N+1))%2==0)
+   // 	   bas(i,j) = acos(z/r);
+	 
+   // 	 else
+   // 	   bas(i,j) = atan2(y, x);
+   //     }
+   //   }
+   // }
+
+   // // Construct symmetry reduced problem
+   // Vector x0 = bas.T()*in;
+   // x0.print();
+   // x0(nn-1) = 1;
+   // x0(0) = 0;
+   // (bas*x0).print();
+   // //return 0;
+   // SymmReduced symmP(x0,para,bas,&prob);
+   // symmP.checkConsistency();
+
+
+
+    // bruteforce a bases matrix for particles
+    Matrix rgp_bf(NP*3,rg_prk);
+    for (int j=0; j<rg_prk/2; j++){
+        for (int i=0; i<NP*3; i++){
+            rgp_bf(i,2*j) = rg_p(i,2*j) + rg_p(i,2*j+1);
+            rgp_bf(i,2*j+1) = rg_p(i,2*j) - rg_p(i,2*j+1);
+        }
+    }
+
+    return 0;
+    
+>>>>>>> 16109ecda5fd0f61bf04a36887ef01f54c00a1af
     
     // Tetrahedral
 //    Matrix r(3,3);
@@ -351,8 +405,6 @@ int main(int argc, char** argv){
    // symmP.checkConsistency();
     symmP.fdf();
     symmP._df.print();
-    
-
 
    MultiMin M("lbfgs", &symmP);
    M._LBFGSB_Initialize();
@@ -368,7 +420,7 @@ int main(int argc, char** argv){
    ofstream outFileAp("Energy.txt", ofstream::app);
    outFileAp << "kappa\t rm\t Total Energy\t Projg\n";
    outFileAp.close();
-   for (int i=0; i<30; i++) {
+   for (int i=0; i<5; i++) {
      // Update parameter re
      symmP._para(2) = symmP._para(2) + 0.05*(i/30.0);
      cout << "re = " << prob._re << endl;

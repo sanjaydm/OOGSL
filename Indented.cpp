@@ -138,10 +138,11 @@ void Indented :: fdf(){
 
       // Call material law
       NeoHookean(est, kst);
-
+      double dist2 = pow(-_d+rho+u,2) + pow(v+S,2)-_r*_r;
       // If Energy flag is on
       if (_fFlag){
-	_f +=  (_lclEnergyDensity*rho - rho*fr*(u-(_d - _r - rho))- rho*fz*v) * Jacwj;
+	//_f +=  (_lclEnergyDensity*rho - rho*fr*(u-(_d - _r - rho))- rho*fz*v) * Jacwj;
+        _f +=  (_lclEnergyDensity*rho - rho*fr*dist2) * Jacwj;
 
       }
       if (_dfFlag){
@@ -213,43 +214,43 @@ void Indented :: fdf(){
 	dfr0 = L0(qj);
 	dfr1 = L1(qj);
 
-	dfz0 = _mu*dfr0;
-	dfz1 = _mu*dfr1;
+	// dfz0 = _mu*dfr0;
+	// dfz1 = _mu*dfr1;
 
 
 	_df(5*ele(0)     ) +=  ((rhoNs * Tr)* du0_s  +
 				rho*Ms*dphi0U_s + 
-				(Nt - rhofr)* du0) *Jacwj ;	
+				(Nt - rhofr*2*(u+rho-_d))* du0) *Jacwj ;	
 	_df(5*ele(0) + 1 ) +=  ((rhoNs * Tr)* du1_s  +
 				rho*Ms*dphi1U_s +
-				(Nt - rhofr)* du1) *Jacwj ;	
+				(Nt - rhofr*2*(u+rho-_d))* du1) *Jacwj ;	
 	
 	_df(5*ele(0) + 2   ) +=  ((rhoNs * Tz)* dv0_s +
 				  rho*Ms*dphi0V_s + Mt*dv0_s
-				  - rhofz* dv0) *Jacwj ;
+				  - rhofr*2*(v+S)*dv0) *Jacwj ;
 	_df(5*ele(0) + 3   ) +=  ((rhoNs * Tz)* dv1_s +
 				  rho*Ms*dphi1V_s + Mt*dv1_s
-				  - rhofz* dv1) *Jacwj ;
+				  - rhofr*2*(v+S)* dv1) *Jacwj ;
 
         
-	_df(5*ele(0) + 4)   += -rho*( (u-(_d-_r-rho))*dfr0 + dfz0*v)*Jacwj;
+	_df(5*ele(0) + 4)   += -rho*dfr0*(pow(-_d+rho+u,2) + pow(v+S,2)-_r*_r)*Jacwj;
 
-        //cout << -rho*( (u-(_d-_r-rho))*dfr0 + dfz0*v)*Jacwj << endl;
+
 	_df(5*ele(1)     ) +=  ((rhoNs * Tr)* du2_s  +
 				rho*Ms*dphi2U_s + 
-				(Nt - rhofr)* du2) *Jacwj ;	
+				(Nt - rhofr*2*(u+rho-_d))* du2) *Jacwj ;	
 	_df(5*ele(1) + 1 ) +=  ((rhoNs * Tr)* du3_s  +
 				rho*Ms*dphi3U_s +
-				(Nt - rhofr)* du3) *Jacwj ;	
+				(Nt - rhofr*2*(u+rho-_d))* du3) *Jacwj ;	
 	
 	_df(5*ele(1) + 2   ) +=  ((rhoNs * Tz)* dv2_s +
 				  rho*Ms*dphi2V_s + Mt*dv2_s
-				  - rhofz* dv2) *Jacwj ;
+				  - rhofr* 2*(v+S)*dv2) *Jacwj ;
 	_df(5*ele(1) + 3   ) +=  ((rhoNs * Tz)* dv3_s +
 				  rho*Ms*dphi3V_s + Mt*dv3_s
-				  - rhofz* dv3) *Jacwj ;
+				  - rhofr*2*(v+S)* dv3) *Jacwj ;
 
-	_df(5*ele(1) + 4)   += -rho*( (u-(_d-_r-rho))*dfr1 + dfz1*v)*Jacwj;
+	_df(5*ele(1) + 4)   += -rho*dfr1*(pow(-_d+rho+u,2) + pow(v+S,2)-_r*_r)*Jacwj;
 
 
       }
@@ -320,17 +321,20 @@ void Indented::writeSolution(string filename){
   myfile << setprecision(15);
   myfile << "x = [";
   for (auto i = 0; i < _nodes.size(); i++) {
-    //if (i%5 == 0)
       myfile << _nodes[i] << ",";
-      //myfile << _r + _x(i)<< ",";
-      
-      //myfile <<_d - _r*cos(_x(i)) << ",";
     }
+  // for (auto i = 0; i < _x.size(); i++) {
+  //   if (i%5 == 0){
+  //     myfile << _d - 1 - _x(i)<< ",";
+  //     //myfile << _r*sin(_x(i)) << ",";
+  //   }
+  // }
   myfile << "]\n";
   myfile << "y = [";
   for (auto i = 0; i < _x.size(); i++) {
-    if (i%5 == 4){
-      myfile << _x(i)<< ",";
+    if (i%5 == 2){
+      //myfile << pow(_x(i)-_d+1,2) + pow(_x(i+2) + _nodes[i/5],2)  << ",";
+      myfile << _x(i)  << ",";
       //myfile << _r*sin(_x(i)) << ",";
     }
   }

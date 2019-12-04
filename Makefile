@@ -27,8 +27,8 @@ testgroup: testgroup.cpp Vector.o Matrix.o Problem.o Group.o SymmReduced.o
 test: test.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o
 	$(CC) $(DBG)  $(OPT) test.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o test.out 
 
-symmHelfLJ: symmHelfLJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o
-	$(CC) $(DBG)  $(OPT) symmHelfLJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJ.out 
+symmHelfLJ: symmHelfLJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o continuation.o kbhit.o
+	$(CC) $(DBG)  $(OPT) symmHelfLJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o continuation.o kbhit.o -L./ -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJ.out 
 
 SymmReduced.o: SymmReduced.cpp
 	$(CC) $(DBG) $(OPT) -c SymmReduced.cpp 
@@ -90,5 +90,12 @@ lbfgsb-routines.o: lbfgsb-routines.f
 libLBFGS: lbfgsb-routines.o blas.o linpack.o timer.o
 	ar cru libLBFGS.a lbfgsb-routines.o blas.o linpack.o timer.o
 	ranlib libLBFGS.a
+
+continuation.o: continuation.h continuation.cpp
+	g++ -c continuation.h continuation.cpp -lgsl -lgslcblas $(DBG) $(OPT)
+
+kbhit.o: kbhit.h kbhit.c
+	g++ -c kbhit.h kbhit.c $(DBG) $(OPT)
+
 clean:
 	rm -r *.o *.gch *.vtk *.out *.a *.txt *.dSYM
