@@ -10,7 +10,8 @@
 
 class SymmReduced: public Problem {
 public:
- SymmReduced(Vector x0, Vector para, Matrix& bas, Problem* prob) {
+  SymmReduced(){;}
+  SymmReduced(Vector x0, Vector para, Matrix& bas, Problem* prob) {
     _bas = bas;
     _basT = _bas.T();
     array<int,2> rowCol = _bas.size();

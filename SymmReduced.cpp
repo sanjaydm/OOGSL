@@ -10,6 +10,7 @@ void SymmReduced::convertBasis2Full(){
      This number corresponds to the total number of spherical harmonics used.
   */
   _fullX = _bas*_x;
+
 }
 void SymmReduced::fdf(){
   //Convert symmetry reduced dofs to full

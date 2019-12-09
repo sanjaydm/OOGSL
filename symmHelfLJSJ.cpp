@@ -43,8 +43,8 @@ int f_wrapper(double* indvar, double* invar, gsl_vector* out){
 
 int main(int argc, char** argv){
   // Number of modes and particles  
-  int N = 12;
-  int NP = 12;
+  int N = 1;
+  int NP = 16;
   int Ntot= (N+1)*(N+1);
   Vector in(Ntot+3*NP); 
   Vector para(3);
@@ -54,7 +54,7 @@ int main(int argc, char** argv){
   
 
   // Parameters of the model
-  double re = 2*sqrt(4.0/NP)-0.1; 
+  double re = 2*sqrt(4.0/NP)-0.1;
   double k = 5;
   double eps = 1;
   para(0) = k;   //bending stiffness kappa
@@ -79,60 +79,162 @@ int main(int argc, char** argv){
 
   //return 0;
 
-  // Generators of Icosahedral Group
-    Matrix g2(3,3);
-   g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
-   << 0.500000000000000 <<  0.309016994374947 << -0.809016994374947
-   << -0.309016994374948 << -0.809016994374947 << -0.500000000000000;
+//  // Generators of Icosahedral Group
+//    Matrix g2(3,3);
+//   g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
+//   << 0.500000000000000 <<  0.309016994374947 << -0.809016994374947
+//   << -0.309016994374948 << -0.809016994374947 << -0.500000000000000;
+//
+//   Matrix g3(3,3);
+//   g3 <<   -0.0000  <<  -0.0000  <<  -1.0000
+//      <<    1.0000  <<   0.0000  <<  -0.0000
+//      <<      0     <<  -1.0000  <<   0.0000;
 
-   Matrix g3(3,3);
-   g3 <<   -0.0000  <<  -0.0000  <<  -1.0000
-      <<    1.0000  <<   0.0000  <<  -0.0000
-      <<      0     <<  -1.0000  <<   0.0000;
+//   // Construct Icosahedral group-rep on spherical harmonics
+//   Matrix r2 = compute_R(0,N,g2);
+//   Matrix r3 = compute_R(0,N,g3);
 
-   // Construct Icosahedral group-rep on spherical harmonics
-   Matrix r2 = compute_R(0,N,g2);
-   Matrix r3 = compute_R(0,N,g3);
+//   // Construct permutation representation
+//   vector<int> g3p = {8,5,6,9,7,12,2,10,11,1,4,3};
+//   vector<int> g2p = {7,5,8,12,2,10,1,3,11,6,9,4};
+//
+//   Matrix g2_Mat = constructMat(g2p,g2);
+//   Matrix g3_Mat = constructMat(g3p,g3);
 
-   // Construct permutation representation
-   vector<int> g3p = {8,5,6,9,7,12,2,10,11,1,4,3};
-   vector<int> g2p = {7,5,8,12,2,10,1,3,11,6,9,4};
+//
+//   // Icosahedral group-rep on spherical harmonics+particles
+//   int GN = r2.size()[0] +g2_Mat.size()[0];
+//   Matrix G2(GN, GN);
+//   Matrix G3(GN, GN);
+//   for (int i=0; i <GN; i++){
+//     for (int j=0; j<GN; j++){
+//       if(i<r2.size()[0] && j < r2.size()[0]){
+//	 G2(i,j) = r2(i,j);
+//	 G3(i,j) = r3(i,j);
+//       }
+//       if(i>=r2.size()[0] && j >= r2.size()[0]){
+//	 G2(i,j) = g2_Mat(i-r2.size()[0],j-r2.size()[0]);
+//	 G3(i,j) = g3_Mat(i-r2.size()[0],j-r2.size()[0]);
+//       }
+//     }
+//   }
 
-   Matrix g2_Mat = constructMat(g2p,g2);
-   Matrix g3_Mat = constructMat(g3p,g3);
-
-
-   // Icosahedral group-rep on spherical harmonics+particles
-   int GN = r2.size()[0] +g2_Mat.size()[0];
-   Matrix G2(GN, GN);
-   Matrix G3(GN, GN);
-   for (int i=0; i <GN; i++){
-     for (int j=0; j<GN; j++){
-       if(i<r2.size()[0] && j < r2.size()[0]){
-	 G2(i,j) = r2(i,j);
-	 G3(i,j) = r3(i,j);
-       }
-       if(i>=r2.size()[0] && j >= r2.size()[0]){
-	 G2(i,j) = g2_Mat(i-r2.size()[0],j-r2.size()[0]);
-	 G3(i,j) = g3_Mat(i-r2.size()[0],j-r2.size()[0]);
-       }
-     }
-   }
-
-   Icosahedral im(G2,G3);
-
-   // Construct projection operators
-   Projection pm(im);
-   Matrix rg = pm._P.range();
+//   Icosahedral im(G2,G3);
+//
+//   // Construct projection operators
+//   Projection pm(im);
+//   Matrix rg = pm._P.range();
    //rg.print();
    
-   int nn = 1;
+    
+    
+    
+//    // Generators of D9
+//    Matrix r(3,3);
+//    r << cos(2*PI/9) << -sin(2*PI/9) << 0
+//      << sin(2*PI/9) << cos(2*PI/9) << 0
+//      << 0 << 0 << 1;
+
+    
+//    // Generators of D5
+//    Matrix r(3,3);
+//      r << cos(2*PI/5) << -sin(2*PI/5) << 0
+//        << sin(2*PI/5) << cos(2*PI/5) << 0
+//        << 0 << 0 << 1;
+    
+    // Generators of D4
+    Matrix r(3,3);
+      r << cos(2*PI/4) << -sin(2*PI/4) << 0
+        << sin(2*PI/4) << cos(2*PI/4) << 0
+        << 0 << 0 << 1;
+
+    
+    Matrix s(3,3);
+      s << 1 << 0 << 0
+        << 0 <<-1 << 0
+        << 0 << 0 << -1;
+    
+    
+    // Construct group-rep on spherical harmonics
+    Matrix rr = compute_R(0,N,r);
+    Matrix ss = compute_R(0,N,s);
+    
+    //candidate for D5
+    vector<int> rp = {2,3,4,1,6,7,8,5,10,11,12,9,14,15,16,13};
+    vector<int> sp = {13,16,15,14,12,11,10,9,8,7,6,5,1,4,3,2};
+    
+    // Construct group-rep on particles
+    Matrix rp_Mat = constructMat(rp,r);
+    Matrix sp_Mat = constructMat(sp,s);
+    
+    // group construction
+    D4 D4_p(sp_Mat,rp_Mat);
+    D4 D4_sh(ss,rr);
+    
+    
+    // Projection operator
+    Projection p_sh(D4_sh);
+    Projection p_p(D4_p);
+    
+    // bases in cartesian
+    Matrix rg_sh = p_sh._P.range();
+    Matrix rg_p = p_p._P.range();
+    
+    int n_sh = rg_sh.rank(); // number of bases for spherical coord.
+    int rg_prk = rg_p.rank(); // number of bases for particles in cartesian
+    int n_p = rg_p.rank();
+
+    // Combine the bases for particles and spherical harmonics into one
+    Matrix bs(rg_sh.size()[0]+rg_p.size()[0],rg_sh.size()[1]+rg_p.size()[1]);
+    for (int i=0; i<rg_sh.size()[0]+rg_p.size()[0]; i++){
+        for (int j=0; j<n_sh+n_p; j++){
+            if (i<rg_sh.size()[0] && j<rg_sh.size()[1]){
+                bs(i,j) = rg_sh(i,j);
+            }
+            if (i>=rg_sh.size()[0] && j>= rg_sh.size()[1]){
+                bs(i,j) = rg_p(i-rg_sh.size()[0],j-rg_sh.size()[1]);
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+//   int nn = 1;
    
    // Construct symmetry reduced problem
-   Vector x0 = rg.T()*in;
+//   Vector x0 = rg.T()*in;
    //x0.print();
+    
+   Vector x0 = bs.T()*in;
+    int nn = x0.size();
+    
+    srand(time(NULL));
+    for (int j=0; j< nn; j++) {
+        x0(j) =  double(rand())/RAND_MAX;
+    }
    
-   symmP = SymmReduced(x0,para,rg,&prob);
+    
+   symmP = SymmReduced(x0,para,bs,&prob);
    symmP.checkConsistency();
    sz = x0.size();
    sz_para = para.size();
@@ -243,7 +345,7 @@ int main(int argc, char** argv){
        ostringstream toStringNP, toStringCntr; 
        toStringNP << NP;
        toStringCntr << i;
-       string temp("Icosa");
+       string temp("D4");
        temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
      
        prob.printToVTK(temp);

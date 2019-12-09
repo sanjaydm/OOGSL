@@ -31,6 +31,14 @@ public:
     void constructGroup();
 };
 
+class D4: public Group{
+public:
+    Matrix _g2;
+    Matrix _g4;
+    D4(Matrix g2, Matrix g4);
+    void constructGroup();
+};
+
 class D5: public Group{
 public:
     Matrix _g2d;

@@ -54,6 +54,25 @@ void Icosahedral::constructGroup(){
         }
     }
 }
+/* --------------- D4 -------------- */
+
+D4::D4(Matrix g2, Matrix g4){
+    _g2 = g2;
+    _g4 = g4;
+    _gen.push_back(_g2);
+    _gen.push_back(_g4);
+    constructGroup();
+}
+
+void D4::constructGroup(){
+    for (int nu = 0; nu <= 3; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            Matrix g4_nu = _g4^nu;
+            Matrix g2_sigma = _g2^sigma;
+            _g.push_back( g4_nu * g2_sigma );
+        }
+    }
+}
 
 
 /* --------------- D5 -------------- */
