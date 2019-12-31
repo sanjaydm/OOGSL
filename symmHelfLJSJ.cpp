@@ -44,7 +44,7 @@ int f_wrapper(double* indvar, double* invar, gsl_vector* out){
 int main(int argc, char** argv){
   // Number of modes and particles  
   int N = 1;
-  int NP = 16;
+  int NP = 15;
   int Ntot= (N+1)*(N+1);
   Vector in(Ntot+3*NP); 
   Vector para(3);
@@ -160,8 +160,26 @@ int main(int argc, char** argv){
     Matrix ss = compute_R(0,N,s);
     
     //candidate for D5
-    vector<int> rp = {2,3,4,1,6,7,8,5,10,11,12,9,14,15,16,13};
-    vector<int> sp = {13,16,15,14,12,11,10,9,8,7,6,5,1,4,3,2};
+    vector<int> rp;
+    vector<int> sp;
+    
+
+    
+    fstream myfiler("~/Documents/MATLAB/clare-4/r_perm.txt", ios_base::in);
+    int x;
+    for (int i=0; i< NP; i++){
+        myfiler >> x;
+        rp.push_back(x);
+    }
+    
+    
+    fstream myfiles("~/Documents/MATLAB/clare-4/s_perm.txt", ios_base::in);
+    for (int i=0; i< NP; i++){
+        myfiles >> x;
+        sp.push_back(x);
+    }
+
+    
     
     // Construct group-rep on particles
     Matrix rp_Mat = constructMat(rp,r);
