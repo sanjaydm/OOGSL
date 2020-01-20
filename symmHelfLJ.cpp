@@ -79,8 +79,8 @@ int main(int argc, char** argv){
 
   //return 0;
 
-  // Generators of Icosahedral Group
-    Matrix g2(3,3);
+  //Generators of Icosahedral Group
+   Matrix g2(3,3);
    g2 <<  -0.809016994374947 <<  0.500000000000000 << -0.309016994374947
    << 0.500000000000000 <<  0.309016994374947 << -0.809016994374947
    << -0.309016994374948 << -0.809016994374947 << -0.500000000000000;
@@ -121,6 +121,7 @@ int main(int argc, char** argv){
 
    Icosahedral im(G2,G3);
 
+   
    // Construct projection operators
    Projection pm(im);
    Matrix rg = pm._P.range();
