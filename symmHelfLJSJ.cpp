@@ -18,6 +18,7 @@
 #include <fstream>
 #include "kbhit.h"
 #include"continuation.h"
+#include <string>
 
 using namespace std;
 int sz, sz_para;
@@ -43,9 +44,10 @@ int f_wrapper(double* indvar, double* invar, gsl_vector* out){
 
 int main(int argc, char** argv){
   // Number of modes and particles  
-  int N = 1;
-  int NP = 15;
+  int N = 0;
+  int NP = 6;
   int Ntot= (N+1)*(N+1);
+  int x = 6;
   Vector in(Ntot+3*NP); 
   Vector para(3);
   Vector discPara(2); //Discretization parameters
@@ -142,10 +144,10 @@ int main(int argc, char** argv){
 //        << sin(2*PI/5) << cos(2*PI/5) << 0
 //        << 0 << 0 << 1;
     
-    // Generators of D4
+    // Generators of Dx
     Matrix r(3,3);
-      r << cos(2*PI/4) << -sin(2*PI/4) << 0
-        << sin(2*PI/4) << cos(2*PI/4) << 0
+      r << cos(2*PI/x) << -sin(2*PI/x) << 0
+        << sin(2*PI/x) << cos(2*PI/x) << 0
         << 0 << 0 << 1;
 
     
@@ -159,26 +161,82 @@ int main(int argc, char** argv){
     Matrix rr = compute_R(0,N,r);
     Matrix ss = compute_R(0,N,s);
     
+    
     //candidate for D5
     vector<int> rp;
     vector<int> sp;
     
+    
+    
+    ifstream myfiler;
+    myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/r_perm.txt");//, ios_base::in
+    int y=0;
+    for (int i=0; i< NP; i++){
+        myfiler >> y;
+        cout << y << endl;
+        rp.push_back(y);
+    }
+    cout << "---------------"<< endl;
+    
+    ifstream myfiles;
+    myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/s_perm.txt");//, ios_base::in
+    for (int i=0; i< NP; i++){
+        myfiles >> y;
+        cout << y << endl;
+        sp.push_back(y);
+    }
+
+
+//    if (x == 2) {
+//        rp = {2,1,4,3,5}; //
+//        sp = {3,4,1,2,5};
+//    }
+//    if (x == 3){
+//        rp = {2,3,1,4,5};
+//        sp = {3,2,1,5,4};
+//    }
+//    if (x == 4){
+//        rp = {2,3,4,1,5};
+//        sp = {2,1,4,3,5};
+//    }
+//    if (x == 5){
+//        rp = {2,3,4,5,1};
+//        sp = {4,3,2,1,5};
+//    }
+//    if (x == 6){
+//        fstream myfiler("~/Documents/MATLAB/clare-4/r_perm.txt", ios_base::in);
+//        int y;
+//        for (int i=0; i< NP; i++){
+//            myfiler >> y;
+//            rp.push_back(y);
+//        }
+//
+//        fstream myfiles("~/Documents/MATLAB/clare-4/s_perm.txt", ios_base::in);
+//        for (int i=0; i< NP; i++){
+//            myfiles >> y;
+//            sp.push_back(y);
+//        }
+//       }
+    
+    
 
     
-    fstream myfiler("~/Documents/MATLAB/clare-4/r_perm.txt", ios_base::in);
-    int x;
-    for (int i=0; i< NP; i++){
-        myfiler >> x;
-        rp.push_back(x);
-    }
-    
-    
-    fstream myfiles("~/Documents/MATLAB/clare-4/s_perm.txt", ios_base::in);
-    for (int i=0; i< NP; i++){
-        myfiles >> x;
-        sp.push_back(x);
-    }
+//    fstream myfiler("~/Documents/MATLAB/clare-4/r_perm.txt", ios_base::in);
+//    int x;
+//    for (int i=0; i< NP; i++){
+//        myfiler >> x;
+//        rp.push_back(x);
+//    }
+//
+//
+//    fstream myfiles("~/Documents/MATLAB/clare-4/s_perm.txt", ios_base::in);
+//    for (int i=0; i< NP; i++){
+//        myfiles >> x;
+//        sp.push_back(x);
+//    }
 
+    Projection p_sh;
+    Projection p_p;
     
     
     // Construct group-rep on particles
@@ -186,13 +244,42 @@ int main(int argc, char** argv){
     Matrix sp_Mat = constructMat(sp,s);
     
     // group construction
-    D4 D4_p(sp_Mat,rp_Mat);
-    D4 D4_sh(ss,rr);
-    
-    
-    // Projection operator
-    Projection p_sh(D4_sh);
-    Projection p_p(D4_p);
+    if (x == 2) {
+        D2 D2_p(sp_Mat,rp_Mat);
+        D2 D2_sh(ss,rr);
+        
+        p_sh = Projection(D2_sh);
+        p_p = Projection(D2_p);
+    }
+    if (x == 3){
+        D3 D3_p(sp_Mat,rp_Mat);
+        D3 D3_sh(ss,rr);
+         
+        p_sh = Projection(D3_sh);
+        p_p = Projection(D3_p);
+    }
+    if (x == 4){
+        D4 D4_p(sp_Mat,rp_Mat);
+        D4 D4_sh(ss,rr);
+        
+        p_sh = Projection(D4_sh);
+        p_p = Projection(D4_p);
+    }
+    if (x == 5){
+        D5 D5_p(sp_Mat,rp_Mat);
+        D5 D5_sh(ss,rr);
+        
+        p_sh = Projection(D5_sh);
+        p_p = Projection(D5_p);
+    }
+    if (x == 6){
+        D6 D6_p(sp_Mat,rp_Mat);
+        D6 D6_sh(ss,rr);
+        
+        p_sh = Projection(D6_sh);
+        p_p = Projection(D6_p);
+    }
+
     
     // bases in cartesian
     Matrix rg_sh = p_sh._P.range();
@@ -242,6 +329,7 @@ int main(int argc, char** argv){
    // Construct symmetry reduced problem
 //   Vector x0 = rg.T()*in;
    //x0.print();
+    bs.print();
     
    Vector x0 = bs.T()*in;
     int nn = x0.size();
@@ -266,6 +354,7 @@ int main(int argc, char** argv){
    outFileAp << "kappa\t rm\t Total Energy\n";
    outFileAp.close();
 
+    
    // One step LBFGS minimization
    for (int i=0; i<1; i++) {
      // Update parameter re
@@ -274,7 +363,7 @@ int main(int argc, char** argv){
 
      // Solve
      M.LBFGSB_Solve();
-     //symmP._x.print();
+
 
      //Print Energy to output
      ofstream outFileAp("Energy.txt", ofstream::app);
@@ -289,12 +378,35 @@ int main(int argc, char** argv){
      ostringstream toStringNP, toStringCntr; 
      toStringNP << NP;
      toStringCntr << i;
-     string temp("Icosa");
+     string temp(to_string(x));
      temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
      prob.printToVTK(temp);
 
    }
+    
+    
+    
+    
+    
+    
+    // Print to Data.txt
+    ofstream outFileApp("Data.txt", ofstream::app);
+    outFileApp.setf(ios_base::scientific);
+    for (int i=0; i< symmP._fullX.size(); i++){
+        outFileApp << symmP._fullX(i) << " \t ";
+    }
+    for (int i=0; i< symmP._para.size(); i++){
+        outFileApp << symmP._para(i) << " \t ";
+    }
+    outFileApp << "\n";
+    // outFileApp << symmP._f << endl;
+    outFileApp.close();
 
+    
+    
+    
+    
+    
    // Numerical Continuation Starts
    double* trivial = new double[sz+sz_para];
    for (int i=0; i< sz; i++)
@@ -358,16 +470,40 @@ int main(int argc, char** argv){
        double enTot = symmP.f();
        outFileAp << symmP._para(0) << " \t " << symmP._para(2)<< "\t" << enTot << "\t" << endl;
        outFileAp.close();
+         
 
        // Print to VTK file
        ostringstream toStringNP, toStringCntr; 
        toStringNP << NP;
        toStringCntr << i;
-       string temp("D4");
+       string temp(to_string(x));
        temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
-     
+         
+         
+         
+         
+        
+         
+    
        prob.printToVTK(temp);
        i++;
+         
+         
+         
+         ofstream outFileApp("Data.txt", ofstream::app);
+          outFileApp.setf(ios_base::scientific);
+         for (int i=0; i< symmP._fullX.size(); i++){
+             outFileApp << symmP._fullX(i) << " \t ";
+         }
+         for (int i=0; i< symmP._para.size(); i++){
+             outFileApp << symmP._para(i) << " \t ";
+         }
+         // outFileApp << symmP._f << endl;
+         outFileApp << endl;
+         outFileApp.close();
+         
+         
+         
      }
 
    }while(key!='x');

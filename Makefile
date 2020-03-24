@@ -31,7 +31,10 @@ symmHelfLJ: symmHelfLJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o Multi
 	$(CC) $(DBG)  $(OPT) symmHelfLJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lCont -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJ.out 
 
 symmHelfLJSJ: symmHelfLJSJ.cpp Vector.o Matrix.o Problem.o libLBFGS MultiMin.o MultiRoot.o Group.o SymmReduced.o MembLJ.o libCont
-	$(CC) $(DBG)  $(OPT) symmHelfLJSJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lCont -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJSJ.out 
+	$(CC) $(DBG)  $(OPT) symmHelfLJSJ.cpp Vector.o Matrix.o Problem.o SymmReduced.o MultiMin.o MultiRoot.o Group.o MembLJ.o -L./ -lCont -lLBFGS -lgfortran -lgsl -lgslcblas -o symmHelfLJSJ.out
+
+ReadData: ReadData.cpp Vector.o Matrix.o Problem.o MembLJ.o
+	$(CC) $(DBG)  $(OPT) ReadData.cpp Vector.o Matrix.o Problem.o MembLJ.o -lgfortran -lgsl -lgslcblas -o ReadData.out
 
 contHelfLJ: contHelfLJ.cpp libCont
 	$(CC) contHelfLJ.cpp -L ./ -lCont -lgsl -lgslcblas -o test.out $(DBG) -O2

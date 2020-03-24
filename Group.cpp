@@ -54,6 +54,45 @@ void Icosahedral::constructGroup(){
         }
     }
 }
+/* --------------- D2 -------------- */
+
+D2::D2(Matrix g2, Matrix g22){
+    _g2 = g2;
+    _g22 = g22;
+    _gen.push_back(_g2);
+    _gen.push_back(_g22);
+    constructGroup();
+}
+
+void D2::constructGroup(){
+    for (int nu = 0; nu <= 1; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            Matrix g22_nu = _g22^nu;
+            Matrix g2_sigma = _g2^sigma;
+            _g.push_back( g22_nu * g2_sigma );
+        }
+    }
+}
+
+/* --------------- D3 -------------- */
+
+D3::D3(Matrix g2, Matrix g3){
+    _g2 = g2;
+    _g3 = g3;
+    _gen.push_back(_g2);
+    _gen.push_back(_g3);
+    constructGroup();
+}
+
+void D3::constructGroup(){
+    for (int nu = 0; nu <= 2; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            Matrix g3_nu = _g3^nu;
+            Matrix g2_sigma = _g2^sigma;
+            _g.push_back( g3_nu * g2_sigma );
+        }
+    }
+}
 /* --------------- D4 -------------- */
 
 D4::D4(Matrix g2, Matrix g4){
@@ -94,7 +133,25 @@ void D5::constructGroup(){
         }
     }
 }
+/* --------------- D6 -------------- */
 
+D6::D6(Matrix g2, Matrix g6){
+    _g2 = g2;
+    _g6 = g6;
+    _gen.push_back(_g2);
+    _gen.push_back(_g6);
+    constructGroup();
+}
+
+void D6::constructGroup(){
+    for (int nu = 0; nu <= 5; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            Matrix g6_nu = _g6^nu;
+            Matrix g2_sigma = _g2^sigma;
+            _g.push_back( g6_nu * g2_sigma );
+        }
+    }
+}
 /* --------------- D9 -------------- */
 
 D9::D9(Matrix g2, Matrix g9){

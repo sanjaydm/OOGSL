@@ -50,12 +50,12 @@ void MembLJ::fdf(){
     
     double theta_p = acos(zp/rp);
       if (theta_p == 0){
-          cout << "test" << endl;
+	//cout << "test" << endl;
           theta_p = 1e-6;
       }
       else if (theta_p == M_PI){
           theta_p = theta_p - 1e-6;
-          cout << "test2" << endl;
+	  // cout << "test2" << endl;
       }
       
       
@@ -99,18 +99,20 @@ void MembLJ::fdf(){
     double yp = _x(_Ntot+3*pid + 1);
     double zp = _x(_Ntot+3*pid + 2);
     double rp = sqrt(xp*xp+yp*yp+zp*zp);
+    
     double theta_p = acos(zp/rp);
       if (theta_p == 0){
-               cout << "test" << endl;
+	//cout << "test" << endl;
                theta_p = 1e-6;
            }
            else if (theta_p == M_PI){
                theta_p = theta_p - 1e-6;
-               cout << "test2" << endl;
+	       //     cout << "test2" << endl;
            }
       tP(pid) = theta_p;
-    pP(pid) = atan2(yp,xp);
-    
+      pP(pid) = atan2(yp,xp);
+      //cout << "tp:" << tP(pid) << " " << pP(pid) << endl;
+      //cout << "xyz:" << xp << " " << yp << " " << zp << endl;
     // Cos and sin values at particle pos.
     double ctP = cos(tP(pid));
     double stP = sin(tP(pid));
@@ -482,22 +484,33 @@ void MembLJ::fdf(){
 		    double DFBt = (PBA(0)*fBt_x + PBA(1)*fBt_y + PBA(2)*fBt_z);
 		    double DFBp = (PBA(0)*fBp_x + PBA(1)*fBp_y + PBA(2)*fBp_z);
 
-		    double dtdxB = xB*zB/(pow(rB,3)*sqrt(1-zB*zB/(rB*rB)));
-		    double dtdyB = yB*zB/(pow(rB,3)*sqrt(1-zB*zB/(rB*rB)));
+		    double dtdxB = (fabs(yB) <1e-10 && fabs(xB)<1e-10 )? 0 : xB*zB/(pow(rB,3)*sqrt(1-zB*zB/(rB*rB)));
+		    double dtdyB = (fabs(yB) <1e-10 && fabs(xB)<1e-10 )? 0 : yB*zB/(pow(rB,3)*sqrt(1-zB*zB/(rB*rB)));
 		    double dtdzB = -sqrt(xB*xB + yB*yB)/pow(rB,2);
 
-		    double dtdxA = xA*zA/(pow(rA,3)*sqrt(1-zA*zA/(rA*rA)));
-		    double dtdyA = yA*zA/(pow(rA,3)*sqrt(1-zA*zA/(rA*rA)));
+		    double dtdxA = (fabs(yA)<1e-10 && fabs(xA)<1e-10)? 0 : xA*zA/(pow(rA,3)*sqrt(1-zA*zA/(rA*rA)));
+		    double dtdyA = (fabs(yA)<1e-10 && fabs(xA)<1e-10)? 0 : yA*zA/(pow(rA,3)*sqrt(1-zA*zA/(rA*rA)));
 		    double dtdzA = -sqrt(xA*xA + yA*yA)/pow(rA,2);
 
-		    double dpdxB = -yB/(xB*xB+yB*yB);
-		    double dpdyB = xB/(xB*xB+yB*yB);
+		    double dpdxB = (fabs(yB)<1e-10 && fabs(xB)<1e-10)? 0 : -yB/(xB*xB+yB*yB);
+		    double dpdyB = (fabs(yB)<1e-10 && fabs(xB)<1e-10)? 0 : xB/(xB*xB+yB*yB);
 		    double dpdzB = 0;
 
-		    double dpdxA = -yA/(xA*xA+yA*yA);
-		    double dpdyA = xA/(xA*xA+yA*yA);
+		    double dpdxA = (fabs(yA)<1e-10 && fabs(xA)<1e-10 )? 0 : -yA/(xA*xA+yA*yA);
+		    double dpdyA = (fabs(yA)<1e-10 && fabs(xA)<1e-10)? 0 : xA/(xA*xA+yA*yA);
 		    double dpdzA = 0;
 
+		    dtdxA = isnan(dtdxA)? 0: dtdxA;
+		    dpdxA = isnan(dpdxA)? 0: dpdxA;
+
+		    dtdxB = isnan(dtdxB)? 0: dtdxB;
+		    dpdxB = isnan(dpdxB)? 0: dpdxB;
+
+		    dtdyA = isnan(dtdyA)? 0: dtdyA;
+		    dpdyA = isnan(dpdyA)? 0: dpdyA;
+
+		    dtdyB = isnan(dtdyB)? 0: dtdyB;
+		    dpdyB = isnan(dpdyB)? 0: dpdyB;
 		    
 		    //if (pidB != (_NP-1)){
 		    //_df(_Ntot+pidB*2)   +=   (PBA(0)*fBt_x + PBA(1)*fBt_y + PBA(2)*fBt_z);
@@ -505,7 +518,9 @@ void MembLJ::fdf(){
 		    _df(_Ntot+pidB*3)   += DFBt*dtdxB+DFBp*dpdxB;
 		    _df(_Ntot+pidB*3+1) += DFBt*dtdyB+DFBp*dpdyB;
 		    _df(_Ntot+pidB*3+2) += DFBt*dtdzB+DFBp*dpdzB;
-		    
+
+		    //cout << DFBt << " " << DFBp << " " << DFBt << " " << DFBp << " " << DFBt << " " << DFBp << endl;
+		    //cout << PBA(0) << " " << PBA(1) << " "<<PBA(2) << endl;
 		      //}
 		      //if (pidA!=(_NP-1)){
 		    //_df(_Ntot+pidA*2)   +=   -(PBA(0)*fAt_x + PBA(1)*fAt_y + PBA(2)*fAt_z);
@@ -516,6 +531,8 @@ void MembLJ::fdf(){
 		    _df(_Ntot+pidA*3)   += DFAt*dtdxA + DFAp*dpdxA;
 		    _df(_Ntot+pidA*3+1) += DFAt*dtdyA + DFAp*dpdyA;
 		    _df(_Ntot+pidA*3+2) += DFAt*dtdzA + DFAp*dpdzA;
+
+		    
                       //}
                 
                   } // end if i==0
@@ -568,12 +585,12 @@ void MembLJ::fdf(){
 void MembLJ::LJ(Vector f12, double e){
   // //Harmonic 
   // double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
-  // if(option==ENERGY)
-  //   *energy = 0.5*e*pow(r-rm, 2);
-  // else if (option==RESIDUE) {
-  //   force(0) =  e*(r-rm)*f12(0)/r;
-  //   force(1) =  e*(r-rm)*f12(1)/r;
-  //   force(2) =  e*(r-rm)*f12(2)/r;
+  // if(_fFlag)
+  //   _LJEnergy = 0.5*e*pow(r-_re, 2);
+  // if (_dfFlag) {
+  //   _LJForce(0) =  e*(r-_re)*f12(0)/r;
+  //   _LJForce(1) =  e*(r-_re)*f12(1)/r;
+  //   _LJForce(2) =  e*(r-_re)*f12(2)/r;
   // }
 
   // --------------- Morse -----------------------
@@ -598,6 +615,7 @@ void MembLJ::LJ(Vector f12, double e){
   double sigma = _re*pow(2,-1./6.);
   double r = sqrt( f12(0)*f12(0) + f12(1)*f12(1) + f12(2)*f12(2) );
   double sigma_r6 = pow(sigma/r,6);
+
   if (_fFlag)
     _LJEnergy = 4*e*( pow(sigma_r6,2) - sigma_r6 );
 

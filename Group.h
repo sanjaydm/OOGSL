@@ -31,6 +31,22 @@ public:
     void constructGroup();
 };
 
+class D2: public Group{
+public:
+    Matrix _g2;
+    Matrix _g22;
+    D2(Matrix g2, Matrix g22);
+    void constructGroup();
+};
+
+class D3: public Group{
+public:
+    Matrix _g2;
+    Matrix _g3;
+    D3(Matrix g2, Matrix g3);
+    void constructGroup();
+};
+
 class D4: public Group{
 public:
     Matrix _g2;
@@ -44,6 +60,14 @@ public:
     Matrix _g2d;
     Matrix _g5;
     D5(Matrix g2d, Matrix g5);
+    void constructGroup();
+};
+
+class D6: public Group{
+public:
+    Matrix _g2;
+    Matrix _g6;
+    D6(Matrix g2, Matrix g6);
     void constructGroup();
 };
 
@@ -67,6 +91,7 @@ class Projection{
 public:
     Group _group;
     Matrix _P;
+    Projection() {;};
     Projection(Group group);
     void computeProjection();
 };
