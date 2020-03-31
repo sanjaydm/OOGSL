@@ -29,7 +29,7 @@ public:
     _NP = discPara(1);
 
     _Ntot = (_Lmax + 1 )*(_Lmax + 1);
-    generateCeliaReinaQuad(32, 2*_Lmax + 2);
+    generateCeliaReinaQuad(64, 3*_Lmax + 1);
     computeYlmLookUp();
   }
 

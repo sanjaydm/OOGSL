@@ -71,6 +71,14 @@ public:
     void constructGroup();
 };
 
+class D8: public Group{
+public:
+    Matrix _g2;
+    Matrix _g8;
+    D6(Matrix g2, Matrix g8);
+    void constructGroup();
+};
+
 class D9: public Group{
 public:
     Matrix _g2;

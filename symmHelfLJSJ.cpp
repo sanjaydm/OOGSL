@@ -44,10 +44,10 @@ int f_wrapper(double* indvar, double* invar, gsl_vector* out){
 
 int main(int argc, char** argv){
   // Number of modes and particles  
-  int N = 0;
-  int NP = 6;
+  int N = 5;
+  int NP = 8;
   int Ntot= (N+1)*(N+1);
-  int x = 6;
+  int x = 4;
   Vector in(Ntot+3*NP); 
   Vector para(3);
   Vector discPara(2); //Discretization parameters
@@ -169,22 +169,143 @@ int main(int argc, char** argv){
     
     
     ifstream myfiler;
-    myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/r_perm.txt");//, ios_base::in
-    int y=0;
-    for (int i=0; i< NP; i++){
-        myfiler >> y;
-        cout << y << endl;
-        rp.push_back(y);
-    }
-    cout << "---------------"<< endl;
+    if (NP == 6){
+        
+        if (x == 3){
+            myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D3_NP6_r_perm.txt");//, ios_base::in
+            int y=0;
+            for (int i=0; i< NP; i++){
+                myfiler >> y;
+                cout << y << endl;
+                rp.push_back(y);
+            }
+            cout << "---------------"<< endl;
+            
+            ifstream myfiles;
+            myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D3_NP6_s_perm.txt");//, ios_base::in
+            for (int i=0; i< NP; i++){
+                myfiles >> y;
+                cout << y << endl;
+                sp.push_back(y);
+            }
+        }
+        if (x == 4){
+            myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D4_NP6_r_perm.txt");//, ios_base::in
+            int y=0;
+            for (int i=0; i< NP; i++){
+                myfiler >> y;
+                cout << y << endl;
+                rp.push_back(y);
+            }
+            cout << "---------------"<< endl;
+            
+            ifstream myfiles;
+            myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D4_NP6_s_perm.txt");//, ios_base::in
+            for (int i=0; i< NP; i++){
+                myfiles >> y;
+                cout << y << endl;
+                sp.push_back(y);
+            }
+        }
     
-    ifstream myfiles;
-    myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/s_perm.txt");//, ios_base::in
-    for (int i=0; i< NP; i++){
-        myfiles >> y;
-        cout << y << endl;
-        sp.push_back(y);
+            if (x == 6){
+                myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D6_NP6_r_perm.txt");//, ios_base::in
+                int y=0;
+                for (int i=0; i< NP; i++){
+                    myfiler >> y;
+                    cout << y << endl;
+                    rp.push_back(y);
+                }
+                cout << "---------------"<< endl;
+                
+                ifstream myfiles;
+                myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D3_NP6_s_perm.txt");//, ios_base::in
+                for (int i=0; i< NP; i++){
+                    myfiles >> y;
+                    cout << y << endl;
+                    sp.push_back(y);
+                }
+            }
     }
+    if (NP == 8){
+        
+        if (x == 3){
+            myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D3_NP8_r_perm.txt");//, ios_base::in
+            int y=0;
+            for (int i=0; i< NP; i++){
+                myfiler >> y;
+                cout << y << endl;
+                rp.push_back(y);
+            }
+            cout << "---------------"<< endl;
+            
+            ifstream myfiles;
+            myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D3_NP8_s_perm.txt");//, ios_base::in
+            for (int i=0; i< NP; i++){
+                myfiles >> y;
+                cout << y << endl;
+                sp.push_back(y);
+            }
+        }
+        if (x == 4){
+            myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D4_NP8_r_perm.txt");//, ios_base::in
+            int y=0;
+            for (int i=0; i< NP; i++){
+                myfiler >> y;
+                cout << y << endl;
+                rp.push_back(y);
+            }
+            cout << "---------------"<< endl;
+            
+            ifstream myfiles;
+            myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D4_NP8_s_perm.txt");//, ios_base::in
+            for (int i=0; i< NP; i++){
+                myfiles >> y;
+                cout << y << endl;
+                sp.push_back(y);
+            }
+        }
+        if (x == 6){
+            myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D6_NP8_r_perm.txt");//, ios_base::in
+            int y=0;
+            for (int i=0; i< NP; i++){
+                myfiler >> y;
+                cout << y << endl;
+                rp.push_back(y);
+            }
+            cout << "---------------"<< endl;
+            
+            ifstream myfiles;
+            myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D6_NP8_s_perm.txt");//, ios_base::in
+            for (int i=0; i< NP; i++){
+                myfiles >> y;
+                cout << y << endl;
+                sp.push_back(y);
+            }
+        }
+        if (x == 8){
+            myfiler.open("/Users/clarec/Documents/MATLAB/clare-4/D8_NP8_r_perm.txt");//, ios_base::in
+            int y=0;
+            for (int i=0; i< NP; i++){
+                myfiler >> y;
+                cout << y << endl;
+                rp.push_back(y);
+            }
+            cout << "---------------"<< endl;
+            
+            ifstream myfiles;
+            myfiles.open("/Users/clarec/Documents/MATLAB/clare-4/D8_NP8_s_perm.txt");//, ios_base::in
+            for (int i=0; i< NP; i++){
+                myfiles >> y;
+                cout << y << endl;
+                sp.push_back(y);
+            }
+        }
+        
+    }
+        
+        
+
 
 
 //    if (x == 2) {
@@ -365,32 +486,37 @@ int main(int argc, char** argv){
      M.LBFGSB_Solve();
 
 
-     //Print Energy to output
-     ofstream outFileAp("Energy.txt", ofstream::app);
-
-     outFileAp.setf(ios_base::scientific);
-     double projg = M._dsave[12];
-     double enTot = symmP._f;
-     outFileAp << symmP._para(0) << " \t " << symmP._para(2)<< "\t" << enTot << "\t" <<  projg << endl;
-     outFileAp.close();
 
      // Print to VTK file
-     ostringstream toStringNP, toStringCntr; 
+     ostringstream toStringNP, toStringN, toStringCntr;
      toStringNP << NP;
+     toStringN << N;
      toStringCntr << i;
      string temp(to_string(x));
-     temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
-     prob.printToVTK(temp);
+     temp = "/Users/clarec/Desktop/Energy_Data/D" + temp + "_N_" + toStringNP.str() + "_L_"+ toStringN.str() ;
+     string tempp = temp + "_" + toStringCntr.str();
+     prob.printToVTK(tempp);
+       
+       
+       //Print Energy to output
+       ofstream outFileAp(temp + "_Energy.txt", ofstream::out);
+       outFileAp.setf(ios_base::scientific);
+       double projg = M._dsave[12];
+       double enTot = symmP._f;
+       outFileAp << symmP._para(0) << " \t " << symmP._para(2)<< "\t" << enTot << "\t" <<  projg << endl;
+       outFileAp.close();
+
 
    }
     
+
     
     
     
     
     
     // Print to Data.txt
-    ofstream outFileApp("Data.txt", ofstream::app);
+    ofstream outFileApp("Data.txt", ofstream::out);
     outFileApp.setf(ios_base::scientific);
     for (int i=0; i< symmP._fullX.size(); i++){
         outFileApp << symmP._fullX(i) << " \t ";
@@ -463,30 +589,32 @@ int main(int argc, char** argv){
        for (int j=0; j<sz_para; j++)
 	 symmP._para(j) = c.solution[sz+j];
 
-       //Print Energy to output
-       ofstream outFileAp("Energy.txt", ofstream::app);
 
-       outFileAp.setf(ios_base::scientific);
-       double enTot = symmP.f();
-       outFileAp << symmP._para(0) << " \t " << symmP._para(2)<< "\t" << enTot << "\t" << endl;
-       outFileAp.close();
          
 
        // Print to VTK file
-       ostringstream toStringNP, toStringCntr; 
+       ostringstream toStringNP, toStringN, toStringCntr;
        toStringNP << NP;
+       toStringN << N;
        toStringCntr << i;
        string temp(to_string(x));
-       temp = temp + "_N_" + toStringNP.str() +  "_" + toStringCntr.str();
+       temp = "/Users/clarec/Desktop/Energy_Data/D" + temp + "_N_" + toStringNP.str() + "_L_"+ toStringN.str() ;
+       string tempp = temp + "_" + toStringCntr.str();
+         
+        prob.printToVTK(tempp);
+        i++;
          
          
          
+         //Print Energy to output
+         ofstream outFileAp(temp + "_Energy.txt", ofstream::app);
+
+         outFileAp.setf(ios_base::scientific);
+         double enTot = symmP.f();
+         outFileAp << symmP._para(0) << " \t " << symmP._para(2)<< "\t" << enTot << "\t" << endl;
+         outFileAp.close();
          
-        
-         
-    
-       prob.printToVTK(temp);
-       i++;
+   
          
          
          

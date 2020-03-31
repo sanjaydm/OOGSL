@@ -152,6 +152,27 @@ void D6::constructGroup(){
         }
     }
 }
+
+/* --------------- D8 -------------- */
+
+D6::D6(Matrix g2, Matrix g8){
+    _g2 = g2;
+    _g8 = g8;
+    _gen.push_back(_g2);
+    _gen.push_back(_g8);
+    constructGroup();
+}
+
+void D6::constructGroup(){
+    for (int nu = 0; nu <= 7; nu ++){
+        for (int sigma = 0; sigma <= 1; sigma ++){
+            Matrix g8_nu = _g8^nu;
+            Matrix g2_sigma = _g2^sigma;
+            _g.push_back( g8_nu * g2_sigma );
+        }
+    }
+}
+
 /* --------------- D9 -------------- */
 
 D9::D9(Matrix g2, Matrix g9){

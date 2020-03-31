@@ -11,11 +11,12 @@
 #include <fstream>
 #include "MembLJ.h"
 #include <iomanip>
+#include <string>
 
 
 int main(){
     
-    int N = 0;
+    int N = 10;
     int NP = 6;
     int Ntot= (N+1)*(N+1);
     Vector in(Ntot+3*NP);
@@ -48,7 +49,11 @@ int main(){
          // Construct the model
         MembLJ prob(in, para, discPara);
         prob.f();
-        ofstream outFile("Output.txt", ofstream::app);
+        
+        string NPstr= to_string(NP);
+        string Nstr= to_string(N);
+        
+        ofstream outFile("/Users/clarec/Desktop/Energy_Data/D4_" + NPstr + "_" + Nstr + ".txt", ofstream::app);
         outFile.setf(ios_base::scientific);
         //outFile << setprecision(9);
         outFile << para(0) << " \t " << para(1) << " \t "<< para(2) << " \t ";
